@@ -15,16 +15,47 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
   };
 
   const formatIngredients = () => {
-    if (!formData.ingredients || formData.ingredients.length === 0) {
+    const finalIngredients = formData.ingredients || [];
+    const baseIngredients = formData.baseProductIngredients || [];
+    
+    if (finalIngredients.length === 0 && baseIngredients.length === 0) {
       return "Ingredients will appear here after extraction...";
     }
     
-    return formData.ingredients
-      .map(ingredient => {
-        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
-        return `${ingredient.name}${percentage}`;
-      })
-      .join(', ');
+    let result = "";
+    
+    // Format final product ingredients
+    if (finalIngredients.length > 0) {
+      const finalFormatted = finalIngredients
+        .filter(ingredient => ingredient.name.trim() !== "")
+        .map(ingredient => {
+          const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
+          return `${ingredient.name}${percentage}`;
+        })
+        .join(', ');
+      
+      if (finalFormatted) {
+        result += `Final Product: ${finalFormatted}`;
+      }
+    }
+    
+    // Format base product ingredients
+    if (baseIngredients.length > 0) {
+      const baseFormatted = baseIngredients
+        .filter(ingredient => ingredient.name.trim() !== "")
+        .map(ingredient => {
+          const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
+          return `${ingredient.name}${percentage}`;
+        })
+        .join(', ');
+      
+      if (baseFormatted) {
+        if (result) result += "; ";
+        result += `Base Product: ${baseFormatted}`;
+      }
+    }
+    
+    return result || "Ingredients will appear here after extraction...";
   };
 
   const handleExportPDF = async () => {

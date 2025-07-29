@@ -39,6 +39,11 @@ export const productInfoSchema = z.object({
     percentage: z.number().optional(),
     origin: z.string().optional(),
   })).optional(),
+  baseProductIngredients: z.array(z.object({
+    name: z.string(),
+    percentage: z.number().optional(),
+    origin: z.string().optional(),
+  })).optional(),
   
   // Extracted nutrition (per 100g)
   nutrition: z.object({

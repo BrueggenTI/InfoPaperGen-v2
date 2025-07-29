@@ -26,25 +26,37 @@ export interface ExtractedNutrition {
   salt: number;
 }
 
-export async function extractIngredientsFromImage(base64Image: string): Promise<ExtractedIngredients> {
+export async function extractIngredientsFromImage(base64Image: string, isBaseProduct: boolean = false): Promise<ExtractedIngredients> {
   try {
+    const productType = isBaseProduct ? "base product" : "final product";
+    const contextDescription = isBaseProduct 
+      ? "This is a base product SAP screenshot. The base product ingredients are components that will be included within a final product. Focus on extracting the ingredient composition of this base component."
+      : "This is a final product SAP screenshot. Extract all ingredients from the complete final product, which may include base products as components.";
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `You are an expert at extracting ingredient information from food product images. 
+          content: `You are an expert at extracting ingredient information from SAP food product screenshots. 
+          ${contextDescription}
+          
           Analyze the image and extract all ingredients with their percentages if visible. 
           Return the data in JSON format with this structure: 
           { "ingredients": [{ "name": "ingredient name", "percentage": number or null }] }
-          If no percentage is shown, set percentage to null. Be precise and thorough.`,
+          If no percentage is shown, set percentage to null. Be precise and thorough.
+          
+          Pay attention to the relationship between base products and final products:
+          - Base products are components used within final products
+          - Final products contain all ingredients including those from base products
+          - Extract ingredients according to the product type specified`,
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Extract all ingredients and their percentages from this product image. Focus on ingredient lists, labels, or any text showing ingredient information."
+              text: `Extract all ingredients and their percentages from this ${productType} SAP screenshot. Focus on ingredient lists, labels, or any text showing ingredient information. ${contextDescription}`
             },
             {
               type: "image_url",

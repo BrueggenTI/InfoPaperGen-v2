@@ -35,15 +35,22 @@ Preferred communication style: Simple, everyday language.
 
 ### Multi-Step Form System
 The application implements a 5-step wizard for product information entry:
-1. **Product Details**: Basic product information (name, number, category, etc.)
+1. **Product Details**: Basic product information (name, number, prepared by, job title)
 2. **Image Upload**: Product, ingredient, and nutrition label images
-3. **Ingredients**: Extracted or manually entered ingredient lists
+3. **Ingredients**: Dual ingredient system with Base Product and Final Product ingredients
 4. **Nutrition**: Nutritional information per 100g and per serving
 5. **Review**: Final review and document generation
 
+### Ingredient Management System
+The application supports a sophisticated ingredient management system that distinguishes between:
+- **Final Product Ingredients**: Complete ingredient list for the finished product
+- **Base Product Ingredients**: Component ingredients that are included within the final product
+This allows for accurate SAP screenshot processing where base products are components used in final products.
+
 ### AI Integration
-- **OpenAI GPT-4o**: Used for extracting ingredient and nutrition data from uploaded images
-- **Image Analysis**: Processes product labels to automatically populate form fields
+- **OpenAI GPT-4o**: Used for extracting ingredient and nutrition data from uploaded SAP screenshots
+- **SAP Screenshot Analysis**: Intelligently processes both Base Product and Final Product screenshots
+- **Context-Aware Extraction**: AI understands the relationship between base products and final products
 - **Error Handling**: Graceful fallback to manual entry if AI extraction fails
 
 ### PDF Generation
