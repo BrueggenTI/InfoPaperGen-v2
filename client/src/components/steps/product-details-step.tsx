@@ -12,10 +12,6 @@ import { ChevronRight } from "lucide-react";
 const formSchema = z.object({
   productNumber: z.string().min(1, "Product number is required"),
   productName: z.string().min(1, "Product name is required"),
-  description: z.string().optional(),
-  category: z.string().optional(),
-  packageSize: z.string().optional(),
-  servingSize: z.string().optional(),
   preparedBy: z.string().optional(),
   jobTitle: z.string().optional(),
 });
@@ -38,10 +34,6 @@ export default function ProductDetailsStep({
     defaultValues: {
       productNumber: formData.productNumber || "",
       productName: formData.productName || "",
-      description: formData.description || "",
-      category: formData.category || "",
-      packageSize: formData.packageSize || "",
-      servingSize: formData.servingSize || "40g",
       preparedBy: formData.preparedBy || "",
       jobTitle: formData.jobTitle || "",
     },
@@ -100,103 +92,6 @@ export default function ProductDetailsStep({
                       onChange={(e) => {
                         field.onChange(e);
                         handleFieldChange("productName", e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Brief description of the product..."
-                    rows={3}
-                    className="resize-none"
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      handleFieldChange("description", e.target.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      handleFieldChange("category", value);
-                    }} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="breakfast-cereals">Breakfast Cereals</SelectItem>
-                      <SelectItem value="snacks">Snacks</SelectItem>
-                      <SelectItem value="organic-foods">Organic Foods</SelectItem>
-                      <SelectItem value="health-foods">Health Foods</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="packageSize"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Package Size</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g., 500g"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleFieldChange("packageSize", e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="servingSize"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Serving Size</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g., 40g"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleFieldChange("servingSize", e.target.value);
                       }}
                     />
                   </FormControl>
