@@ -141,9 +141,9 @@ export default function ProductGenerator() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Form Steps */}
-          <div className="lg:col-span-2">
+        <div className="space-y-8">
+          {/* Form Section */}
+          <div>
             {/* Progress Steps */}
             <StepIndicator 
               currentStep={formData.currentStep} 
@@ -162,8 +162,8 @@ export default function ProductGenerator() {
             />
           </div>
 
-          {/* Right Column - Live Preview */}
-          <div className="lg:col-span-1">
+          {/* Live Preview Section - Below Form */}
+          <div>
             <DocumentPreview formData={formData} />
           </div>
         </div>
