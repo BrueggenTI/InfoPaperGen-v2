@@ -75,6 +75,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Extract ingredients from base64 image (for the new ingredients step)
+  app.post("/api/extract-ingredients", async (req, res) => {
+    try {
+      const { image, isBaseProduct } = req.body;
+      
+      if (!image) {
+        res.status(400).json({ message: "No image data provided" });
+        return;
+      }
+
+      const extractedIngredients = await extractIngredientsFromImage(image, isBaseProduct);
+      res.json(extractedIngredients);
+    } catch (error) {
+      res.status(500).json({ message: "Error extracting ingredients", error: (error as Error).message });
+    }
+  });
+
   // Extract nutrition from image
   app.post("/api/extract/nutrition", upload.single("image"), async (req, res) => {
     try {

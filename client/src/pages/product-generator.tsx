@@ -14,8 +14,8 @@ import DocumentPreview from "@/components/document-preview";
 
 const STEPS = [
   { id: 1, name: "Product Details", component: ProductDetailsStep },
-  { id: 2, name: "Images", component: ImageUploadStep },
-  { id: 3, name: "Ingredients", component: IngredientsStep },
+  { id: 2, name: "Ingredients", component: IngredientsStep },
+  { id: 3, name: "Images", component: ImageUploadStep },
   { id: 4, name: "Nutrition", component: NutritionStep },
   { id: 5, name: "Review", component: ReviewStep },
 ];
@@ -88,8 +88,8 @@ export default function ProductGenerator() {
   }, [sessionId]);
 
   useEffect(() => {
-    if (sessionData && 'sessionData' in sessionData) {
-      setFormData(sessionData.sessionData);
+    if (sessionData && typeof sessionData === 'object' && sessionData !== null && 'sessionData' in sessionData) {
+      setFormData(sessionData.sessionData as ProductInfo);
     }
   }, [sessionData]);
 

@@ -22,40 +22,33 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
       return "Ingredients will appear here after extraction...";
     }
     
-    let result = "";
+    // Format base ingredients for inclusion in brackets
+    const baseFormatted = baseIngredients
+      .filter(ingredient => ingredient.name.trim() !== "")
+      .map(ingredient => {
+        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
+        return `${ingredient.name}${percentage}`;
+      })
+      .join(', ');
+
+    // Format final ingredients with base ingredients in brackets
+    const finalFormatted = finalIngredients
+      .filter(ingredient => ingredient.name.trim() !== "")
+      .map(ingredient => {
+        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
+        
+        // If this is the base product (Granola), include base ingredients in brackets
+        if (ingredient.name.toLowerCase().includes('granola') || ingredient.name.toLowerCase().includes('base')) {
+          return baseFormatted 
+            ? `${ingredient.name}${percentage} [${baseFormatted}]`
+            : `${ingredient.name}${percentage}`;
+        }
+        
+        return `${ingredient.name}${percentage}`;
+      })
+      .join(', ');
     
-    // Format final product ingredients
-    if (finalIngredients.length > 0) {
-      const finalFormatted = finalIngredients
-        .filter(ingredient => ingredient.name.trim() !== "")
-        .map(ingredient => {
-          const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
-          return `${ingredient.name}${percentage}`;
-        })
-        .join(', ');
-      
-      if (finalFormatted) {
-        result += `Final Product: ${finalFormatted}`;
-      }
-    }
-    
-    // Format base product ingredients
-    if (baseIngredients.length > 0) {
-      const baseFormatted = baseIngredients
-        .filter(ingredient => ingredient.name.trim() !== "")
-        .map(ingredient => {
-          const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
-          return `${ingredient.name}${percentage}`;
-        })
-        .join(', ');
-      
-      if (baseFormatted) {
-        if (result) result += "; ";
-        result += `Base Product: ${baseFormatted}`;
-      }
-    }
-    
-    return result || "Ingredients will appear here after extraction...";
+    return finalFormatted || "Ingredients will appear here after extraction...";
   };
 
   const handleExportPDF = async () => {

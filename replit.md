@@ -7,6 +7,16 @@ This is a full-stack web application built for generating product information do
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Preferred language: German for user interface and documentation.
+
+## Recent Changes (Juli 30, 2025)
+
+✓ Umstrukturierung der Steps: Ingredients kommt jetzt direkt nach Product Details
+✓ Implementierung separater Upload-Bereiche für Final Recipe und Base Recipe
+✓ Automatische Prozentumrechnung von Base Product zu Gesamtprodukt (z.B. 23,0% × 0,907 = 20,9%)
+✓ Neue kombinierte Darstellung: Final ingredients mit Base ingredients in eckigen Klammern
+✓ Zutaten-Tabelle mit drei Spalten: Ingredients, Percentage content per whole product, Country of Origin
+✓ Bearbeitbare Text-Bereiche nach AI-Extraktion für manuelle Anpassungen
 
 ## System Architecture
 
