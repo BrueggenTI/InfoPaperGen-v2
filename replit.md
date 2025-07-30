@@ -17,6 +17,23 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Conditions & Notes Section Implementation
+- **Added new "Conditions & Notes" step in form wizard**
+- **Features Added**:
+  - Product type selector with 21 predefined product categories
+  - Automatic shelf life calculation based on product type (8-15 months)
+  - Auto-generated storage conditions text template
+  - Manual input fields for allergy advice and preparation instructions
+  - Storage conditions display in Live Preview document
+- **Product Types Supported**: Cornflakes, Muesli, Oat flakes, Rice flakes, Extruded products, Bars, Porridge, and more
+- **Storage Text Template**: "{months}* months in original packaging unit at about 20°C and relative humidity below 60%. * To confirm on the storage test."
+- **Files Created/Modified**:
+  - `client/src/components/steps/conditions-step.tsx` - New step component
+  - `shared/schema.ts` - Added productType and shelfLifeMonths fields
+  - `client/src/pages/product-generator.tsx` - Added step 4 to wizard
+  - `client/src/components/document-preview.tsx` - Added storage conditions display
+- **Result**: Complete product conditions management with automatic storage text generation
+
 ### 2025-01-30 - Conditional Section Display and Footer Implementation
 - **Implemented conditional display of sections in Live Preview**
 - **Features Added**:

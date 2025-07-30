@@ -470,6 +470,22 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             </div>
             )}
 
+            {/* Storage Conditions - Only show if storage conditions exist */}
+            {formData.storageConditions && (
+              <div>
+                <h3 className="font-semibold text-sm mb-2">Storage Conditions</h3>
+                <table className="w-full border-collapse border border-slate-400 text-xs">
+                  <tbody>
+                    <tr>
+                      <td className="border border-slate-400 p-2 whitespace-pre-line">
+                        {formData.storageConditions}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             {/* Valid From Date and Prepared By Section - Footer */}
             <div className="mt-8 pt-4 border-t border-slate-300">
               <div className="grid grid-cols-2 gap-4 text-xs">

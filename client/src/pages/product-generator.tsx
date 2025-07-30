@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import ProductDetailsStep from "@/components/steps/product-details-step";
 import IngredientsStep from "@/components/steps/ingredients-step";
 import NutritionStep from "@/components/steps/nutrition-step";
+import { ConditionsStep } from "@/components/steps/conditions-step";
 import ReviewStep from "@/components/steps/review-step";
 import StepIndicator from "@/components/ui/step-indicator";
 import DocumentPreview from "@/components/document-preview";
@@ -15,7 +16,8 @@ const STEPS = [
   { id: 1, name: "Product Details", component: ProductDetailsStep },
   { id: 2, name: "Ingredients", component: IngredientsStep },
   { id: 3, name: "Nutrition", component: NutritionStep },
-  { id: 4, name: "Review", component: ReviewStep },
+  { id: 4, name: "Conditions & Notes", component: ConditionsStep },
+  { id: 5, name: "Review", component: ReviewStep },
 ];
 
 export default function ProductGenerator() {

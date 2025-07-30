@@ -67,6 +67,8 @@ export const productInfoSchema = z.object({
   allergyAdvice: z.string().optional(),
   storageConditions: z.string().optional(),
   preparation: z.string().optional(),
+  productType: z.string().optional(),
+  shelfLifeMonths: z.number().optional(),
   declarations: z.object({
     highFiber: z.boolean().optional().default(false),
     highProtein: z.boolean().optional().default(false),
