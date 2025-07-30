@@ -349,7 +349,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 <tbody>
                   <tr>
                     <td className="border border-slate-400 p-2">
-                      {formData.ingredients || "Ingredients list not provided"}
+                      {Array.isArray(formData.ingredients) 
+                        ? formData.ingredients.map(ing => ing.name).join(', ')
+                        : formData.ingredients || "Ingredients list not provided"}
                     </td>
                   </tr>
                 </tbody>

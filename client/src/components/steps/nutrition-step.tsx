@@ -600,37 +600,39 @@ export default function NutritionStep({
       </div>
 
       {/* Fruit/Veg/Legume Content Input */}
-      <div className="bg-white border border-slate-300 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Fruit/Vegetable/Legume Content</h3>
-        <p className="text-sm text-slate-600 mb-3">
-          Enter the percentage of fruits, vegetables, nuts and legumes for accurate Nutri-Score calculation.
-        </p>
-        <FormField
-          control={form.control}
-          name="fruitVegLegumeContent"
-          render={({ field }) => (
-            <FormItem className="w-48">
-              <FormLabel>Fruit/Veg/Legume Content (%)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  placeholder="0"
-                  {...field}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value) || 0;
-                    field.onChange(value);
-                    handleFieldChange("fruitVegLegumeContent", value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <Form {...form}>
+        <div className="bg-white border border-slate-300 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Fruit/Vegetable/Legume Content</h3>
+          <p className="text-sm text-slate-600 mb-3">
+            Enter the percentage of fruits, vegetables, nuts and legumes for accurate Nutri-Score calculation.
+          </p>
+          <FormField
+            control={form.control}
+            name="fruitVegLegumeContent"
+            render={({ field }) => (
+              <FormItem className="w-48">
+                <FormLabel>Fruit/Veg/Legume Content (%)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    placeholder="0"
+                    {...field}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      field.onChange(value);
+                      handleFieldChange("fruitVegLegumeContent", value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </Form>
 
       {/* Nutri-Score Calculation */}
       {(() => {

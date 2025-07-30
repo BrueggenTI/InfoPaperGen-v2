@@ -17,6 +17,19 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Manual Fruit/Vegetable/Legume Content Input
+- **Added manual input field for fruit/vegetable/legume percentage**
+- **Features Added**:
+  - Dedicated input section in nutrition step for entering percentage (0-100%)
+  - Real-time Nutri-Score calculation updates based on entered percentage
+  - Proper form validation with error handling
+  - Integration with shared schema and data storage
+- **Files Modified**:
+  - `shared/schema.ts` - Added fruitVegLegumeContent field to nutrition schema
+  - `client/src/components/steps/nutrition-step.tsx` - Added input field and form context
+  - `client/src/components/document-preview.tsx` - Fixed ingredients display array handling
+- **Result**: Users can now manually enter fruit/veg/legume content for accurate Nutri-Score calculation
+
 ### 2025-01-30 - Consistent Table Design Implementation
 - **Updated all tables to match nutrition table design pattern**
 - **Changes Made**:
