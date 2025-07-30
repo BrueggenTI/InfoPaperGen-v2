@@ -186,7 +186,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   ))}
                 </tbody>
               </table>
-            )}</div>
+            )}
 
             <div className="text-xs text-slate-700 leading-relaxed">
               The quality of all raw materials used in the manufacture and the

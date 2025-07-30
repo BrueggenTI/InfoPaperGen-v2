@@ -308,8 +308,14 @@ export default function IngredientsStep({
   };
 
   const handleNext = () => {
+    // Ensure all ingredients have the isMarkedAsBase property set
+    const processedIngredients = finalProductIngredients.map(ing => ({
+      ...ing,
+      isMarkedAsBase: ing.isMarkedAsBase ?? false
+    }));
+    
     onUpdate({
-      ingredients: finalProductIngredients,
+      ingredients: processedIngredients,
       baseProductIngredients: baseProductIngredients,
     });
     onNext();
@@ -510,7 +516,12 @@ export default function IngredientsStep({
                                 ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
                               );
                               setFinalProductIngredients(updatedFinalIngredients);
-                              onUpdate({ ingredients: updatedFinalIngredients });
+                              // Ensure all ingredients have the isMarkedAsBase property set
+                              const processedIngredients = updatedFinalIngredients.map(ing => ({
+                                ...ing,
+                                isMarkedAsBase: ing.isMarkedAsBase ?? false
+                              }));
+                              onUpdate({ ingredients: processedIngredients });
                             } else {
                               // Update origin in base product ingredients
                               const updatedBaseIngredients = baseProductIngredients.map(ing => 
