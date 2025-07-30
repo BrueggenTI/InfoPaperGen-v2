@@ -159,17 +159,28 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 <p className="text-sm font-medium text-slate-700">Page 1</p>
               </div>
             </div>
-            {/* Header Table */}
+
+            {/* Product Name Section */}
+            <div className="flex items-center justify-between mb-6">
+              {/* Left - "Product name:" label */}
+              <div className="flex-shrink-0">
+                <span className="text-lg font-medium text-slate-700">Product name:</span>
+              </div>
+              
+              {/* Center - Product Name */}
+              <div className="flex-1 text-center">
+                <h2 className="text-lg font-bold" style={{ color: '#e2bc54' }}>
+                  {formData.productName || "Product name will appear here..."}
+                </h2>
+              </div>
+              
+              {/* Right - Empty space for balance */}
+              <div className="flex-shrink-0 w-32"></div>
+            </div>
+
+            {/* Ingredients Table */}
             <table className="w-full border-collapse border border-slate-400">
               <tbody>
-                <tr>
-                  <td className="border border-slate-400 p-2 font-semibold bg-slate-50 w-1/4">
-                    Product name:
-                  </td>
-                  <td className="border border-slate-400 p-2">
-                    {formData.productName || "Product name will appear here..."}
-                  </td>
-                </tr>
                 <tr>
                   <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
                     Ingredients:
