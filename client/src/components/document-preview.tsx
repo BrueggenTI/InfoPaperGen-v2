@@ -358,22 +358,16 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               });
 
               return (
-                <table className="w-full border-collapse border border-slate-400 text-xs">
-                  <tbody>
-                    <tr>
-                      <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
-                        Nutri-score:
-                      </td>
-                      <td className="border border-slate-400 p-2">
-                        <img 
-                          src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
-                          alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
-                          className="h-6 w-auto"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div className="flex items-center gap-4 py-3">
+                  <span className="font-semibold text-sm">Nutri Score:</span>
+                  <div className="flex-1 flex justify-center">
+                    <img 
+                      src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
+                      alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
+                      className="h-10 w-auto"
+                    />
+                  </div>
+                </div>
               );
             })()}
 
