@@ -1,4 +1,9 @@
 // Nutri-Score calculation utility based on official threshold tables
+import nutriScoreA from "@assets/Nutri_Score_1_1753880672878.jpg";
+import nutriScoreB from "@assets/Nutri_Score_2_1753880672879.jpg";
+import nutriScoreC from "@assets/Nutri_Score_3_1753880672880.jpg";
+import nutriScoreD from "@assets/Nutri_Score_4_1753880672881.jpg";
+import nutriScoreE from "@assets/Nutri_Score_5_1753880672882.jpg";
 
 export interface NutritionData {
   energy: { kj: number; kcal: number };
@@ -140,7 +145,21 @@ export function calculateNutriScore(nutrition: NutritionData): NutriScoreResult 
 }
 
 /**
- * Get color class for Nutri-Score grade
+ * Get Nutri-Score image path for grade
+ */
+export function getNutriScoreImage(grade: string): string {
+  switch (grade) {
+    case 'A': return nutriScoreA;
+    case 'B': return nutriScoreB;
+    case 'C': return nutriScoreC;
+    case 'D': return nutriScoreD;
+    case 'E': return nutriScoreE;
+    default: return nutriScoreA;
+  }
+}
+
+/**
+ * Get color class for Nutri-Score grade (fallback)
  */
 export function getNutriScoreColor(grade: string): string {
   switch (grade) {

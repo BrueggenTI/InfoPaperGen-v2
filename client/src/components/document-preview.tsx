@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { generatePDF } from "@/lib/pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
-import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
+import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -366,9 +366,11 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                       </td>
                       <td className="border border-slate-400 p-2">
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded font-bold ${getNutriScoreColor(nutriScoreResult.nutriGrade)}`}>
-                            {nutriScoreResult.nutriGrade}
-                          </span>
+                          <img 
+                            src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
+                            alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
+                            className="h-6 w-auto"
+                          />
                           <span className="text-xs text-slate-600">
                             (Score: {nutriScoreResult.finalScore})
                           </span>

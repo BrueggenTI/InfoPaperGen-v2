@@ -11,7 +11,7 @@ import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2 } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { calculateNutriScore, getNutriScoreColor, formatNutriScoreDetails } from "@/lib/nutri-score";
+import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage, formatNutriScoreDetails } from "@/lib/nutri-score";
 
 const nutritionSchema = z.object({
   energy: z.object({
@@ -669,8 +669,12 @@ export default function NutritionStep({
                     {nutriScoreResult.malusScore} (malus) - {nutriScoreResult.bonusScore} (bonus) = {nutriScoreResult.finalScore}
                   </p>
                 </div>
-                <div className={`px-4 py-2 rounded-lg font-bold text-xl ${getNutriScoreColor(nutriScoreResult.nutriGrade)}`}>
-                  {nutriScoreResult.nutriGrade}
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
+                    alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
+                    className="h-8 w-auto"
+                  />
                 </div>
               </div>
             </div>
