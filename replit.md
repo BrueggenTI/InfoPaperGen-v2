@@ -13,10 +13,12 @@ Preferred language: German for user interface and documentation.
 
 ✓ Umstrukturierung der Steps: Ingredients kommt jetzt direkt nach Product Details
 ✓ Implementierung separater Upload-Bereiche für Final Recipe und Base Recipe
-✓ Automatische Prozentumrechnung von Base Product zu Gesamtprodukt (z.B. 23,0% × 0,907 = 20,9%)
-✓ Neue kombinierte Darstellung: Final ingredients mit Base ingredients in eckigen Klammern
-✓ Zutaten-Tabelle mit drei Spalten: Ingredients, Percentage content per whole product, Country of Origin
-✓ Bearbeitbare Text-Bereiche nach AI-Extraktion für manuelle Anpassungen
+✓ Neue Markierungsfunktion: Final Recipe Zutaten können als Base Recipe markiert werden
+✓ Intelligente Prozentumrechnung basierend auf markierter Zutat (Formel: Base % × Markierte % ÷ 100)
+✓ Kombinierte Darstellung mit fetten Final Recipe Zutaten: **Granola 90,7%** [Base Recipe in Klammern]
+✓ Button-Interface zum Markieren/Entmarkieren von Zutaten (nur eine Zutat gleichzeitig)
+✓ Zutaten-Tabelle mit automatischer Umrechnung basierend auf markierter Final Recipe Zutat
+✓ Bearbeitbare Text-Bereiche nach AI-Extraktion mit Prozentanteilen in Klammern
 
 ## System Architecture
 

@@ -52,17 +52,17 @@ export default function IngredientsStep({
   
   const { toast } = useToast();
 
-  // Calculate percentage from base product to whole product
-  const calculateWholeProductPercentage = (basePercentage: number, baseProductPercentage: number) => {
-    return +(basePercentage * (baseProductPercentage / 100)).toFixed(1);
+  // Calculate percentage from base product to whole product using the new formula
+  const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
+    // Formula: (basePercentage / 100) * 100 * (markedIngredientPercentage / 100)
+    // Simplified: basePercentage * markedIngredientPercentage / 100
+    return +((basePercentage * markedIngredientPercentage) / 100).toFixed(1);
   };
 
-  // Extract base product percentage from final ingredients
-  const getBaseProductPercentage = () => {
-    const baseProductItem = finalProductIngredients.find(ing => 
-      ing.name.toLowerCase().includes('granola') || ing.name.toLowerCase().includes('base')
-    );
-    return baseProductItem?.percentage || 90.7; // Default from example
+  // Extract base product percentage from marked ingredient
+  const getMarkedIngredientPercentage = () => {
+    const markedIngredient = finalProductIngredients.find(ing => ing.isMarkedAsBase);
+    return markedIngredient?.percentage || 0;
   };
 
   // AI extraction mutations - separate for each type
@@ -246,12 +246,12 @@ export default function IngredientsStep({
   };
 
   const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string}> => {
-    const baseProductPercentage = getBaseProductPercentage();
+    const markedIngredientPercentage = getMarkedIngredientPercentage();
     const tableIngredients: Array<{name: string, percentage: number, origin: string}> = [];
 
-    // Add final product ingredients (excluding base product)
+    // Add final product ingredients (excluding marked base ingredient)
     finalProductIngredients
-      .filter(ing => ing.name.trim() && !ing.name.toLowerCase().includes('granola') && !ing.name.toLowerCase().includes('base'))
+      .filter(ing => ing.name.trim() && !ing.isMarkedAsBase)
       .forEach(ing => {
         tableIngredients.push({
           name: ing.name,
@@ -260,19 +260,21 @@ export default function IngredientsStep({
         });
       });
 
-    // Add base product ingredients with recalculated percentages
-    baseProductIngredients
-      .filter(ing => ing.name.trim())
-      .forEach(ing => {
-        const wholeProductPercentage = ing.percentage 
-          ? calculateWholeProductPercentage(ing.percentage, baseProductPercentage)
-          : 0;
-        tableIngredients.push({
-          name: ing.name,
-          percentage: wholeProductPercentage,
-          origin: ing.origin || ""
+    // Add base product ingredients with recalculated percentages based on marked ingredient
+    if (markedIngredientPercentage > 0) {
+      baseProductIngredients
+        .filter(ing => ing.name.trim())
+        .forEach(ing => {
+          const wholeProductPercentage = ing.percentage 
+            ? calculateWholeProductPercentage(ing.percentage, markedIngredientPercentage)
+            : 0;
+          tableIngredients.push({
+            name: ing.name,
+            percentage: wholeProductPercentage,
+            origin: ing.origin || ""
+          });
         });
-      });
+    }
 
     return tableIngredients;
   };
@@ -456,8 +458,14 @@ export default function IngredientsStep({
           <CardHeader>
             <CardTitle>Zutaten Tabelle</CardTitle>
             <p className="text-sm text-slate-600">
-              Base Product Prozentanteile werden automatisch auf das Gesamtprodukt umgerechnet.
+              Base Product Zutaten werden basierend auf der markierten Final Recipe Zutat umgerechnet.
             </p>
+            {getMarkedIngredientPercentage() > 0 && (
+              <p className="text-xs text-slate-500">
+                Formel: Base Zutat % × {getMarkedIngredientPercentage()}% ÷ 100
+                (Beispiel: 20% × {getMarkedIngredientPercentage()}% ÷ 100 = {((20 * getMarkedIngredientPercentage()) / 100).toFixed(1)}%)
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
