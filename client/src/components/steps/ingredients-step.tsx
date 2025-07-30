@@ -45,12 +45,6 @@ export default function IngredientsStep({
   
   // Track which final ingredient is marked as base recipe
   const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
-
-  // Update marked ingredient state when ingredients change
-  useEffect(() => {
-    const currentMarked = finalProductIngredients.find(ing => ing.isMarkedAsBase);
-    setMarkedIngredient(currentMarked?.name || null);
-  }, [finalProductIngredients]);
   
   // Upload refs
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
@@ -255,33 +249,32 @@ export default function IngredientsStep({
     const markedIngredientPercentage = getMarkedIngredientPercentage();
     const tableIngredients: Array<{name: string, percentage: number, origin: string}> = [];
 
-    // Generate table in the same order as combined preview
+    // Add final product ingredients (excluding marked base ingredient)
     finalProductIngredients
-      .filter(ing => ing.name.trim())
+      .filter(ing => ing.name.trim() && !ing.isMarkedAsBase)
       .forEach(ing => {
-        if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-          // Replace marked ingredient with its base ingredients
-          baseProductIngredients
-            .filter(baseIng => baseIng.name.trim())
-            .forEach(baseIng => {
-              const wholeProductPercentage = baseIng.percentage 
-                ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
-                : 0;
-              tableIngredients.push({
-                name: baseIng.name,
-                percentage: wholeProductPercentage,
-                origin: baseIng.origin || ""
-              });
-            });
-        } else {
-          // Add non-marked final ingredients as they are
+        tableIngredients.push({
+          name: ing.name,
+          percentage: ing.percentage || 0,
+          origin: ing.origin || ""
+        });
+      });
+
+    // Add base product ingredients with recalculated percentages based on marked ingredient
+    if (markedIngredientPercentage > 0) {
+      baseProductIngredients
+        .filter(ing => ing.name.trim())
+        .forEach(ing => {
+          const wholeProductPercentage = ing.percentage 
+            ? calculateWholeProductPercentage(ing.percentage, markedIngredientPercentage)
+            : 0;
           tableIngredients.push({
             name: ing.name,
-            percentage: ing.percentage || 0,
+            percentage: wholeProductPercentage,
             origin: ing.origin || ""
           });
-        }
-      });
+        });
+    }
 
     return tableIngredients;
   };
@@ -300,7 +293,7 @@ export default function IngredientsStep({
     });
     
     setFinalProductIngredients(updatedIngredients);
-    onUpdate({ ingredients: updatedIngredients.map(ing => ({ ...ing, isMarkedAsBase: ing.isMarkedAsBase || false })) });
+    onUpdate({ ingredients: updatedIngredients });
   };
 
   const handleNext = () => {
