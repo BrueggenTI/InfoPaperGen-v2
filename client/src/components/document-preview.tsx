@@ -160,6 +160,14 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               * percentage in ingredient
             </div>
 
+            <div className="text-xs text-slate-700 leading-relaxed">
+              The quality of all raw materials used in the manufacture and the
+              finished product meets the current applicable legal requirements
+              relating to these products. Admissible levels of mycotoxins, heavy
+              metal contamination, pesticides and other - in accordance with
+              applicable legislation.
+            </div>
+
             {/* Ingredients Table */}
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
               <table className="w-full border-collapse border border-slate-400 text-xs mt-4">
@@ -187,14 +195,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 </tbody>
               </table>
             )}
-
-            <div className="text-xs text-slate-700 leading-relaxed">
-              The quality of all raw materials used in the manufacture and the
-              finished product meets the current applicable legal requirements
-              relating to these products. Admissible levels of mycotoxins, heavy
-              metal contamination, pesticides and other - in accordance with
-              applicable legislation.
-            </div>
 
             {/* Nutritional Table */}
             <table className="w-full border-collapse border border-slate-400 text-xs">
