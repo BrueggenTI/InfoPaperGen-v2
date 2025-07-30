@@ -17,6 +17,21 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Comprehensive Nutri-Score Calculation System
+- **Implemented complete Nutri-Score calculation based on EU standards**
+- **Features Added**:
+  - Malus scoring system for negative nutrients (energy, saturated fat, sugar, salt)
+  - Bonus scoring system for positive nutrients (fiber, protein, fruit/veg/legume content)
+  - Automatic grade calculation (A-E) with proper threshold values
+  - Real-time visual display with color-coded grades
+  - Integration in both nutrition step form and Live Preview document
+- **Files Created/Modified**:
+  - `client/src/lib/nutri-score.ts` - Core calculation engine with threshold tables
+  - `client/src/components/steps/nutrition-step.tsx` - Added real-time Nutri-Score display
+  - `client/src/components/document-preview.tsx` - Integrated calculated Nutri-Score in preview
+- **Threshold Values**: Final score thresholds: ≤-15 (A), ≤1 (B), ≤3 (C), ≤11 (D), >11 (E)
+- **Result**: Automatic Nutri-Score calculation and display throughout the application
+
 ### 2025-01-30 - Table Header Alignment Fix
 - **Fixed nutrition table column header alignment issues**
 - **Problem**: Table headers were misaligned - "per 100g" and "per serving size" columns were offset

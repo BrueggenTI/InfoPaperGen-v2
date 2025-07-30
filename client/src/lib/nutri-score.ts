@@ -69,7 +69,7 @@ const PROTEIN_THRESHOLDS = [
 
 // Final Nutri-Score grade thresholds
 const NUTRI_GRADE_THRESHOLDS = [
-  [-1, 'A'], [2, 'B'], [10, 'C'], [18, 'D'], [Infinity, 'E']
+  [-15, 'A'], [1, 'B'], [3, 'C'], [11, 'D'], [19, 'E']
 ] as const;
 
 /**
@@ -89,11 +89,10 @@ function calculateScore(value: number, thresholds: readonly (readonly [number, n
  * Calculate Nutri-Score grade based on final score
  */
 function calculateNutriGrade(finalScore: number): 'A' | 'B' | 'C' | 'D' | 'E' {
-  for (const [threshold, grade] of NUTRI_GRADE_THRESHOLDS) {
-    if (finalScore <= threshold) {
-      return grade as 'A' | 'B' | 'C' | 'D' | 'E';
-    }
-  }
+  if (finalScore <= -15) return 'A';
+  if (finalScore <= 1) return 'B';
+  if (finalScore <= 3) return 'C';
+  if (finalScore <= 11) return 'D';
   return 'E';
 }
 
