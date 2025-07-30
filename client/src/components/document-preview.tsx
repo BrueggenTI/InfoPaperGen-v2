@@ -50,6 +50,64 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
     return finalFormatted || "Ingredients will appear here after extraction...";
   };
 
+  // Calculate percentage from base product to whole product using the same formula as ingredients-step
+  const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
+    return +((basePercentage * markedIngredientPercentage) / 100).toFixed(1);
+  };
+
+  // Extract base product percentage from marked ingredient
+  const getMarkedIngredientPercentage = () => {
+    const markedIngredient = (formData.ingredients || []).find(ing => ing.isMarkedAsBase);
+    return markedIngredient?.percentage || 0;
+  };
+
+  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
+    const finalIngredients = formData.ingredients || [];
+    const baseIngredients = formData.baseProductIngredients || [];
+    const markedIngredientPercentage = getMarkedIngredientPercentage();
+    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
+
+    // Add final product ingredients in the same order as they appear
+    finalIngredients
+      .filter(ing => ing.name.trim())
+      .forEach(ing => {
+        if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
+          // First add the marked ingredient itself
+          tableIngredients.push({
+            name: ing.name,
+            percentage: ing.percentage || 0,
+            origin: ing.origin || "",
+            isFinalProduct: true
+          });
+          
+          // Then add base product ingredients with recalculated percentages
+          baseIngredients
+            .filter(baseIng => baseIng.name.trim())
+            .forEach(baseIng => {
+              const wholeProductPercentage = baseIng.percentage 
+                ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
+                : 0;
+              tableIngredients.push({
+                name: baseIng.name,
+                percentage: wholeProductPercentage,
+                origin: baseIng.origin || "",
+                isFinalProduct: false
+              });
+            });
+        } else {
+          // Add regular final product ingredient
+          tableIngredients.push({
+            name: ing.name,
+            percentage: ing.percentage || 0,
+            origin: ing.origin || "",
+            isFinalProduct: true
+          });
+        }
+      });
+
+    return tableIngredients;
+  };
+
   const handleExportPDF = async () => {
     try {
       await generatePDF(formData);
@@ -101,6 +159,34 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             <div className="text-xs text-slate-600 italic">
               * percentage in ingredient
             </div>
+
+            {/* Ingredients Table */}
+            {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
+              <table className="w-full border-collapse border border-slate-400 text-xs mt-4">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-400 p-2 text-left font-semibold">Ingredients</th>
+                    <th className="border border-slate-400 p-2 text-left font-semibold">Percentage content per whole product</th>
+                    <th className="border border-slate-400 p-2 text-left font-semibold">Country of Origin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {generateIngredientsTable().map((ingredient, index) => (
+                    <tr key={index}>
+                      <td className="border border-slate-400 p-2">
+                        {ingredient.isFinalProduct ? (
+                          <strong>{ingredient.name}</strong>
+                        ) : (
+                          ingredient.name
+                        )}
+                      </td>
+                      <td className="border border-slate-400 p-2">{ingredient.percentage}%</td>
+                      <td className="border border-slate-400 p-2">{ingredient.origin || ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}</div>
 
             <div className="text-xs text-slate-700 leading-relaxed">
               The quality of all raw materials used in the manufacture and the
