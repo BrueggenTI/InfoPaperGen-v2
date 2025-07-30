@@ -178,6 +178,17 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               <div className="flex-shrink-0 w-32"></div>
             </div>
 
+            {/* Product Image */}
+            {formData.productImage && (
+              <div className="flex justify-center mb-6">
+                <img
+                  src={formData.productImage}
+                  alt="Product"
+                  className="max-w-xs max-h-48 object-contain rounded-lg shadow-sm border border-slate-200"
+                />
+              </div>
+            )}
+
             {/* Ingredients Table */}
             <table className="w-full border-collapse border border-slate-400">
               <tbody>
