@@ -364,7 +364,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                     <img 
                       src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
                       alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
-                      className="h-10 w-auto"
+                      className="h-16 w-auto"
                     />
                   </div>
                 </div>
