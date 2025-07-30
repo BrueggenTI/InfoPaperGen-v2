@@ -22,7 +22,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
       return "Ingredients will appear here after extraction...";
     }
     
-    // Format base ingredients for inclusion in brackets
+    // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
     const baseFormatted = baseIngredients
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
@@ -31,20 +31,19 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
       })
       .join(', ');
 
-    // Format final ingredients with base ingredients in brackets
+    // Format final ingredients with base ingredients in brackets (same as Kombinierte Vorschau)
     const finalFormatted = finalIngredients
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
-        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%` : '';
+        const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
+        const ingredientText = `${ingredient.name}${percentage}`;
         
-        // If this is the base product (Granola), include base ingredients in brackets
-        if (ingredient.name.toLowerCase().includes('granola') || ingredient.name.toLowerCase().includes('base')) {
-          return baseFormatted 
-            ? `${ingredient.name}${percentage} [${baseFormatted}]`
-            : `${ingredient.name}${percentage}`;
+        // Check if this ingredient is marked as base recipe
+        if (ingredient.isMarkedAsBase && baseFormatted) {
+          return `${ingredientText} [${baseFormatted}]`;
         }
         
-        return `${ingredient.name}${percentage}`;
+        return ingredientText;
       })
       .join(', ');
     
