@@ -17,6 +17,20 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Enhanced Conditions & Notes with Default Text and Preparation Types
+- **Enhanced "Conditions & Notes" section with default content and preparation types**
+- **Features Added**:
+  - Default allergy advice text pre-filled with standard allergen information
+  - Preparation type selector (Porridge vs Other Product)
+  - Automatic preparation instructions based on type selection
+  - Porridge preparation: "1) Open the lid 2) Pour with 150 ml hot water and mix thoroughly 3) Wait for 3 minutes and it's ready"
+  - Other Product preparation: "Dont Apply"
+- **Default Allergy Text**: "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."
+- **Files Modified**:
+  - `client/src/components/steps/conditions-step.tsx` - Added preparation type selector and default texts
+  - `shared/schema.ts` - Added preparationType field
+- **Result**: Streamlined user experience with pre-filled content and automatic preparation instructions
+
 ### 2025-01-30 - Conditions & Notes Section Implementation
 - **Added new "Conditions & Notes" step in form wizard**
 - **Features Added**:

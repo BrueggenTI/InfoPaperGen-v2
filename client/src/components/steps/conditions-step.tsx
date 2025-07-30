@@ -23,6 +23,7 @@ const conditionsSchema = z.object({
   shelfLifeMonths: z.number().optional(),
   storageConditions: z.string().optional(),
   allergyAdvice: z.string().optional(),
+  preparationType: z.string().optional(),
   preparation: z.string().optional(),
 });
 
@@ -51,6 +52,15 @@ const PRODUCT_SHELF_LIFE = {
   "Probiotic products (e.g., Lactobacillus)": 8,
 } as const;
 
+// Default allergy advice text
+const DEFAULT_ALLERGY_ADVICE = "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products.";
+
+// Preparation types and their corresponding text
+const PREPARATION_TYPES = {
+  "Porridge": "1) Open the lid\n2) Pour with 150 ml hot water and mix thoroughly\n3) Wait for 3 minutes and it's ready",
+  "Other Product": "Dont Apply"
+} as const;
+
 export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }: ConditionsStepProps) {
   const form = useForm<z.infer<typeof conditionsSchema>>({
     resolver: zodResolver(conditionsSchema),
@@ -58,7 +68,8 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
       productType: formData.productType || "",
       shelfLifeMonths: formData.shelfLifeMonths || undefined,
       storageConditions: formData.storageConditions || "",
-      allergyAdvice: formData.allergyAdvice || "",
+      allergyAdvice: formData.allergyAdvice || DEFAULT_ALLERGY_ADVICE,
+      preparationType: formData.preparationType || "",
       preparation: formData.preparation || "",
     },
   });
@@ -78,6 +89,18 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
         productType,
         shelfLifeMonths: shelfLife,
         storageConditions: storageText,
+      });
+    }
+  };
+
+  const handlePreparationTypeChange = (preparationType: string) => {
+    const preparationText = PREPARATION_TYPES[preparationType as keyof typeof PREPARATION_TYPES];
+    if (preparationText) {
+      form.setValue('preparation', preparationText);
+      
+      onUpdate({
+        preparationType,
+        preparation: preparationText,
       });
     }
   };
@@ -189,7 +212,7 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
                     <FormControl>
                       <Textarea
                         placeholder="Enter allergy information and warnings..."
-                        className="min-h-[80px]"
+                        className="min-h-[120px]"
                         {...field}
                         onChange={(e) => {
                           field.onChange(e.target.value);
@@ -204,14 +227,42 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
 
               <FormField
                 control={form.control}
+                name="preparationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preparation Type</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handlePreparationTypeChange(value);
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select preparation type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Porridge">Porridge</SelectItem>
+                        <SelectItem value="Other Product">Other Product</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="preparation"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Preparation Instructions</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Enter preparation instructions..."
-                        className="min-h-[80px]"
+                        placeholder="Preparation instructions will be automatically generated when you select a preparation type..."
+                        className="min-h-[100px]"
                         {...field}
                         onChange={(e) => {
                           field.onChange(e.target.value);
