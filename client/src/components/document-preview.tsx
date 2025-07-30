@@ -2,6 +2,7 @@ import { ProductInfo } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { generatePDF } from "@/lib/pdf-generator";
+import brueggenLogo from "@/assets/brueggen-logo.png";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -134,6 +135,30 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
         {/* Document Preview */}
         <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-inner min-h-[600px] text-xs leading-tight">
           <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-300 pb-4 mb-6">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <img 
+                  src={brueggenLogo} 
+                  alt="Brüggen Logo" 
+                  className="h-12 w-auto"
+                />
+              </div>
+              
+              {/* Center - Product Information and Recipe Number */}
+              <div className="flex-1 text-center">
+                <h1 className="text-lg font-bold text-slate-900 mb-1">Product Information</h1>
+                <p className="text-sm text-slate-600">
+                  {formData.productNumber || "Recipe Number"}
+                </p>
+              </div>
+              
+              {/* Right - Page Number */}
+              <div className="flex-shrink-0 text-right">
+                <p className="text-sm font-medium text-slate-700">Page 1</p>
+              </div>
+            </div>
             {/* Header Table */}
             <table className="w-full border-collapse border border-slate-400">
               <tbody>
