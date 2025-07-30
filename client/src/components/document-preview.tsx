@@ -486,6 +486,38 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </div>
             )}
 
+            {/* Allergy Advice - Only show if allergy advice exists */}
+            {formData.allergyAdvice && (
+              <div>
+                <h3 className="font-semibold text-sm mb-2">Allergy Advice</h3>
+                <table className="w-full border-collapse border border-slate-400 text-xs">
+                  <tbody>
+                    <tr>
+                      <td className="border border-slate-400 p-2 whitespace-pre-line">
+                        {formData.allergyAdvice}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Preparation - Only show if preparation exists */}
+            {formData.preparation && (
+              <div>
+                <h3 className="font-semibold text-sm mb-2">Preparation</h3>
+                <table className="w-full border-collapse border border-slate-400 text-xs">
+                  <tbody>
+                    <tr>
+                      <td className="border border-slate-400 p-2 whitespace-pre-line">
+                        {formData.preparation}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             {/* Valid From Date and Prepared By Section - Footer */}
             <div className="mt-8 pt-4 border-t border-slate-300">
               <div className="grid grid-cols-2 gap-4 text-xs">

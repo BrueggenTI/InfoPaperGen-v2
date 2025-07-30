@@ -125,10 +125,10 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Product Type Selection */}
+          {/* Storage Conditions Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Product Type & Storage</CardTitle>
+              <CardTitle className="text-lg">Storage Conditions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
@@ -178,7 +178,7 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
                 name="storageConditions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Storage Conditions</FormLabel>
+                    <FormLabel>Storage Conditions Text</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Storage conditions will be automatically generated when you select a product type..."
@@ -197,18 +197,18 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
             </CardContent>
           </Card>
 
-          {/* Additional Information */}
+          {/* Allergy Advice Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Additional Information</CardTitle>
+              <CardTitle className="text-lg">Allergy Advice</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <FormField
                 control={form.control}
                 name="allergyAdvice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Allergy Advice</FormLabel>
+                    <FormLabel>Allergy Information</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Enter allergy information and warnings..."
@@ -224,7 +224,15 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
                   </FormItem>
                 )}
               />
+            </CardContent>
+          </Card>
 
+          {/* Preparations Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Preparations</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <FormField
                 control={form.control}
                 name="preparationType"
