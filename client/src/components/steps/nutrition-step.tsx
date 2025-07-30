@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage, formatNutriScoreDetails } from "@/lib/nutri-score";
+import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 
 const nutritionSchema = z.object({
   energy: z.object({
@@ -604,79 +605,177 @@ export default function NutritionStep({
           fruitVegLegumeContent: 0 // Default to 0 for now, can be made editable later
         });
 
+        const claimsResult = calculateClaims({
+          protein: watchedValues.protein,
+          fiber: watchedValues.fiber,
+          salt: watchedValues.salt,
+          sugars: watchedValues.sugars,
+          fat: watchedValues.fat,
+          saturatedFat: watchedValues.saturatedFat
+        });
+
+        const validClaims = getValidClaims({
+          protein: watchedValues.protein,
+          fiber: watchedValues.fiber,
+          salt: watchedValues.salt,
+          sugars: watchedValues.sugars,
+          fat: watchedValues.fat,
+          saturatedFat: watchedValues.saturatedFat
+        });
+
         return (
-          <div className="bg-white border border-slate-300 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutri-Score Calculation</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Malus Score */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-red-600">Malus Score (Negative Nutrients)</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Energy Score:</span>
-                    <span className="font-mono">{nutriScoreResult.energyScore}</span>
+          <div className="space-y-6">
+            {/* Nutri-Score Section */}
+            <div className="bg-white border border-slate-300 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutri-Score Calculation</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Malus Score */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-red-600">Malus Score (Negative Nutrients)</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Energy Score:</span>
+                      <span className="font-mono">{nutriScoreResult.energyScore}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Saturated Fat Score:</span>
+                      <span className="font-mono">{nutriScoreResult.saturatedFatScore}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sugar Score:</span>
+                      <span className="font-mono">{nutriScoreResult.sugarScore}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Salt Score:</span>
+                      <span className="font-mono">{nutriScoreResult.saltScore}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2 font-semibold">
+                      <span>Total Malus:</span>
+                      <span className="font-mono text-red-600">{nutriScoreResult.malusScore}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Saturated Fat Score:</span>
-                    <span className="font-mono">{nutriScoreResult.saturatedFatScore}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Sugar Score:</span>
-                    <span className="font-mono">{nutriScoreResult.sugarScore}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Salt Score:</span>
-                    <span className="font-mono">{nutriScoreResult.saltScore}</span>
-                  </div>
-                  <div className="flex justify-between border-t pt-2 font-semibold">
-                    <span>Total Malus:</span>
-                    <span className="font-mono text-red-600">{nutriScoreResult.malusScore}</span>
+                </div>
+
+                {/* Bonus Score */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-green-600">Bonus Score (Positive Nutrients)</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Fruit/Veg/Legume Score:</span>
+                      <span className="font-mono">{nutriScoreResult.fruitVegLegumeScore}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Fiber Score:</span>
+                      <span className="font-mono">{nutriScoreResult.fiberScore}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Protein Score:</span>
+                      <span className="font-mono">{nutriScoreResult.proteinScore}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2 font-semibold">
+                      <span>Total Bonus:</span>
+                      <span className="font-mono text-green-600">{nutriScoreResult.bonusScore}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bonus Score */}
-              <div className="space-y-3">
-                <h4 className="font-semibold text-green-600">Bonus Score (Positive Nutrients)</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Fruit/Veg/Legume Score:</span>
-                    <span className="font-mono">{nutriScoreResult.fruitVegLegumeScore}</span>
+              {/* Final Result */}
+              <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold mb-1">Final Nutri-Score</h4>
+                    <p className="text-sm text-slate-600">
+                      {nutriScoreResult.malusScore} (malus) - {nutriScoreResult.bonusScore} (bonus) = {nutriScoreResult.finalScore}
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Fiber Score:</span>
-                    <span className="font-mono">{nutriScoreResult.fiberScore}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Protein Score:</span>
-                    <span className="font-mono">{nutriScoreResult.proteinScore}</span>
-                  </div>
-                  <div className="flex justify-between border-t pt-2 font-semibold">
-                    <span>Total Bonus:</span>
-                    <span className="font-mono text-green-600">{nutriScoreResult.bonusScore}</span>
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
+                      alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
+                      className="h-8 w-auto"
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Final Result */}
-            <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold mb-1">Final Nutri-Score</h4>
-                  <p className="text-sm text-slate-600">
-                    {nutriScoreResult.malusScore} (malus) - {nutriScoreResult.bonusScore} (bonus) = {nutriScoreResult.finalScore}
-                  </p>
+            {/* Claims Calculation Section */}
+            <div className="bg-white border border-slate-300 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutrient Claims Analysis</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Positive Claims */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-green-600">Positive Claims</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Protein:</span>
+                      <span className={`font-medium ${claimsResult.protein.bestClaim ? 'text-green-600' : 'text-slate-400'}`}>
+                        {claimsResult.protein.bestClaim || "No claim"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Fiber:</span>
+                      <span className={`font-medium ${claimsResult.fiber.bestClaim ? 'text-green-600' : 'text-slate-400'}`}>
+                        {claimsResult.fiber.bestClaim || "No claim"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <img 
-                    src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
-                    alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
-                    className="h-8 w-auto"
-                  />
+
+                {/* Negative Claims (Low/Free) */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-blue-600">Low/Free Claims</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Salt:</span>
+                      <span className={`font-medium ${claimsResult.salt.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
+                        {claimsResult.salt.bestClaim || "No claim"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sugar:</span>
+                      <span className={`font-medium ${claimsResult.sugar.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
+                        {claimsResult.sugar.bestClaim || "No claim"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Fat:</span>
+                      <span className={`font-medium ${claimsResult.fat.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
+                        {claimsResult.fat.bestClaim || "No claim"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Saturated Fat:</span>
+                      <span className={`font-medium ${claimsResult.saturatedFat.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
+                        {claimsResult.saturatedFat.bestClaim || "No claim"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Summary of Valid Claims */}
+              {validClaims.length > 0 && (
+                <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-green-800">Valid Claims for Product Labeling</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {validClaims.map((claim, index) => (
+                      <span key={index} className="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm font-medium">
+                        {claim}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {validClaims.length === 0 && (
+                <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+                  <p className="text-slate-600 text-sm">No nutrient claims can be made for this product based on current nutrition values.</p>
+                </div>
+              )}
             </div>
           </div>
         );

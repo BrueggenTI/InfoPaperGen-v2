@@ -4,6 +4,7 @@ import { Download } from "lucide-react";
 import { generatePDF } from "@/lib/pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
+import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -371,38 +372,116 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               );
             })()}
 
-            {/* Declarations */}
-            <table className="w-full border-collapse border border-slate-400 text-xs">
-              <tbody>
-                <tr>
-                  <td className="border border-slate-400 p-2 font-semibold bg-slate-50 align-top" rowSpan={4}>
-                    Possible declarations:
-                  </td>
-                  <td className="border border-slate-400 p-1">Source of fibre / High fibre</td>
-                  <td className="border border-slate-400 p-1 text-center">
-                    {formData.declarations?.highFiber ? "✓" : "No declaration"}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-slate-400 p-1">Source of protein / High protein</td>
-                  <td className="border border-slate-400 p-1 text-center">
-                    {formData.declarations?.highProtein ? "✓" : "No declaration"}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-slate-400 p-1">Content of wholegrain</td>
-                  <td className="border border-slate-400 p-1 text-center">
-                    {formData.declarations?.wholegrain ? "✓" : "No declaration"}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-slate-400 p-1">Other</td>
-                  <td className="border border-slate-400 p-1 text-center">
-                    {formData.declarations?.other || "No declaration"}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            {/* Declarations - Calculated Claims */}
+            {(() => {
+              if (!formData.nutrition) return (
+                <table className="w-full border-collapse border border-slate-400 text-xs">
+                  <tbody>
+                    <tr>
+                      <td className="border border-slate-400 p-2 font-semibold bg-slate-50 align-top" rowSpan={4}>
+                        Possible declarations:
+                      </td>
+                      <td className="border border-slate-400 p-1">Source of fibre / High fibre</td>
+                      <td className="border border-slate-400 p-1 text-center">
+                        {formData.declarations?.highFiber ? "✓" : "No declaration"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-slate-400 p-1">Source of protein / High protein</td>
+                      <td className="border border-slate-400 p-1 text-center">
+                        {formData.declarations?.highProtein ? "✓" : "No declaration"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-slate-400 p-1">Content of wholegrain</td>
+                      <td className="border border-slate-400 p-1 text-center">
+                        {formData.declarations?.wholegrain ? "✓" : "No declaration"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-slate-400 p-1">Other</td>
+                      <td className="border border-slate-400 p-1 text-center">
+                        {formData.declarations?.other || "No declaration"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              );
+
+              const claimsResult = calculateClaims({
+                protein: formData.nutrition.protein || 0,
+                fiber: formData.nutrition.fiber || 0,
+                salt: formData.nutrition.salt || 0,
+                sugars: formData.nutrition.sugars || 0,
+                fat: formData.nutrition.fat || 0,
+                saturatedFat: formData.nutrition.saturatedFat || 0
+              });
+
+              const validClaims = getValidClaims({
+                protein: formData.nutrition.protein || 0,
+                fiber: formData.nutrition.fiber || 0,
+                salt: formData.nutrition.salt || 0,
+                sugars: formData.nutrition.sugars || 0,
+                fat: formData.nutrition.fat || 0,
+                saturatedFat: formData.nutrition.saturatedFat || 0
+              });
+
+              const allPossibleClaims = [
+                { label: "Source of fibre / High fibre", claim: claimsResult.fiber.bestClaim },
+                { label: "Source of protein / High protein", claim: claimsResult.protein.bestClaim },
+                { label: "Low/Free salt", claim: claimsResult.salt.bestClaim },
+                { label: "Low/Free sugar", claim: claimsResult.sugar.bestClaim },
+                { label: "Low/Free fat", claim: claimsResult.fat.bestClaim },
+                { label: "Low saturated fat", claim: claimsResult.saturatedFat.bestClaim }
+              ];
+
+              const claimsToShow = allPossibleClaims.filter(item => item.claim);
+              
+              // Add wholegrain and other manual declarations
+              if (formData.declarations?.wholegrain) {
+                claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
+              }
+              if (formData.declarations?.other) {
+                claimsToShow.push({ label: "Other", claim: formData.declarations.other });
+              }
+
+              if (claimsToShow.length === 0) {
+                return (
+                  <table className="w-full border-collapse border border-slate-400 text-xs">
+                    <tbody>
+                      <tr>
+                        <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
+                          Possible declarations:
+                        </td>
+                        <td className="border border-slate-400 p-2">
+                          No claims available
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                );
+              }
+
+              return (
+                <table className="w-full border-collapse border border-slate-400 text-xs">
+                  <tbody>
+                    {claimsToShow.map((item, index) => (
+                      <tr key={index}>
+                        {index === 0 && (
+                          <td className="border border-slate-400 p-2 font-semibold bg-slate-50 align-top" rowSpan={claimsToShow.length}>
+                            Possible declarations:
+                          </td>
+                        )}
+                        <td className="border border-slate-400 p-1">{item.label}</td>
+                        <td className="border border-slate-400 p-1 text-center font-medium text-green-600">
+                          {item.claim}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              );
+            })()}
 
             {/* Additional Information */}
             <table className="w-full border-collapse border border-slate-400 text-xs">
