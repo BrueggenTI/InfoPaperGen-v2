@@ -17,6 +17,17 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Updated Fruit/Vegetable/Legume Threshold Values
+- **Updated Nutri-Score calculation with corrected fruit/veg/legume thresholds**
+- **New Threshold Values**:
+  - ≤40%: Score 0
+  - >40%: Score 2  
+  - >60%: Score 4
+  - >80%: Score 6
+- **Files Modified**:
+  - `client/src/lib/nutri-score.ts` - Updated FRUIT_VEG_LEGUME_THRESHOLDS array
+- **Result**: Nutri-Score calculation now uses accurate EU standard thresholds for fruit/vegetable/legume content
+
 ### 2025-01-30 - Manual Fruit/Vegetable/Legume Content Input
 - **Added manual input field for fruit/vegetable/legume percentage**
 - **Features Added**:

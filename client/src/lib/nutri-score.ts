@@ -60,7 +60,7 @@ const SALT_THRESHOLDS = [
 
 // Bonus (positive) nutrient thresholds
 const FRUIT_VEG_LEGUME_THRESHOLDS = [
-  [40.0, 0], [40.01, 1], [60.01, 2], [80.01, 5]
+  [40.0, 0], [40.01, 2], [60.01, 4], [80.01, 6]
 ] as const;
 
 const FIBER_THRESHOLDS = [
