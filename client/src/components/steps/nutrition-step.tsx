@@ -26,6 +26,7 @@ const nutritionSchema = z.object({
   fiber: z.number().min(0, "Fiber must be positive"),
   protein: z.number().min(0, "Protein must be positive"),
   salt: z.number().min(0, "Salt must be positive"),
+  fruitVegLegumeContent: z.number().min(0, "Fruit/Veg/Legume content must be positive").max(100, "Percentage cannot exceed 100%"),
 });
 
 interface NutritionStepProps {
@@ -59,6 +60,7 @@ export default function NutritionStep({
       fiber: 0,
       protein: 0,
       salt: 0,
+      fruitVegLegumeContent: 0,
     },
   });
 
@@ -75,8 +77,12 @@ export default function NutritionStep({
     onSuccess: (data) => {
       if (data && data.nutrition) {
         // Update form with extracted nutrition values
-        form.reset(data.nutrition);
-        onUpdate({ nutrition: data.nutrition });
+        const nutritionWithDefaults = {
+          ...data.nutrition,
+          fruitVegLegumeContent: data.nutrition.fruitVegLegumeContent || 0
+        };
+        form.reset(nutritionWithDefaults);
+        onUpdate({ nutrition: nutritionWithDefaults });
         toast({
           title: "Nährwerte extrahiert",
           description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
@@ -145,6 +151,7 @@ export default function NutritionStep({
           fiber: formData.nutrition?.fiber || 0,
           protein: formData.nutrition?.protein || 0,
           salt: formData.nutrition?.salt || 0,
+          fruitVegLegumeContent: formData.nutrition?.fruitVegLegumeContent || 0,
           [field]: {
             ...(formData.nutrition?.[field as keyof typeof formData.nutrition] as any),
             [nestedField]: value,
@@ -162,6 +169,7 @@ export default function NutritionStep({
           fiber: formData.nutrition?.fiber || 0,
           protein: formData.nutrition?.protein || 0,
           salt: formData.nutrition?.salt || 0,
+          fruitVegLegumeContent: formData.nutrition?.fruitVegLegumeContent || 0,
           ...formData.nutrition,
           [field]: value,
         },
@@ -591,6 +599,39 @@ export default function NutritionStep({
         </table>
       </div>
 
+      {/* Fruit/Veg/Legume Content Input */}
+      <div className="bg-white border border-slate-300 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Fruit/Vegetable/Legume Content</h3>
+        <p className="text-sm text-slate-600 mb-3">
+          Enter the percentage of fruits, vegetables, nuts and legumes for accurate Nutri-Score calculation.
+        </p>
+        <FormField
+          control={form.control}
+          name="fruitVegLegumeContent"
+          render={({ field }) => (
+            <FormItem className="w-48">
+              <FormLabel>Fruit/Veg/Legume Content (%)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  placeholder="0"
+                  {...field}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    field.onChange(value);
+                    handleFieldChange("fruitVegLegumeContent", value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
       {/* Nutri-Score Calculation */}
       {(() => {
         const nutriScoreResult = calculateNutriScore({
@@ -602,7 +643,7 @@ export default function NutritionStep({
           fiber: watchedValues.fiber,
           protein: watchedValues.protein,
           salt: watchedValues.salt,
-          fruitVegLegumeContent: 0 // Default to 0 for now, can be made editable later
+          fruitVegLegumeContent: watchedValues.fruitVegLegumeContent || 0
         });
 
         const claimsResult = calculateClaims({

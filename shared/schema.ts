@@ -59,6 +59,7 @@ export const productInfoSchema = z.object({
     fiber: z.number(),
     protein: z.number(),
     salt: z.number(),
+    fruitVegLegumeContent: z.number().default(0),
   }).optional(),
   
   // Additional fields
