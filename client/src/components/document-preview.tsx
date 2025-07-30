@@ -365,16 +365,11 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                         Nutri-score:
                       </td>
                       <td className="border border-slate-400 p-2">
-                        <div className="flex items-center gap-2">
-                          <img 
-                            src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
-                            alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
-                            className="h-6 w-auto"
-                          />
-                          <span className="text-xs text-slate-600">
-                            (Score: {nutriScoreResult.finalScore})
-                          </span>
-                        </div>
+                        <img 
+                          src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
+                          alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
+                          className="h-6 w-auto"
+                        />
                       </td>
                     </tr>
                   </tbody>
