@@ -94,11 +94,11 @@ function calculateScore(value: number, thresholds: readonly (readonly [number, n
  * Calculate Nutri-Score grade based on final score
  */
 function calculateNutriGrade(finalScore: number): 'A' | 'B' | 'C' | 'D' | 'E' {
-  if (finalScore <= -15) return 'A';
-  if (finalScore <= 1) return 'B';
-  if (finalScore <= 3) return 'C';
-  if (finalScore <= 11) return 'D';
-  return 'E';
+  if (finalScore >= -15 && finalScore <= 1) return 'A';
+  if (finalScore > 1 && finalScore <= 3) return 'B';
+  if (finalScore > 3 && finalScore <= 11) return 'C';
+  if (finalScore > 11 && finalScore <= 19) return 'D';
+  return 'E'; // finalScore > 19 or finalScore < -15
 }
 
 /**

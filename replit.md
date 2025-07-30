@@ -29,7 +29,8 @@ An AI-powered web application that generates professional Product Information Pa
   - `client/src/lib/nutri-score.ts` - Core calculation engine with threshold tables
   - `client/src/components/steps/nutrition-step.tsx` - Added real-time Nutri-Score display
   - `client/src/components/document-preview.tsx` - Integrated calculated Nutri-Score in preview
-- **Threshold Values**: Final score thresholds: ≤-15 (A), ≤1 (B), ≤3 (C), ≤11 (D), >11 (E)
+- **Threshold Values**: Final score ranges: -15 to 1 (A), 2 to 3 (B), 4 to 11 (C), 12 to 19 (D), 20+ (E)
+- **Visual Integration**: Official EU Nutri-Score graphics automatically displayed based on calculated grade
 - **Result**: Automatic Nutri-Score calculation and display throughout the application
 
 ### 2025-01-30 - Table Header Alignment Fix
