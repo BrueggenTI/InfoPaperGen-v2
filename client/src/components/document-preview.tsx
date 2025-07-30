@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { generatePDF } from "@/lib/pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
+import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -340,19 +341,44 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </tbody>
             </table>
 
-            {/* Nutri-score */}
-            <table className="w-full border-collapse border border-slate-400 text-xs">
-              <tbody>
-                <tr>
-                  <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
-                    Nutri-score:
-                  </td>
-                  <td className="border border-slate-400 p-2">
-                    {formData.nutriScore || ""}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            {/* Nutri-score - Calculated */}
+            {(() => {
+              if (!formData.nutrition) return null;
+              
+              const nutriScoreResult = calculateNutriScore({
+                energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
+                fat: formData.nutrition.fat || 0,
+                saturatedFat: formData.nutrition.saturatedFat || 0,
+                carbohydrates: formData.nutrition.carbohydrates || 0,
+                sugars: formData.nutrition.sugars || 0,
+                fiber: formData.nutrition.fiber || 0,
+                protein: formData.nutrition.protein || 0,
+                salt: formData.nutrition.salt || 0,
+                fruitVegLegumeContent: 0
+              });
+
+              return (
+                <table className="w-full border-collapse border border-slate-400 text-xs">
+                  <tbody>
+                    <tr>
+                      <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
+                        Nutri-score:
+                      </td>
+                      <td className="border border-slate-400 p-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded font-bold ${getNutriScoreColor(nutriScoreResult.nutriGrade)}`}>
+                            {nutriScoreResult.nutriGrade}
+                          </span>
+                          <span className="text-xs text-slate-600">
+                            (Score: {nutriScoreResult.finalScore})
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              );
+            })()}
 
             {/* Declarations */}
             <table className="w-full border-collapse border border-slate-400 text-xs">

@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2 } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { calculateNutriScore, getNutriScoreColor, formatNutriScoreDetails } from "@/lib/nutri-score";
 
 const nutritionSchema = z.object({
   energy: z.object({
@@ -588,6 +589,94 @@ export default function NutritionStep({
           </tbody>
         </table>
       </div>
+
+      {/* Nutri-Score Calculation */}
+      {(() => {
+        const nutriScoreResult = calculateNutriScore({
+          energy: watchedValues.energy,
+          fat: watchedValues.fat,
+          saturatedFat: watchedValues.saturatedFat,
+          carbohydrates: watchedValues.carbohydrates,
+          sugars: watchedValues.sugars,
+          fiber: watchedValues.fiber,
+          protein: watchedValues.protein,
+          salt: watchedValues.salt,
+          fruitVegLegumeContent: 0 // Default to 0 for now, can be made editable later
+        });
+
+        return (
+          <div className="bg-white border border-slate-300 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutri-Score Calculation</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Malus Score */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-red-600">Malus Score (Negative Nutrients)</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Energy Score:</span>
+                    <span className="font-mono">{nutriScoreResult.energyScore}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Saturated Fat Score:</span>
+                    <span className="font-mono">{nutriScoreResult.saturatedFatScore}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Sugar Score:</span>
+                    <span className="font-mono">{nutriScoreResult.sugarScore}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Salt Score:</span>
+                    <span className="font-mono">{nutriScoreResult.saltScore}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 font-semibold">
+                    <span>Total Malus:</span>
+                    <span className="font-mono text-red-600">{nutriScoreResult.malusScore}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bonus Score */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-green-600">Bonus Score (Positive Nutrients)</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Fruit/Veg/Legume Score:</span>
+                    <span className="font-mono">{nutriScoreResult.fruitVegLegumeScore}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fiber Score:</span>
+                    <span className="font-mono">{nutriScoreResult.fiberScore}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Protein Score:</span>
+                    <span className="font-mono">{nutriScoreResult.proteinScore}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 font-semibold">
+                    <span>Total Bonus:</span>
+                    <span className="font-mono text-green-600">{nutriScoreResult.bonusScore}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Final Result */}
+            <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold mb-1">Final Nutri-Score</h4>
+                  <p className="text-sm text-slate-600">
+                    {nutriScoreResult.malusScore} (malus) - {nutriScoreResult.bonusScore} (bonus) = {nutriScoreResult.finalScore}
+                  </p>
+                </div>
+                <div className={`px-4 py-2 rounded-lg font-bold text-xl ${getNutriScoreColor(nutriScoreResult.nutriGrade)}`}>
+                  {nutriScoreResult.nutriGrade}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
