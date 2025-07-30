@@ -236,120 +236,231 @@ export default function NutritionStep({
         </CardContent>
       </Card>
 
+      {/* Nutritional Table - Same format as Live Preview */}
+      <div className="bg-white border border-slate-300 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Nährwerttabelle</h3>
+        <table className="w-full border-collapse border border-slate-400 text-sm">
+          <tbody>
+            <tr>
+              <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={3}>
+                Average nutritional value:
+              </td>
+              <td className="border border-slate-400 p-2 text-center font-semibold">
+                per 100 g of product
+              </td>
+              <td className="border border-slate-400 p-2 text-center font-semibold">
+                per {servingSize} g of product
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1">Energy</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.energy.kj || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('energy.kj', value);
+                      handleFieldChange("energy", value, "kj");
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">kJ /</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.energy.kcal || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('energy.kcal', value);
+                      handleFieldChange("energy", value, "kcal");
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">kcal</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.energy.kj)} kJ / {calculatePerServing(watchedValues.energy.kcal)} kcal
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1">Fat</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.fat || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('fat', value);
+                      handleFieldChange("fat", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.fat)} g
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1"></td>
+              <td className="border border-slate-400 p-1">of which saturates</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.saturatedFat || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('saturatedFat', value);
+                      handleFieldChange("saturatedFat", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.saturatedFat)} g
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1"></td>
+              <td className="border border-slate-400 p-1">Carbohydrates</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.carbohydrates || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('carbohydrates', value);
+                      handleFieldChange("carbohydrates", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.carbohydrates)} g
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1"></td>
+              <td className="border border-slate-400 p-1">of which sugars</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.sugars || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('sugars', value);
+                      handleFieldChange("sugars", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.sugars)} g
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1"></td>
+              <td className="border border-slate-400 p-1">Fibre</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.fiber || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('fiber', value);
+                      handleFieldChange("fiber", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.fiber)} g
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1"></td>
+              <td className="border border-slate-400 p-1">Protein</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.protein || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('protein', value);
+                      handleFieldChange("protein", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.protein)} g
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-slate-400 p-1"></td>
+              <td className="border border-slate-400 p-1">Salt</td>
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={watchedValues.salt || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      form.setValue('salt', value);
+                      handleFieldChange("salt", value);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
+              </td>
+              <td className="border border-slate-400 p-1 text-center text-xs">
+                {calculatePerServing(watchedValues.salt)} g
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Energy */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border border-slate-200 rounded-lg">
-            <div>
-              <h3 className="font-medium text-slate-900 mb-2">Energy</h3>
-            </div>
-            <div>
-              <FormField
-                control={form.control}
-                name="energy.kj"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>kJ per 100g</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
-                          field.onChange(value);
-                          handleFieldChange("energy", value, "kj");
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="text-sm text-slate-600 flex items-end pb-2">
-              {calculatePerServing(watchedValues.energy.kj)} kJ per {servingSize}g
-            </div>
-
-            <div></div>
-            <div>
-              <FormField
-                control={form.control}
-                name="energy.kcal"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>kcal per 100g</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
-                          field.onChange(value);
-                          handleFieldChange("energy", value, "kcal");
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="text-sm text-slate-600 flex items-end pb-2">
-              {calculatePerServing(watchedValues.energy.kcal)} kcal per {servingSize}g
-            </div>
-          </div>
-
-          {/* Macronutrients */}
-          {[
-            { key: 'fat', label: 'Fat', unit: 'g' },
-            { key: 'saturatedFat', label: 'Saturated Fat', unit: 'g' },
-            { key: 'carbohydrates', label: 'Carbohydrates', unit: 'g' },
-            { key: 'sugars', label: 'Sugars', unit: 'g' },
-            { key: 'fiber', label: 'Fiber', unit: 'g' },
-            { key: 'protein', label: 'Protein', unit: 'g' },
-            { key: 'salt', label: 'Salt', unit: 'g' },
-          ].map((nutrient) => (
-            <div key={nutrient.key} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border border-slate-200 rounded-lg">
-              <div>
-                <h3 className="font-medium text-slate-900">{nutrient.label}</h3>
-              </div>
-              <div>
-                <FormField
-                  control={form.control}
-                  name={nutrient.key as any}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{nutrient.unit} per 100g</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          {...field}
-                          value={field.value || ''}
-                          onChange={(e) => {
-                            const value = parseFloat(e.target.value) || 0;
-                            field.onChange(value);
-                            handleFieldChange(nutrient.key, value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="text-sm text-slate-600 flex items-end pb-2">
-                {calculatePerServing(watchedValues[nutrient.key as keyof typeof watchedValues] as number)} {nutrient.unit} per {servingSize}g
-              </div>
-            </div>
-          ))}
 
           <div className="flex justify-between mt-8">
             <Button 
