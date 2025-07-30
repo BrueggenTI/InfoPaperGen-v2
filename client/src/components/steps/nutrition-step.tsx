@@ -238,13 +238,10 @@ export default function NutritionStep({
 
       {/* Nutritional Table - Same format as Live Preview */}
       <div className="bg-white border border-slate-300 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Nährwerttabelle</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Average nutritional value:</h3>
         <table className="w-full border-collapse border border-slate-400 text-sm">
           <tbody>
             <tr>
-              <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={9}>
-                Average nutritional value:
-              </td>
               <td className="border border-slate-400 p-2 text-center font-semibold">
                 per 100 g of product
               </td>
@@ -284,8 +281,37 @@ export default function NutritionStep({
                   <span className="text-xs">kcal</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.energy.kj)} kJ / {calculatePerServing(watchedValues.energy.kcal)} kcal
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.energy.kj) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('energy.kj', per100g);
+                      handleFieldChange("energy", per100g, "kj");
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">kJ /</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.energy.kcal) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('energy.kcal', per100g);
+                      handleFieldChange("energy", per100g, "kcal");
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">kcal</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -307,8 +333,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.fat)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.fat) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('fat', per100g);
+                      handleFieldChange("fat", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -330,8 +371,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.saturatedFat)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.saturatedFat) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('saturatedFat', per100g);
+                      handleFieldChange("saturatedFat", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -353,8 +409,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.carbohydrates)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.carbohydrates) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('carbohydrates', per100g);
+                      handleFieldChange("carbohydrates", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -376,8 +447,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.sugars)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.sugars) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('sugars', per100g);
+                      handleFieldChange("sugars", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -399,8 +485,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.fiber)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.fiber) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('fiber', per100g);
+                      handleFieldChange("fiber", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -422,8 +523,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.protein)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.protein) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('protein', per100g);
+                      handleFieldChange("protein", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
             <tr>
@@ -445,8 +561,23 @@ export default function NutritionStep({
                   <span className="text-xs">g</span>
                 </div>
               </td>
-              <td className="border border-slate-400 p-1 text-center text-xs">
-                {calculatePerServing(watchedValues.salt)} g
+              <td className="border border-slate-400 p-1 text-center">
+                <div className="flex items-center justify-center space-x-1">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={calculatePerServing(watchedValues.salt) || ''}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      const per100g = (value * 100) / servingSize;
+                      form.setValue('salt', per100g);
+                      handleFieldChange("salt", per100g);
+                    }}
+                    className="w-16 h-8 text-xs text-center p-1"
+                  />
+                  <span className="text-xs">g</span>
+                </div>
               </td>
             </tr>
           </tbody>
