@@ -250,8 +250,11 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             <table className="w-full border-collapse border border-slate-400 text-xs">
               <tbody>
                 <tr>
-                  <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={3}>
+                  <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={9}>
                     Average nutritional value:
+                  </td>
+                  <td className="border border-slate-400 p-2 text-center font-semibold">
+                    {/* Empty header cell to align with nutrient names column */}
                   </td>
                   <td className="border border-slate-400 p-2 text-center font-semibold">
                     per 100 g of product
@@ -279,7 +282,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-slate-400 p-1"></td>
                   <td className="border border-slate-400 p-1">of which saturates</td>
                   <td className="border border-slate-400 p-1 text-center">
                     {formData.nutrition?.saturatedFat || 0} g
@@ -289,7 +291,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-slate-400 p-1"></td>
                   <td className="border border-slate-400 p-1">Carbohydrates</td>
                   <td className="border border-slate-400 p-1 text-center">
                     {formData.nutrition?.carbohydrates || 0} g
@@ -299,7 +300,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-slate-400 p-1"></td>
                   <td className="border border-slate-400 p-1">of which sugars</td>
                   <td className="border border-slate-400 p-1 text-center">
                     {formData.nutrition?.sugars || 0} g
@@ -309,7 +309,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-slate-400 p-1"></td>
                   <td className="border border-slate-400 p-1">Fibre</td>
                   <td className="border border-slate-400 p-1 text-center">
                     {formData.nutrition?.fiber || 0} g
@@ -319,7 +318,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-slate-400 p-1"></td>
                   <td className="border border-slate-400 p-1">Protein</td>
                   <td className="border border-slate-400 p-1 text-center">
                     {formData.nutrition?.protein || 0} g
@@ -329,7 +327,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-slate-400 p-1"></td>
                   <td className="border border-slate-400 p-1">Salt</td>
                   <td className="border border-slate-400 p-1 text-center">
                     {formData.nutrition?.salt || 0} g

@@ -34,6 +34,12 @@ export default function DocumentPreviewPage({ sessionId }: DocumentPreviewPagePr
     productNumber: "",
     productName: "",
     currentStep: 1,
+    description: "",
+    category: "",
+    packageSize: "",
+    servingSize: "40g",
+    preparedBy: "",
+    jobTitle: "",
   };
 
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
