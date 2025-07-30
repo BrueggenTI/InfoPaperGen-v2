@@ -242,7 +242,7 @@ export default function NutritionStep({
         <table className="w-full border-collapse border border-slate-400 text-sm">
           <tbody>
             <tr>
-              <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={3}>
+              <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={9}>
                 Average nutritional value:
               </td>
               <td className="border border-slate-400 p-2 text-center font-semibold">
@@ -312,7 +312,6 @@ export default function NutritionStep({
               </td>
             </tr>
             <tr>
-              <td className="border border-slate-400 p-1"></td>
               <td className="border border-slate-400 p-1">of which saturates</td>
               <td className="border border-slate-400 p-1 text-center">
                 <div className="flex items-center justify-center space-x-1">
@@ -336,7 +335,6 @@ export default function NutritionStep({
               </td>
             </tr>
             <tr>
-              <td className="border border-slate-400 p-1"></td>
               <td className="border border-slate-400 p-1">Carbohydrates</td>
               <td className="border border-slate-400 p-1 text-center">
                 <div className="flex items-center justify-center space-x-1">
@@ -360,7 +358,6 @@ export default function NutritionStep({
               </td>
             </tr>
             <tr>
-              <td className="border border-slate-400 p-1"></td>
               <td className="border border-slate-400 p-1">of which sugars</td>
               <td className="border border-slate-400 p-1 text-center">
                 <div className="flex items-center justify-center space-x-1">
@@ -384,7 +381,6 @@ export default function NutritionStep({
               </td>
             </tr>
             <tr>
-              <td className="border border-slate-400 p-1"></td>
               <td className="border border-slate-400 p-1">Fibre</td>
               <td className="border border-slate-400 p-1 text-center">
                 <div className="flex items-center justify-center space-x-1">
@@ -408,7 +404,6 @@ export default function NutritionStep({
               </td>
             </tr>
             <tr>
-              <td className="border border-slate-400 p-1"></td>
               <td className="border border-slate-400 p-1">Protein</td>
               <td className="border border-slate-400 p-1 text-center">
                 <div className="flex items-center justify-center space-x-1">
@@ -432,7 +427,6 @@ export default function NutritionStep({
               </td>
             </tr>
             <tr>
-              <td className="border border-slate-400 p-1"></td>
               <td className="border border-slate-400 p-1">Salt</td>
               <td className="border border-slate-400 p-1 text-center">
                 <div className="flex items-center justify-center space-x-1">
