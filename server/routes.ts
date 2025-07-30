@@ -108,6 +108,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Extract nutrition from base64 image
+  app.post("/api/extract-nutrition", async (req, res) => {
+    try {
+      const { image } = req.body;
+      
+      if (!image) {
+        res.status(400).json({ message: "No image data provided" });
+        return;
+      }
+
+      const extractedNutrition = await extractNutritionFromImage(image);
+      res.json({ nutrition: extractedNutrition });
+    } catch (error) {
+      res.status(500).json({ message: "Error extracting nutrition", error: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -1,12 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductInfo } from "@shared/schema";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 const nutritionSchema = z.object({
   energy: z.object({
@@ -37,6 +41,9 @@ export default function NutritionStep({
   onPrev,
   isLoading = false,
 }: NutritionStepProps) {
+  const { toast } = useToast();
+  const nutritionImageInputRef = useRef<HTMLInputElement>(null);
+  const [nutritionImage, setNutritionImage] = useState<string | null>(null);
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
   const form = useForm<z.infer<typeof nutritionSchema>>({
@@ -55,9 +62,66 @@ export default function NutritionStep({
 
   const watchedValues = form.watch();
 
+  // AI nutrition extraction mutation
+  const extractNutritionMutation = useMutation({
+    mutationFn: async (imageData: string) => {
+      const res = await apiRequest("POST", "/api/extract-nutrition", { 
+        image: imageData.split(',')[1] // Remove data:image/jpeg;base64, prefix
+      });
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      if (data && data.nutrition) {
+        // Update form with extracted nutrition values
+        form.reset(data.nutrition);
+        onUpdate({ nutrition: data.nutrition });
+        toast({
+          title: "Nährwerte extrahiert",
+          description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Fehler bei der Extraktion",
+        description: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Calculate per serving values
   const calculatePerServing = (per100g: number) => {
     return (per100g * servingSize / 100).toFixed(1);
+  };
+
+  const handleNutritionImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Datei zu groß",
+        description: "Bitte wählen Sie eine Datei unter 10MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      setNutritionImage(base64);
+      extractNutritionMutation.mutate(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeNutritionImage = () => {
+    setNutritionImage(null);
+    if (nutritionImageInputRef.current) {
+      nutritionImageInputRef.current.value = '';
+    }
   };
 
   const onSubmit = (values: z.infer<typeof nutritionSchema>) => {
@@ -71,6 +135,14 @@ export default function NutritionStep({
       updateData = {
         nutrition: {
           ...formData.nutrition,
+          energy: formData.nutrition?.energy || { kj: 0, kcal: 0 },
+          fat: formData.nutrition?.fat || 0,
+          saturatedFat: formData.nutrition?.saturatedFat || 0,
+          carbohydrates: formData.nutrition?.carbohydrates || 0,
+          sugars: formData.nutrition?.sugars || 0,
+          fiber: formData.nutrition?.fiber || 0,
+          protein: formData.nutrition?.protein || 0,
+          salt: formData.nutrition?.salt || 0,
           [field]: {
             ...(formData.nutrition?.[field as keyof typeof formData.nutrition] as any),
             [nestedField]: value,
@@ -80,6 +152,14 @@ export default function NutritionStep({
     } else {
       updateData = {
         nutrition: {
+          energy: formData.nutrition?.energy || { kj: 0, kcal: 0 },
+          fat: formData.nutrition?.fat || 0,
+          saturatedFat: formData.nutrition?.saturatedFat || 0,
+          carbohydrates: formData.nutrition?.carbohydrates || 0,
+          sugars: formData.nutrition?.sugars || 0,
+          fiber: formData.nutrition?.fiber || 0,
+          protein: formData.nutrition?.protein || 0,
+          salt: formData.nutrition?.salt || 0,
           ...formData.nutrition,
           [field]: value,
         },
@@ -96,6 +176,65 @@ export default function NutritionStep({
           Review and edit the extracted nutritional values per 100g. Values per {servingSize}g serving will be calculated automatically.
         </p>
       </div>
+
+      {/* Nutrition Image Upload */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Camera className="w-5 h-5" />
+            <span>Nährwerttabelle hochladen</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+            <input
+              ref={nutritionImageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleNutritionImageUpload}
+              className="hidden"
+            />
+            <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-sm text-slate-600 mb-2">
+              Laden Sie ein Bild der Nährwerttabelle hoch, um die Werte automatisch zu extrahieren
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => nutritionImageInputRef.current?.click()}
+              disabled={isLoading || extractNutritionMutation.isPending}
+            >
+              {extractNutritionMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Extrahiere Nährwerte...
+                </>
+              ) : (
+                "Nährwerttabelle hochladen"
+              )}
+            </Button>
+          </div>
+
+          {nutritionImage && (
+            <div className="relative">
+              <img
+                src={nutritionImage}
+                alt="Nutrition Label"
+                className="w-full max-w-md mx-auto rounded-lg shadow-sm"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={removeNutritionImage}
+                className="absolute top-2 right-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
