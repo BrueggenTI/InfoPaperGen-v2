@@ -230,51 +230,54 @@ export default function IngredientsStep({
     const finalFormatted = finalProductIngredients
       .filter(ing => ing.name.trim())
       .map(ing => {
-        const percentage = ing.percentage ? ` ${ing.percentage}%` : '';
-        const ingredientText = `${ing.name}${percentage}`;
+        const percentage = ing.percentage ? ` **(${ing.percentage}%)**` : '';
+        const ingredientText = `**${ing.name}${percentage}**`;
         
         // Check if this ingredient is marked as base recipe
         if (ing.isMarkedAsBase && baseFormatted) {
-          return `**${ingredientText}** [${baseFormatted}]`;
+          return `${ingredientText} [${baseFormatted}]`;
         }
         
-        return `**${ingredientText}**`;
+        return ingredientText;
       })
       .join(', ');
 
     return finalFormatted;
   };
 
-  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string}> => {
+  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
     const markedIngredientPercentage = getMarkedIngredientPercentage();
-    const tableIngredients: Array<{name: string, percentage: number, origin: string}> = [];
+    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
 
-    // Add final product ingredients (excluding marked base ingredient)
+    // Add final product ingredients in the same order as they appear
     finalProductIngredients
-      .filter(ing => ing.name.trim() && !ing.isMarkedAsBase)
+      .filter(ing => ing.name.trim())
       .forEach(ing => {
-        tableIngredients.push({
-          name: ing.name,
-          percentage: ing.percentage || 0,
-          origin: ing.origin || ""
-        });
-      });
-
-    // Add base product ingredients with recalculated percentages based on marked ingredient
-    if (markedIngredientPercentage > 0) {
-      baseProductIngredients
-        .filter(ing => ing.name.trim())
-        .forEach(ing => {
-          const wholeProductPercentage = ing.percentage 
-            ? calculateWholeProductPercentage(ing.percentage, markedIngredientPercentage)
-            : 0;
+        if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
+          // Add base product ingredients with recalculated percentages
+          baseProductIngredients
+            .filter(baseIng => baseIng.name.trim())
+            .forEach(baseIng => {
+              const wholeProductPercentage = baseIng.percentage 
+                ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
+                : 0;
+              tableIngredients.push({
+                name: baseIng.name,
+                percentage: wholeProductPercentage,
+                origin: baseIng.origin || "",
+                isFinalProduct: false
+              });
+            });
+        } else {
+          // Add regular final product ingredient
           tableIngredients.push({
             name: ing.name,
-            percentage: wholeProductPercentage,
-            origin: ing.origin || ""
+            percentage: ing.percentage || 0,
+            origin: ing.origin || "",
+            isFinalProduct: true
           });
-        });
-    }
+        }
+      });
 
     return tableIngredients;
   };
@@ -480,14 +483,34 @@ export default function IngredientsStep({
                 <tbody>
                   {generateIngredientsTable().map((ingredient, index) => (
                     <tr key={index}>
-                      <td className="border border-slate-300 p-2">{ingredient.name}</td>
+                      <td className="border border-slate-300 p-2">
+                        {ingredient.isFinalProduct ? (
+                          <strong>{ingredient.name}</strong>
+                        ) : (
+                          ingredient.name
+                        )}
+                      </td>
                       <td className="border border-slate-300 p-2">{ingredient.percentage}%</td>
                       <td className="border border-slate-300 p-2">
                         <Input
                           value={ingredient.origin}
                           onChange={(e) => {
-                            // Update origin in the appropriate ingredients array
-                            // This is a simplified version - you might want to implement proper origin tracking
+                            const newOrigin = e.target.value;
+                            // Update origin in final product ingredients
+                            if (ingredient.isFinalProduct) {
+                              const updatedFinalIngredients = finalProductIngredients.map(ing => 
+                                ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
+                              );
+                              setFinalProductIngredients(updatedFinalIngredients);
+                              onUpdate({ ingredients: updatedFinalIngredients });
+                            } else {
+                              // Update origin in base product ingredients
+                              const updatedBaseIngredients = baseProductIngredients.map(ing => 
+                                ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
+                              );
+                              setBaseProductIngredients(updatedBaseIngredients);
+                              onUpdate({ baseProductIngredients: updatedBaseIngredients });
+                            }
                           }}
                           placeholder="Land eingeben"
                           className="border-0 p-0 h-auto"
