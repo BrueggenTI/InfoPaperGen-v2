@@ -61,48 +61,68 @@ export default function IngredientsStep({
     return baseProductItem?.percentage || 90.7; // Default from example
   };
 
-  // AI extraction mutation
-  const extractIngredientsMutation = useMutation({
-    mutationFn: async ({ image, isBaseProduct }: { image: string, isBaseProduct: boolean }) => {
+  // AI extraction mutations - separate for each type
+  const extractFinalIngredientsMutation = useMutation({
+    mutationFn: async ({ image }: { image: string }) => {
       const res = await apiRequest("POST", "/api/extract-ingredients", {
         image,
-        isBaseProduct,
+        isBaseProduct: false,
       });
       return await res.json();
     },
-    onSuccess: (data, variables) => {
-      if (variables.isBaseProduct) {
-        setBaseProductIngredients(data.ingredients || []);
-        onUpdate({ baseProductIngredients: data.ingredients || [] });
-        // Update text representation
-        const text = data.ingredients.map((ing: Ingredient) => 
-          `${ing.name}${ing.percentage ? ` ${ing.percentage}%` : ''}`
-        ).join(', ');
-        setBaseRecipeText(text);
-      } else {
-        setFinalProductIngredients(data.ingredients || []);
-        onUpdate({ ingredients: data.ingredients || [] });
-        // Update text representation  
-        const text = data.ingredients.map((ing: Ingredient) => 
-          `${ing.name}${ing.percentage ? ` ${ing.percentage}%` : ''}`
-        ).join(', ');
-        setFinalRecipeText(text);
-      }
+    onSuccess: (data) => {
+      setFinalProductIngredients(data.ingredients || []);
+      onUpdate({ ingredients: data.ingredients || [] });
+      // Update text representation with percentages in parentheses
+      const text = data.ingredients.map((ing: Ingredient) => 
+        `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
+      ).join(', ');
+      setFinalRecipeText(text);
       toast({
-        title: "Erfolgreich extrahiert",
-        description: `${variables.isBaseProduct ? 'Base Recipe' : 'Final Recipe'} Zutaten wurden erfolgreich extrahiert.`,
+        title: "Final Recipe erfolgreich extrahiert",
+        description: "Final Recipe Zutaten wurden erfolgreich extrahiert.",
       });
     },
     onError: () => {
       toast({
         title: "Fehler",
-        description: "Fehler beim Extrahieren der Zutaten. Bitte versuchen Sie es erneut.",
+        description: "Fehler beim Extrahieren der Final Recipe Zutaten.",
         variant: "destructive",
       });
     },
   });
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isBaseProduct: boolean) => {
+  const extractBaseIngredientsMutation = useMutation({
+    mutationFn: async ({ image }: { image: string }) => {
+      const res = await apiRequest("POST", "/api/extract-ingredients", {
+        image,
+        isBaseProduct: true,
+      });
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      setBaseProductIngredients(data.ingredients || []);
+      onUpdate({ baseProductIngredients: data.ingredients || [] });
+      // Update text representation with percentages in parentheses
+      const text = data.ingredients.map((ing: Ingredient) => 
+        `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
+      ).join(', ');
+      setBaseRecipeText(text);
+      toast({
+        title: "Base Recipe erfolgreich extrahiert",
+        description: "Base Recipe Zutaten wurden erfolgreich extrahiert.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Fehler",
+        description: "Fehler beim Extrahieren der Base Recipe Zutaten.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFinalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -119,21 +139,41 @@ export default function IngredientsStep({
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
       const base64Data = base64.split(',')[1];
-      extractIngredientsMutation.mutate({ 
-        image: base64Data, 
-        isBaseProduct 
+      extractFinalIngredientsMutation.mutate({ image: base64Data });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBaseImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Datei zu groß",
+        description: "Bitte wählen Sie eine Datei unter 10MB.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      const base64Data = base64.split(',')[1];
+      extractBaseIngredientsMutation.mutate({ image: base64Data });
     };
     reader.readAsDataURL(file);
   };
 
   const handleFinalRecipeTextChange = (text: string) => {
     setFinalRecipeText(text);
-    // Parse text back to ingredients array
+    // Parse text back to ingredients array - handle percentages in parentheses
     const ingredients = text.split(',').map(item => {
       const trimmed = item.trim();
-      const percentageMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
-      const name = trimmed.replace(/\s*\d+(?:\.\d+)?%\s*/, '').trim();
+      // Match percentages in parentheses like (90.7%) or without parentheses
+      const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
+      const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
       return {
         name,
         percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
@@ -147,11 +187,12 @@ export default function IngredientsStep({
 
   const handleBaseRecipeTextChange = (text: string) => {
     setBaseRecipeText(text);
-    // Parse text back to ingredients array
+    // Parse text back to ingredients array - handle percentages in parentheses
     const ingredients = text.split(',').map(item => {
       const trimmed = item.trim();
-      const percentageMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
-      const name = trimmed.replace(/\s*\d+(?:\.\d+)?%\s*/, '').trim();
+      // Match percentages in parentheses like (23.0%) or without parentheses
+      const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
+      const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
       return {
         name,
         percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
@@ -164,7 +205,6 @@ export default function IngredientsStep({
   };
 
   const formatCombinedIngredients = () => {
-    const baseProductPercentage = getBaseProductPercentage();
     const baseFormatted = baseProductIngredients
       .filter(ing => ing.name.trim())
       .map(ing => {
@@ -178,7 +218,9 @@ export default function IngredientsStep({
       .map(ing => {
         const percentage = ing.percentage ? ` ${ing.percentage}%` : '';
         if (ing.name.toLowerCase().includes('granola') || ing.name.toLowerCase().includes('base')) {
-          return `${ing.name}${percentage} [${baseFormatted}]`;
+          return baseFormatted 
+            ? `${ing.name}${percentage} [${baseFormatted}]`
+            : `${ing.name}${percentage}`;
         }
         return `${ing.name}${percentage}`;
       })
@@ -250,7 +292,7 @@ export default function IngredientsStep({
               ref={finalRecipeInputRef}
               type="file"
               accept="image/*"
-              onChange={(e) => handleImageUpload(e, false)}
+              onChange={handleFinalImageUpload}
               className="hidden"
             />
             <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
@@ -260,9 +302,9 @@ export default function IngredientsStep({
             <Button
               variant="outline"
               onClick={() => finalRecipeInputRef.current?.click()}
-              disabled={extractIngredientsMutation.isPending}
+              disabled={extractFinalIngredientsMutation.isPending}
             >
-              {extractIngredientsMutation.isPending ? "Extrahiere..." : "Final Recipe hochladen"}
+              {extractFinalIngredientsMutation.isPending ? "Extrahiere..." : "Final Recipe hochladen"}
             </Button>
           </div>
 
@@ -272,7 +314,7 @@ export default function IngredientsStep({
               <Textarea
                 value={finalRecipeText}
                 onChange={(e) => handleFinalRecipeTextChange(e.target.value)}
-                placeholder="Granola 90,7%, Coconut chips 5%, pineapple chips 4,3%"
+                placeholder="Granola (90,7%), Coconut chips (5%), pineapple chips (4,3%)"
                 rows={3}
               />
             </div>
@@ -294,7 +336,7 @@ export default function IngredientsStep({
               ref={baseRecipeInputRef}
               type="file"
               accept="image/*"
-              onChange={(e) => handleImageUpload(e, true)}
+              onChange={handleBaseImageUpload}
               className="hidden"
             />
             <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
@@ -304,9 +346,9 @@ export default function IngredientsStep({
             <Button
               variant="outline"
               onClick={() => baseRecipeInputRef.current?.click()}
-              disabled={extractIngredientsMutation.isPending}
+              disabled={extractBaseIngredientsMutation.isPending}
             >
-              {extractIngredientsMutation.isPending ? "Extrahiere..." : "Base Recipe hochladen"}
+              {extractBaseIngredientsMutation.isPending ? "Extrahiere..." : "Base Recipe hochladen"}
             </Button>
           </div>
 
@@ -316,7 +358,7 @@ export default function IngredientsStep({
               <Textarea
                 value={baseRecipeText}
                 onChange={(e) => handleBaseRecipeTextChange(e.target.value)}
-                placeholder="whole grain oat flakes 23,0%*, high-fiber oat bran 20,0%*, corn fiber 17,5%*..."
+                placeholder="whole grain oat flakes (23,0%), high-fiber oat bran (20,0%), corn fiber (17,5%)"
                 rows={4}
               />
             </div>
