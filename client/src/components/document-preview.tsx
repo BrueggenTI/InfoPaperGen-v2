@@ -342,21 +342,33 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </tbody>
             </table>
 
-            {/* Ingredients Table */}
-            <div>
-              <h3 className="font-semibold text-sm mb-2">Ingredients</h3>
-              <table className="w-full border-collapse border border-slate-400 text-xs">
-                <tbody>
-                  <tr>
-                    <td className="border border-slate-400 p-2">
-                      {Array.isArray(formData.ingredients) 
-                        ? formData.ingredients.map(ing => ing.name).join(', ')
-                        : formData.ingredients || "Ingredients list not provided"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {/* Nutri-Score Display */}
+            {formData.nutrition && (() => {
+              const nutriScore = calculateNutriScore({
+                energy: formData.nutrition.energy?.kcal || 0,
+                fat: formData.nutrition.fat || 0,
+                saturatedFat: formData.nutrition.saturatedFat || 0,
+                carbohydrates: formData.nutrition.carbohydrates || 0,
+                sugars: formData.nutrition.sugars || 0,
+                fiber: formData.nutrition.fiber || 0,
+                protein: formData.nutrition.protein || 0,
+                salt: formData.nutrition.salt || 0,
+                fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
+              });
+
+              return (
+                <div>
+                  <h3 className="font-semibold text-sm mb-2">Nutri-Score</h3>
+                  <div className="flex justify-center">
+                    <img 
+                      src={getNutriScoreImage(nutriScore.nutriGrade)} 
+                      alt={`Nutri-Score ${nutriScore.nutriGrade}`}
+                      className="h-16 w-auto"
+                    />
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Declarations - Calculated Claims */}
             <div>
