@@ -342,41 +342,19 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </tbody>
             </table>
 
-            {/* Nutri-score - Calculated */}
-            {(() => {
-              if (!formData.nutrition) return null;
-              
-              const nutriScoreResult = calculateNutriScore({
-                energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
-                fat: formData.nutrition.fat || 0,
-                saturatedFat: formData.nutrition.saturatedFat || 0,
-                carbohydrates: formData.nutrition.carbohydrates || 0,
-                sugars: formData.nutrition.sugars || 0,
-                fiber: formData.nutrition.fiber || 0,
-                protein: formData.nutrition.protein || 0,
-                salt: formData.nutrition.salt || 0,
-                fruitVegLegumeContent: 0
-              });
-
-              return (
-                <div>
-                  <h3 className="font-semibold text-sm mb-2">Nutri Score</h3>
-                  <table className="w-full border-collapse border border-slate-400 text-xs">
-                    <tbody>
-                      <tr>
-                        <td className="border border-slate-400 p-2 text-center">
-                          <img 
-                            src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
-                            alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
-                            className="h-16 w-auto mx-auto"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })()}
+            {/* Ingredients Table */}
+            <div>
+              <h3 className="font-semibold text-sm mb-2">Ingredients</h3>
+              <table className="w-full border-collapse border border-slate-400 text-xs">
+                <tbody>
+                  <tr>
+                    <td className="border border-slate-400 p-2">
+                      {formData.ingredients || "Ingredients list not provided"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             {/* Declarations - Calculated Claims */}
             <div>
@@ -472,78 +450,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               })()}
             </div>
 
-            {/* Preparation */}
-            <div>
-              <h3 className="font-semibold text-sm mb-2">Preparation</h3>
-              <table className="w-full border-collapse border border-slate-400 text-xs">
-                <tbody>
-                  <tr>
-                    <td className="border border-slate-400 p-2">
-                      {formData.preparation || "Don't apply"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
 
-            {/* Allergy advice */}
-            <div>
-              <h3 className="font-semibold text-sm mb-2">Allergy advice</h3>
-              <table className="w-full border-collapse border border-slate-400 text-xs">
-                <tbody>
-                  <tr>
-                    <td className="border border-slate-400 p-2">
-                      {formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Storage conditions */}
-            <div>
-              <h3 className="font-semibold text-sm mb-2">Storage conditions</h3>
-              <table className="w-full border-collapse border border-slate-400 text-xs">
-                <tbody>
-                  <tr>
-                    <td className="border border-slate-400 p-2">
-                      {formData.storageConditions || "12 months in original packaging unit at about 20°C and relative humidity below 60%."}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Footer Information */}
-            <div>
-              <h3 className="font-semibold text-sm mb-2">Product Information</h3>
-              <table className="w-full border-collapse border border-slate-400 text-xs">
-                <tbody>
-                  <tr>
-                    <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
-                      Valid from:
-                    </td>
-                    <td className="border border-slate-400 p-2">
-                      {new Date().toLocaleDateString('en-GB')}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
-                      Prepared by:
-                    </td>
-                    <td className="border border-slate-400 p-2">
-                      {formData.preparedBy || ""}
-                      {formData.jobTitle && (
-                        <>
-                          <br />
-                          {formData.jobTitle}
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
 
             <div className="text-xs text-slate-600 italic leading-relaxed mt-4">
               The purpose of this product information is to describe a sample made
