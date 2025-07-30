@@ -36,7 +36,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
         const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
-        const ingredientText = `${ingredient.name}${percentage}`;
+        const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
         
         // Check if this ingredient is marked as base recipe
         if (ingredient.isMarkedAsBase && baseFormatted) {
@@ -149,9 +149,12 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   <td className="border border-slate-400 p-2 font-semibold bg-slate-50">
                     Ingredients:
                   </td>
-                  <td className="border border-slate-400 p-2">
-                    {formatIngredients()}
-                  </td>
+                  <td 
+                    className="border border-slate-400 p-2"
+                    dangerouslySetInnerHTML={{
+                      __html: formatIngredients()
+                    }}
+                  />
                 </tr>
               </tbody>
             </table>
