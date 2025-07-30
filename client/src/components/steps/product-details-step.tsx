@@ -241,7 +241,7 @@ export default function ProductDetailsStep({
               disabled={isLoading}
               className="flex items-center space-x-2"
             >
-              <span>Continue to Images</span>
+              <span>Continue to Ingredients</span>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

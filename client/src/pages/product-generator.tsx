@@ -5,7 +5,6 @@ import { ProductInfo } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 import ProductDetailsStep from "@/components/steps/product-details-step";
-import ImageUploadStep from "@/components/steps/image-upload-step";
 import IngredientsStep from "@/components/steps/ingredients-step";
 import NutritionStep from "@/components/steps/nutrition-step";
 import ReviewStep from "@/components/steps/review-step";
@@ -15,9 +14,8 @@ import DocumentPreview from "@/components/document-preview";
 const STEPS = [
   { id: 1, name: "Product Details", component: ProductDetailsStep },
   { id: 2, name: "Ingredients", component: IngredientsStep },
-  { id: 3, name: "Images", component: ImageUploadStep },
-  { id: 4, name: "Nutrition", component: NutritionStep },
-  { id: 5, name: "Review", component: ReviewStep },
+  { id: 3, name: "Nutrition", component: NutritionStep },
+  { id: 4, name: "Review", component: ReviewStep },
 ];
 
 export default function ProductGenerator() {
