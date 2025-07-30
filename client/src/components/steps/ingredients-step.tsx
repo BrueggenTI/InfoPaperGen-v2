@@ -254,7 +254,15 @@ export default function IngredientsStep({
       .filter(ing => ing.name.trim())
       .forEach(ing => {
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-          // Add base product ingredients with recalculated percentages
+          // First add the marked ingredient itself
+          tableIngredients.push({
+            name: ing.name,
+            percentage: ing.percentage || 0,
+            origin: ing.origin || "",
+            isFinalProduct: true
+          });
+          
+          // Then add base product ingredients with recalculated percentages
           baseProductIngredients
             .filter(baseIng => baseIng.name.trim())
             .forEach(baseIng => {
