@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ProductInfo } from "@shared/schema";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ interface Ingredient {
   name: string;
   percentage?: number;
   origin?: string;
+  isMarkedAsBase?: boolean;
 }
 
 interface IngredientsStepProps {
@@ -32,15 +33,18 @@ export default function IngredientsStep({
   isLoading = false,
 }: IngredientsStepProps) {
   const [finalProductIngredients, setFinalProductIngredients] = useState<Ingredient[]>(
-    formData.ingredients || [{ name: "", percentage: undefined, origin: "" }]
+    formData.ingredients || [{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false }]
   );
   const [baseProductIngredients, setBaseProductIngredients] = useState<Ingredient[]>(
-    formData.baseProductIngredients || [{ name: "", percentage: undefined, origin: "" }]
+    formData.baseProductIngredients || [{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false }]
   );
   
   // Text versions for manual editing after AI extraction
   const [finalRecipeText, setFinalRecipeText] = useState<string>("");
   const [baseRecipeText, setBaseRecipeText] = useState<string>("");
+  
+  // Track which final ingredient is marked as base recipe
+  const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
   
   // Upload refs
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
@@ -71,10 +75,14 @@ export default function IngredientsStep({
       return await res.json();
     },
     onSuccess: (data) => {
-      setFinalProductIngredients(data.ingredients || []);
-      onUpdate({ ingredients: data.ingredients || [] });
+      const ingredientsWithMarking = (data.ingredients || []).map((ing: any) => ({
+        ...ing,
+        isMarkedAsBase: false
+      }));
+      setFinalProductIngredients(ingredientsWithMarking);
+      onUpdate({ ingredients: ingredientsWithMarking });
       // Update text representation with percentages in parentheses
-      const text = data.ingredients.map((ing: Ingredient) => 
+      const text = ingredientsWithMarking.map((ing: Ingredient) => 
         `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
       ).join(', ');
       setFinalRecipeText(text);
@@ -101,10 +109,14 @@ export default function IngredientsStep({
       return await res.json();
     },
     onSuccess: (data) => {
-      setBaseProductIngredients(data.ingredients || []);
-      onUpdate({ baseProductIngredients: data.ingredients || [] });
+      const ingredientsWithMarking = (data.ingredients || []).map((ing: any) => ({
+        ...ing,
+        isMarkedAsBase: false
+      }));
+      setBaseProductIngredients(ingredientsWithMarking);
+      onUpdate({ baseProductIngredients: ingredientsWithMarking });
       // Update text representation with percentages in parentheses
-      const text = data.ingredients.map((ing: Ingredient) => 
+      const text = ingredientsWithMarking.map((ing: Ingredient) => 
         `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
       ).join(', ');
       setBaseRecipeText(text);
@@ -177,7 +189,8 @@ export default function IngredientsStep({
       return {
         name,
         percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
-        origin: ""
+        origin: "",
+        isMarkedAsBase: false
       };
     }).filter(ing => ing.name);
     
@@ -196,7 +209,8 @@ export default function IngredientsStep({
       return {
         name,
         percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
-        origin: ""
+        origin: "",
+        isMarkedAsBase: false
       };
     }).filter(ing => ing.name);
     
@@ -217,12 +231,14 @@ export default function IngredientsStep({
       .filter(ing => ing.name.trim())
       .map(ing => {
         const percentage = ing.percentage ? ` ${ing.percentage}%` : '';
-        if (ing.name.toLowerCase().includes('granola') || ing.name.toLowerCase().includes('base')) {
-          return baseFormatted 
-            ? `${ing.name}${percentage} [${baseFormatted}]`
-            : `${ing.name}${percentage}`;
+        const ingredientText = `${ing.name}${percentage}`;
+        
+        // Check if this ingredient is marked as base recipe
+        if (ing.isMarkedAsBase && baseFormatted) {
+          return `**${ingredientText}** [${baseFormatted}]`;
         }
-        return `${ing.name}${percentage}`;
+        
+        return `**${ingredientText}**`;
       })
       .join(', ');
 
@@ -259,6 +275,23 @@ export default function IngredientsStep({
       });
 
     return tableIngredients;
+  };
+
+  // Function to mark/unmark an ingredient as base recipe
+  const toggleIngredientAsBase = (ingredientName: string) => {
+    const updatedIngredients = finalProductIngredients.map(ing => {
+      if (ing.name === ingredientName) {
+        const isMarked = !ing.isMarkedAsBase;
+        // Update marked ingredient tracker
+        setMarkedIngredient(isMarked ? ingredientName : null);
+        return { ...ing, isMarkedAsBase: isMarked };
+      }
+      // Remove mark from other ingredients (only one can be marked)
+      return { ...ing, isMarkedAsBase: false };
+    });
+    
+    setFinalProductIngredients(updatedIngredients);
+    onUpdate({ ingredients: updatedIngredients });
   };
 
   const handleNext = () => {
@@ -309,14 +342,41 @@ export default function IngredientsStep({
           </div>
 
           {finalRecipeText && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Extrahierte Final Recipe Zutaten (bearbeitbar):</label>
-              <Textarea
-                value={finalRecipeText}
-                onChange={(e) => handleFinalRecipeTextChange(e.target.value)}
-                placeholder="Granola (90,7%), Coconut chips (5%), pineapple chips (4,3%)"
-                rows={3}
-              />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Extrahierte Final Recipe Zutaten (bearbeitbar):</label>
+                <Textarea
+                  value={finalRecipeText}
+                  onChange={(e) => handleFinalRecipeTextChange(e.target.value)}
+                  placeholder="Granola (90,7%), Coconut chips (5%), pineapple chips (4,3%)"
+                  rows={3}
+                />
+              </div>
+              
+              {/* Ingredient marking section */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Zutat als Base Recipe markieren:</label>
+                <div className="grid grid-cols-1 gap-2">
+                  {finalProductIngredients
+                    .filter(ing => ing.name.trim())
+                    .map((ingredient, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 border rounded">
+                        <span className="flex-1">
+                          {ingredient.name} {ingredient.percentage ? `(${ingredient.percentage}%)` : ''}
+                        </span>
+                        <Button
+                          variant={ingredient.isMarkedAsBase ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => toggleIngredientAsBase(ingredient.name)}
+                          className="ml-2"
+                        >
+                          <Tag className="w-4 h-4 mr-1" />
+                          {ingredient.isMarkedAsBase ? "Markiert" : "Markieren"}
+                        </Button>
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
@@ -373,10 +433,17 @@ export default function IngredientsStep({
             <CardTitle>Kombinierte Zutaten Vorschau</CardTitle>
           </CardHeader>
           <CardContent>
+            <p className="text-sm text-slate-600 mb-2">
+              Final Recipe Zutaten (fett) mit Base Recipe (in eckigen Klammern):
+            </p>
             <div className="bg-slate-50 p-4 rounded-lg">
-              <p className="text-sm text-slate-700">
-                <strong>Ingredients:</strong> {formatCombinedIngredients()}
-              </p>
+              <div 
+                className="text-sm text-slate-700"
+                dangerouslySetInnerHTML={{
+                  __html: `<strong>Ingredients:</strong> ${(formatCombinedIngredients() || "Noch keine Zutaten extrahiert...")
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}`
+                }}
+              />
               <p className="text-xs text-slate-500 mt-2">* percentage in ingredient</p>
             </div>
           </CardContent>

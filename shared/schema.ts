@@ -38,6 +38,7 @@ export const productInfoSchema = z.object({
     name: z.string(),
     percentage: z.number().optional(),
     origin: z.string().optional(),
+    isMarkedAsBase: z.boolean().optional().default(false),
   })).optional(),
   baseProductIngredients: z.array(z.object({
     name: z.string(),
