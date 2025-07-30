@@ -17,6 +17,21 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Conditional Section Display and Footer Implementation
+- **Implemented conditional display of sections in Live Preview**
+- **Features Added**:
+  - Nutrition table only shows when nutrition data exists
+  - Nutri-Score only displays when nutrition data is available
+  - Claims section only appears when nutrition data is present
+  - Detailed ingredients table only shows when ingredients are provided
+- **Added Footer Section**:
+  - "Valid from" date (current date in DD/MM/YYYY format)
+  - "Prepared by" section showing name and job title when available
+  - Professional layout with proper spacing and typography
+- **Files Modified**:
+  - `client/src/components/document-preview.tsx` - Added conditional rendering and footer
+- **Result**: Live Preview now only shows relevant sections and includes professional footer information
+
 ### 2025-01-30 - Updated Fruit/Vegetable/Legume Threshold Values
 - **Updated Nutri-Score calculation with corrected fruit/veg/legume thresholds**
 - **New Threshold Values**:

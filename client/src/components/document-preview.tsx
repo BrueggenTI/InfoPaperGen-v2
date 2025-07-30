@@ -220,7 +220,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               applicable legislation.
             </div>
 
-            {/* Ingredients Table */}
+            {/* Detailed Ingredients Table - Only show if ingredients exist */}
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
               <table className="w-full border-collapse border border-slate-400 text-xs mt-4">
                 <thead>
@@ -248,11 +248,13 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </table>
             )}
 
-            {/* Nutritional Table */}
-            <div className="mb-2">
-              <h4 className="text-sm font-semibold">Average nutritional value:</h4>
-            </div>
-            <table className="w-full border-collapse border border-slate-400 text-xs">
+            {/* Nutritional Table - Only show if nutrition data exists */}
+            {formData.nutrition && (
+            <>
+              <div className="mb-2">
+                <h4 className="text-sm font-semibold">Average nutritional value:</h4>
+              </div>
+              <table className="w-full border-collapse border border-slate-400 text-xs">
               <thead>
                 <tr>
                   <th className="border border-slate-400 p-2 text-left font-semibold bg-slate-50">
@@ -341,11 +343,13 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 </tr>
               </tbody>
             </table>
+            </>
+            )}
 
-            {/* Nutri-Score Display */}
+            {/* Nutri-Score Display - Only show if nutrition data exists */}
             {formData.nutrition && (() => {
               const nutriScore = calculateNutriScore({
-                energy: formData.nutrition.energy?.kcal || 0,
+                energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
                 fat: formData.nutrition.fat || 0,
                 saturatedFat: formData.nutrition.saturatedFat || 0,
                 carbohydrates: formData.nutrition.carbohydrates || 0,
@@ -370,7 +374,8 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               );
             })()}
 
-            {/* Declarations - Calculated Claims */}
+            {/* Declarations - Calculated Claims - Only show if nutrition data exists */}
+            {formData.nutrition && (
             <div>
               <h3 className="font-semibold text-sm mb-2">Possible declarations</h3>
               {(() => {
@@ -463,8 +468,31 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 );
               })()}
             </div>
+            )}
 
-
+            {/* Valid From Date and Prepared By Section - Footer */}
+            <div className="mt-8 pt-4 border-t border-slate-300">
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                {/* Valid From Date */}
+                <div>
+                  <span className="font-semibold">Valid from:</span>
+                  <span className="ml-2">{new Date().toLocaleDateString('en-GB')}</span>
+                </div>
+                
+                {/* Prepared By */}
+                {(formData.preparedBy || formData.jobTitle) && (
+                  <div>
+                    <span className="font-semibold">Prepared by:</span>
+                    <span className="ml-2">
+                      {formData.preparedBy && formData.jobTitle 
+                        ? `${formData.preparedBy}, ${formData.jobTitle}`
+                        : formData.preparedBy || formData.jobTitle || ''
+                      }
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <div className="text-xs text-slate-600 italic leading-relaxed mt-4">
               The purpose of this product information is to describe a sample made
