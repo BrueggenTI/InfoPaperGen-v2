@@ -243,6 +243,9 @@ export default function NutritionStep({
           <tbody>
             <tr>
               <td className="border border-slate-400 p-2 text-center font-semibold">
+                {/* Empty header cell to align with nutrient names column */}
+              </td>
+              <td className="border border-slate-400 p-2 text-center font-semibold">
                 per 100 g of product
               </td>
               <td className="border border-slate-400 p-2 text-center font-semibold">

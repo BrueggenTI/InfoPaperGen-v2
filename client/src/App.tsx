@@ -11,7 +11,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={ProductGenerator} />
-      <Route path="/preview" component={DocumentPreviewPage} />
+      <Route path="/preview" component={() => <DocumentPreviewPage />} />
       <Route component={NotFound} />
     </Switch>
   );
