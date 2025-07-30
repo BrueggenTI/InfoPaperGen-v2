@@ -149,7 +149,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               {/* Center - Product Information and Recipe Number */}
               <div className="flex-1 text-center">
                 <h1 className="text-lg font-bold text-slate-900 mb-1">Product Information</h1>
-                <p className="text-sm text-slate-600">
+                <p className="text-lg font-semibold text-slate-800">
                   {formData.productNumber || "Recipe Number"}
                 </p>
               </div>
