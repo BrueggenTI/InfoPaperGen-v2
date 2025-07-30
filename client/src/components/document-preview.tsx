@@ -247,22 +247,24 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             )}
 
             {/* Nutritional Table */}
+            <div className="mb-2">
+              <h4 className="text-sm font-semibold">Average nutritional value:</h4>
+            </div>
             <table className="w-full border-collapse border border-slate-400 text-xs">
-              <tbody>
+              <thead>
                 <tr>
-                  <td className="border border-slate-400 p-2 font-semibold bg-slate-50" rowSpan={9}>
-                    Average nutritional value:
-                  </td>
-                  <td className="border border-slate-400 p-2 text-center font-semibold">
-                    {/* Empty header cell to align with nutrient names column */}
-                  </td>
-                  <td className="border border-slate-400 p-2 text-center font-semibold">
+                  <th className="border border-slate-400 p-2 text-left font-semibold bg-slate-50">
+                    {/* Nutrient names column */}
+                  </th>
+                  <th className="border border-slate-400 p-2 text-center font-semibold bg-slate-50">
                     per 100 g of product
-                  </td>
-                  <td className="border border-slate-400 p-2 text-center font-semibold">
+                  </th>
+                  <th className="border border-slate-400 p-2 text-center font-semibold bg-slate-50">
                     per {servingSize} g of product
-                  </td>
+                  </th>
                 </tr>
+              </thead>
+              <tbody>
                 <tr>
                   <td className="border border-slate-400 p-1">Energy</td>
                   <td className="border border-slate-400 p-1 text-center">

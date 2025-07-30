@@ -240,18 +240,20 @@ export default function NutritionStep({
       <div className="bg-white border border-slate-300 rounded-lg p-4">
         <h3 className="text-lg font-semibold text-slate-900 mb-4">Average nutritional value:</h3>
         <table className="w-full border-collapse border border-slate-400 text-sm">
-          <tbody>
+          <thead>
             <tr>
-              <td className="border border-slate-400 p-2 text-center font-semibold">
-                {/* Empty header cell to align with nutrient names column */}
-              </td>
-              <td className="border border-slate-400 p-2 text-center font-semibold">
+              <th className="border border-slate-400 p-2 text-left font-semibold">
+                {/* Nutrient names column */}
+              </th>
+              <th className="border border-slate-400 p-2 text-center font-semibold">
                 per 100 g of product
-              </td>
-              <td className="border border-slate-400 p-2 text-center font-semibold">
+              </th>
+              <th className="border border-slate-400 p-2 text-center font-semibold">
                 per {servingSize} g of product
-              </td>
+              </th>
             </tr>
+          </thead>
+          <tbody>
             <tr>
               <td className="border border-slate-400 p-1">Energy</td>
               <td className="border border-slate-400 p-1 text-center">
