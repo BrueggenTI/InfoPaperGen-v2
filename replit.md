@@ -17,6 +17,17 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-30 - Consistent Table Design Implementation
+- **Updated all tables to match nutrition table design pattern**
+- **Changes Made**:
+  - Moved titles from separate columns to headers above tables
+  - Applied consistent formatting: title (h3) above, table content below
+  - Updated Nutri-Score display, declarations, preparation, allergy advice, storage, and footer sections
+  - Maintained table borders and styling while improving layout consistency
+- **Files Modified**:
+  - `client/src/components/document-preview.tsx` - Redesigned all table layouts
+- **Result**: All document sections now follow the same clean design pattern with titles above tables
+
 ### 2025-01-30 - Comprehensive Nutri-Score Calculation System
 - **Implemented complete Nutri-Score calculation based on EU standards**
 - **Features Added**:
