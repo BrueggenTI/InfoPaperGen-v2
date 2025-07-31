@@ -30,7 +30,7 @@ export default function DocumentPreviewPage({ sessionId }: DocumentPreviewPagePr
     enabled: !!currentSessionId,
   });
 
-  const formData: ProductInfo = sessionData || {
+  const formData: ProductInfo = (sessionData?.sessionData as ProductInfo) || {
     productNumber: "",
     productName: "",
     currentStep: 1,

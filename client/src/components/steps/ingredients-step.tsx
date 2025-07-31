@@ -87,14 +87,14 @@ export default function IngredientsStep({
       ).join(', ');
       setFinalRecipeText(text);
       toast({
-        title: "Final Recipe erfolgreich extrahiert",
-        description: "Final Recipe Zutaten wurden erfolgreich extrahiert.",
+        title: "Final Recipe extracted successfully",
+        description: "Final Recipe ingredients have been successfully extracted.",
       });
     },
     onError: () => {
       toast({
-        title: "Fehler",
-        description: "Fehler beim Extrahieren der Final Recipe Zutaten.",
+        title: "Error",
+        description: "Error extracting Final Recipe ingredients.",
         variant: "destructive",
       });
     },
@@ -121,14 +121,14 @@ export default function IngredientsStep({
       ).join(', ');
       setBaseRecipeText(text);
       toast({
-        title: "Base Recipe erfolgreich extrahiert",
-        description: "Base Recipe Zutaten wurden erfolgreich extrahiert.",
+        title: "Base Recipe extracted successfully",
+        description: "Base Recipe ingredients have been successfully extracted.",
       });
     },
     onError: () => {
       toast({
-        title: "Fehler",
-        description: "Fehler beim Extrahieren der Base Recipe Zutaten.",
+        title: "Error",
+        description: "Error extracting Base Recipe ingredients.",
         variant: "destructive",
       });
     },
@@ -140,8 +140,8 @@ export default function IngredientsStep({
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Datei zu groß",
-        description: "Bitte wählen Sie eine Datei unter 10MB.",
+        title: "File too large",
+        description: "Please select a file under 10MB.",
         variant: "destructive",
       });
       return;
@@ -162,8 +162,8 @@ export default function IngredientsStep({
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Datei zu groß",
-        description: "Bitte wählen Sie eine Datei unter 10MB.",
+        title: "File too large",
+        description: "Please select a file under 10MB.",
         variant: "destructive",
       });
       return;
@@ -324,9 +324,9 @@ export default function IngredientsStep({
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Zutaten</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Ingredients</h2>
         <p className="text-slate-600">
-          Laden Sie Bilder von Ihrem Final Recipe und Base Recipe hoch, um die Zutaten automatisch zu extrahieren.
+          Upload images of your Final Recipe and Base Recipe to automatically extract ingredients.
         </p>
       </div>
 
@@ -349,21 +349,21 @@ export default function IngredientsStep({
             />
             <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
             <p className="text-sm text-slate-600 mb-2">
-              Klicken Sie hier, um ein Bild des Final Recipe hochzuladen
+              Click here to upload an image of the Final Recipe
             </p>
             <Button
               variant="outline"
               onClick={() => finalRecipeInputRef.current?.click()}
               disabled={extractFinalIngredientsMutation.isPending}
             >
-              {extractFinalIngredientsMutation.isPending ? "Extrahiere..." : "Final Recipe hochladen"}
+              {extractFinalIngredientsMutation.isPending ? "Extracting..." : "Upload Final Recipe"}
             </Button>
           </div>
 
           {finalRecipeText && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Extrahierte Final Recipe Zutaten (bearbeitbar):</label>
+                <label className="text-sm font-medium">Extracted Final Recipe Ingredients (editable):</label>
                 <Textarea
                   value={finalRecipeText}
                   onChange={(e) => handleFinalRecipeTextChange(e.target.value)}
@@ -374,7 +374,7 @@ export default function IngredientsStep({
               
               {/* Ingredient marking section */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Zutat als Base Recipe markieren:</label>
+                <label className="text-sm font-medium">Mark ingredient as Base Recipe:</label>
                 <div className="grid grid-cols-1 gap-2">
                   {finalProductIngredients
                     .filter(ing => ing.name.trim())
@@ -390,7 +390,7 @@ export default function IngredientsStep({
                           className="ml-2"
                         >
                           <Tag className="w-4 h-4 mr-1" />
-                          {ingredient.isMarkedAsBase ? "Markiert" : "Markieren"}
+                          {ingredient.isMarkedAsBase ? "Marked" : "Mark"}
                         </Button>
                       </div>
                     ))}
@@ -420,20 +420,20 @@ export default function IngredientsStep({
             />
             <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
             <p className="text-sm text-slate-600 mb-2">
-              Klicken Sie hier, um ein Bild des Base Recipe hochzuladen
+              Click here to upload an image of the Base Recipe
             </p>
             <Button
               variant="outline"
               onClick={() => baseRecipeInputRef.current?.click()}
               disabled={extractBaseIngredientsMutation.isPending}
             >
-              {extractBaseIngredientsMutation.isPending ? "Extrahiere..." : "Base Recipe hochladen"}
+              {extractBaseIngredientsMutation.isPending ? "Extracting..." : "Upload Base Recipe"}
             </Button>
           </div>
 
           {baseRecipeText && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Extrahierte Base Recipe Zutaten (bearbeitbar):</label>
+              <label className="text-sm font-medium">Extracted Base Recipe Ingredients (editable):</label>
               <Textarea
                 value={baseRecipeText}
                 onChange={(e) => handleBaseRecipeTextChange(e.target.value)}
@@ -449,17 +449,17 @@ export default function IngredientsStep({
       {(finalProductIngredients.some(ing => ing.name.trim()) || baseProductIngredients.some(ing => ing.name.trim())) && (
         <Card>
           <CardHeader>
-            <CardTitle>Kombinierte Zutaten Vorschau</CardTitle>
+            <CardTitle>Combined Ingredients Preview</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-slate-600 mb-2">
-              Final Recipe Zutaten (fett) mit Base Recipe (in eckigen Klammern):
+              Final Recipe ingredients (bold) with Base Recipe (in square brackets):
             </p>
             <div className="bg-slate-50 p-4 rounded-lg">
               <div 
                 className="text-sm text-slate-700"
                 dangerouslySetInnerHTML={{
-                  __html: `<strong>Ingredients:</strong> ${(formatCombinedIngredients() || "Noch keine Zutaten extrahiert...")
+                  __html: `<strong>Ingredients:</strong> ${(formatCombinedIngredients() || "No ingredients extracted yet...")
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}`
                 }}
               />
@@ -473,14 +473,14 @@ export default function IngredientsStep({
       {(finalProductIngredients.some(ing => ing.name.trim()) || baseProductIngredients.some(ing => ing.name.trim())) && (
         <Card>
           <CardHeader>
-            <CardTitle>Zutaten Tabelle</CardTitle>
+            <CardTitle>Ingredients Table</CardTitle>
             <p className="text-sm text-slate-600">
-              Base Product Zutaten werden basierend auf der markierten Final Recipe Zutat umgerechnet.
+              Base Product ingredients are calculated based on the marked Final Recipe ingredient.
             </p>
             {getMarkedIngredientPercentage() > 0 && (
               <p className="text-xs text-slate-500">
-                Formel: Base Zutat % × {getMarkedIngredientPercentage()}% ÷ 100
-                (Beispiel: 20% × {getMarkedIngredientPercentage()}% ÷ 100 = {((20 * getMarkedIngredientPercentage()) / 100).toFixed(1)}%)
+                Formula: Base ingredient % × {getMarkedIngredientPercentage()}% ÷ 100
+                (Example: 20% × {getMarkedIngredientPercentage()}% ÷ 100 = {((20 * getMarkedIngredientPercentage()) / 100).toFixed(1)}%)
               </p>
             )}
           </CardHeader>
@@ -531,7 +531,7 @@ export default function IngredientsStep({
                               onUpdate({ baseProductIngredients: updatedBaseIngredients });
                             }
                           }}
-                          placeholder="Land eingeben"
+                          placeholder="Enter country"
                           className="border-0 p-0 h-auto"
                         />
                       </td>
@@ -548,10 +548,10 @@ export default function IngredientsStep({
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrev} disabled={isLoading}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Zurück
+          Previous
         </Button>
         <Button onClick={handleNext} disabled={isLoading}>
-          Weiter
+          Next
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>

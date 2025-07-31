@@ -18,7 +18,12 @@ An AI-powered web application that generates professional Product Information Pa
 ## Recent Changes
 
 ### 2025-01-31 - Complete Layout Redesign and English Translation
-- **Converted entire application from German to English language**
+- **Completely converted entire application from German to English language**
+  - Translated all user interface text, error messages, button labels, form fields
+  - Updated toast notifications, validation messages, and placeholder text
+  - Translated navigation elements, step names, and section headers
+  - Updated ingredient extraction messages and file upload prompts
+  - All components now use English throughout: product-details-step, ingredients-step, nutrition-step, conditions-step
 - **Implemented Brüggen corporate design matching their website (https://www.brueggen.com/de/karriere-bei-brueggen/)**
 - **New Layout Structure**:
   - Removed side-by-side layout between form and Live Preview
