@@ -120,7 +120,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className="p-6">
       <div className="flex justify-end mb-4">
         <Button
           onClick={handleExportPDF}
