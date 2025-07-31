@@ -188,7 +188,7 @@ export default function ProductDetailsStep({
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Camera className="w-5 h-5" />
-                <span>Produktbild</span>
+                <span>Product Image</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -202,7 +202,7 @@ export default function ProductDetailsStep({
                 />
                 <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                 <p className="text-sm text-slate-600 mb-2">
-                  Klicken Sie hier, um ein Produktbild hochzuladen
+                  Click here to upload a product image
                 </p>
                 <Button
                   type="button"
@@ -210,7 +210,7 @@ export default function ProductDetailsStep({
                   onClick={() => productImageInputRef.current?.click()}
                   disabled={isLoading}
                 >
-                  Produktbild hochladen
+                  Upload Product Image
                 </Button>
               </div>
 

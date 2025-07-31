@@ -115,10 +115,10 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-2">Conditions & Notes</h2>
-        <p className="text-slate-600">
+        <h2 className="text-2xl font-semibold text-primary mb-2">Conditions & Notes</h2>
+        <p className="text-muted-foreground">
           Select the product type and add storage conditions, allergy advice, and preparation instructions.
         </p>
       </div>

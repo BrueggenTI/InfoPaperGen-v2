@@ -17,6 +17,32 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-31 - Complete Layout Redesign and English Translation
+- **Converted entire application from German to English language**
+- **Implemented Brüggen corporate design matching their website (https://www.brueggen.com/de/karriere-bei-brueggen/)**
+- **New Layout Structure**:
+  - Removed side-by-side layout between form and Live Preview
+  - Live Preview now appears below form sections, both taking full width
+  - Added Document Status card showing completion status for each section
+  - Improved visual hierarchy with proper spacing and typography
+- **Design Updates**:
+  - Applied Brüggen brand colors throughout the application
+  - Updated all form steps to use consistent Brüggen styling (text-primary, text-muted-foreground)
+  - Enhanced section divider with branded gradient styling
+  - Improved button styling with btn-bruggen classes
+- **User Experience Improvements**:
+  - Better mobile responsiveness with full-width layout
+  - Clearer visual feedback for form completion status
+  - Professional document preview layout matching corporate standards
+- **Files Modified**:
+  - `client/src/pages/product-generator.tsx` - Redesigned layout structure
+  - `client/src/components/steps/product-details-step.tsx` - English translation and styling
+  - `client/src/components/steps/nutrition-step.tsx` - English translation and styling
+  - `client/src/components/steps/conditions-step.tsx` - English translation and styling
+  - `client/src/components/document-preview.tsx` - Layout restructuring and styling
+  - `client/src/index.css` - Enhanced Brüggen brand styling
+- **Result**: Complete visual and language transformation to match Brüggen corporate identity with improved user experience
+
 ### 2025-01-30 - Three-Card Layout for Conditions & Notes with Live Preview Integration
 - **Reorganized Conditions & Notes into three separate cards with enhanced Live Preview**
 - **Card Structure**:

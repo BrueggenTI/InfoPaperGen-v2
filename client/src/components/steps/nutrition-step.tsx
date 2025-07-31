@@ -84,15 +84,15 @@ export default function NutritionStep({
         form.reset(nutritionWithDefaults);
         onUpdate({ nutrition: nutritionWithDefaults });
         toast({
-          title: "Nährwerte extrahiert",
-          description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
+          title: "Nutrition values extracted",
+          description: "Nutrition values have been successfully extracted from the image.",
         });
       }
     },
     onError: (error) => {
       toast({
-        title: "Fehler bei der Extraktion",
-        description: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.",
+        title: "Extraction error",
+        description: "Nutrition values could not be extracted from the image. Please enter them manually.",
         variant: "destructive",
       });
     },
@@ -109,8 +109,8 @@ export default function NutritionStep({
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Datei zu groß",
-        description: "Bitte wählen Sie eine Datei unter 10MB.",
+        title: "File too large",
+        description: "Please select a file under 10MB.",
         variant: "destructive",
       });
       return;
@@ -179,10 +179,10 @@ export default function NutritionStep({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-2">Nutritional Information</h2>
-        <p className="text-slate-600">
+        <h2 className="text-2xl font-semibold text-primary mb-2">Nutritional Information</h2>
+        <p className="text-muted-foreground">
           Review and edit the extracted nutritional values per 100g. Values per {servingSize}g serving will be calculated automatically.
         </p>
       </div>
@@ -192,7 +192,7 @@ export default function NutritionStep({
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Camera className="w-5 h-5" />
-            <span>Nährwerttabelle hochladen</span>
+            <span>Upload Nutrition Table</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -206,7 +206,7 @@ export default function NutritionStep({
             />
             <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
             <p className="text-sm text-slate-600 mb-2">
-              Laden Sie ein Bild der Nährwerttabelle hoch, um die Werte automatisch zu extrahieren
+              Upload an image of the nutrition table to automatically extract values
             </p>
             <Button
               type="button"
@@ -217,10 +217,10 @@ export default function NutritionStep({
               {extractNutritionMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Extrahiere Nährwerte...
+                  Extracting nutrition values...
                 </>
               ) : (
-                "Nährwerttabelle hochladen"
+                "Upload Nutrition Table"
               )}
             </Button>
           </div>

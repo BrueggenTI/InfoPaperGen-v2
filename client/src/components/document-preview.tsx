@@ -120,22 +120,19 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
   };
 
   return (
-    <div className="sticky top-24">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-900">Live Preview</h3>
-          <Button
-            size="sm"
-            onClick={handleExportPDF}
-            className="text-sm flex items-center space-x-1"
-          >
-            <Download className="w-4 h-4" />
-            <span>Export PDF</span>
-          </Button>
-        </div>
+    <div className="w-full">
+      <div className="flex justify-end mb-4">
+        <Button
+          onClick={handleExportPDF}
+          className="btn-bruggen flex items-center space-x-2"
+        >
+          <Download className="w-4 h-4" />
+          <span>Export PDF</span>
+        </Button>
+      </div>
 
-        {/* Document Preview */}
-        <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-inner min-h-[600px] text-xs leading-tight">
+      {/* Document Preview */}
+      <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-inner min-h-[600px] text-xs leading-tight">
           <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-300 pb-4 mb-6">
@@ -549,7 +546,6 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }
