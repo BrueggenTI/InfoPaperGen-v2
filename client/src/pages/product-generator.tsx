@@ -131,41 +131,14 @@ export default function ProductGenerator() {
         <div className="space-y-8">
           {/* Form Section - Full Width */}
           <div className="w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Progress Steps */}
-              <div className="card-bruggen p-6">
-                <StepIndicator 
-                  currentStep={formData.currentStep} 
-                  totalSteps={STEPS.length}
-                  steps={STEPS}
-                  onStepClick={goToStep}
-                />
-              </div>
-              
-              {/* Quick Actions / Status */}
-              <div className="card-bruggen p-6">
-                <h3 className="text-lg font-semibold text-primary mb-2">Document Status</h3>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Product Details:</span>
-                    <span className={formData.productName ? "text-green-600 font-medium" : "text-gray-400"}>
-                      {formData.productName ? "✓ Complete" : "Pending"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Ingredients:</span>
-                    <span className={formData.ingredients?.length ? "text-green-600 font-medium" : "text-gray-400"}>
-                      {formData.ingredients?.length ? "✓ Complete" : "Pending"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Nutrition Values:</span>
-                    <span className={formData.nutrition ? "text-green-600 font-medium" : "text-gray-400"}>
-                      {formData.nutrition ? "✓ Complete" : "Pending"}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            {/* Progress Steps - Full Width */}
+            <div className="card-bruggen p-6">
+              <StepIndicator 
+                currentStep={formData.currentStep} 
+                totalSteps={STEPS.length}
+                steps={STEPS}
+                onStepClick={goToStep}
+              />
             </div>
 
             {/* Current Step Component - Full Width */}
