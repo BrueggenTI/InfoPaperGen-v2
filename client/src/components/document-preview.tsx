@@ -483,21 +483,19 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </div>
             )}
 
-            {/* Allergy Advice - Only show if allergy advice exists */}
-            {formData.allergyAdvice && (
-              <div>
-                <h3 className="font-semibold text-sm mb-2">Allergy Advice</h3>
-                <table className="w-full border-collapse border border-slate-400 text-xs">
-                  <tbody>
-                    <tr>
-                      <td className="border border-slate-400 p-2 whitespace-pre-line">
-                        {formData.allergyAdvice}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
+            {/* Allergy Advice - Always show in template */}
+            <div>
+              <h3 className="font-semibold text-sm mb-2">Allergy Advice</h3>
+              <table className="w-full border-collapse border border-slate-400 text-xs">
+                <tbody>
+                  <tr>
+                    <td className="border border-slate-400 p-2 whitespace-pre-line">
+                      {formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             {/* Preparation - Only show if preparation exists */}
             {formData.preparation && (

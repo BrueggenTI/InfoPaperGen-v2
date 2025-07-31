@@ -17,6 +17,16 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-31 - Always Display Allergy Advice in Templates
+- **Modified both document preview templates to always show Allergy Advice section**
+- **Changes Made**:
+  - Updated `client/src/components/document-preview.tsx` to always display Allergy Advice section (removed conditional rendering)
+  - Updated `client/src/lib/pdf-generator.ts` to always include Allergy Advice in PDF exports
+  - Allergy Advice now appears consistently under Storage Conditions with default fallback text
+  - Default text: "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."
+- **Template Consistency**: Both Live Preview and document-preview-page.tsx now consistently display Allergy Advice
+- **Result**: Allergy Advice section is now always visible in both preview and PDF export, ensuring template completeness
+
 ### 2025-01-31 - Complete Layout Redesign and English Translation
 - **Completely converted entire application from German to English language**
   - Translated all user interface text, error messages, button labels, form fields

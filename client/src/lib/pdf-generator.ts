@@ -394,22 +394,21 @@ export async function generatePDF(formData: ProductInfo) {
     yPosition += 8;
   }
 
-  // Allergy Advice
-  if (formData.allergyAdvice) {
-    checkPageBreak(25);
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Allergy Advice", margin, yPosition);
-    yPosition += 8;
-    
-    drawTable(
-      [""],
-      [[formData.allergyAdvice]],
-      [pageWidth - margin * 2],
-      false
-    );
-    yPosition += 8;
-  }
+  // Allergy Advice - Always include in PDF
+  checkPageBreak(25);
+  pdf.setFontSize(10);
+  pdf.setFont("helvetica", "bold");
+  pdf.text("Allergy Advice", margin, yPosition);
+  yPosition += 8;
+  
+  const allergyText = formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products.";
+  drawTable(
+    [""],
+    [[allergyText]],
+    [pageWidth - margin * 2],
+    false
+  );
+  yPosition += 8;
 
   // Preparation
   if (formData.preparation) {
