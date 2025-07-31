@@ -8,7 +8,7 @@ import ProductDetailsStep from "@/components/steps/product-details-step";
 import IngredientsStep from "@/components/steps/ingredients-step";
 import NutritionStep from "@/components/steps/nutrition-step";
 import { ConditionsStep } from "@/components/steps/conditions-step";
-import ReviewStep from "@/components/steps/review-step";
+
 import StepIndicator from "@/components/ui/step-indicator";
 import DocumentPreview from "@/components/document-preview";
 import BruggenHeader from "@/components/bruggen-header";
@@ -18,7 +18,6 @@ const STEPS = [
   { id: 2, name: "Ingredients", component: IngredientsStep },
   { id: 3, name: "Nutrition Values", component: NutritionStep },
   { id: 4, name: "Storage & Preparation", component: ConditionsStep },
-  { id: 5, name: "Review & Export", component: ReviewStep },
 ];
 
 export default function ProductGenerator() {

@@ -295,7 +295,7 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
               Previous
             </Button>
             <Button type="submit" disabled={isLoading}>
-              Next: Review
+              Complete
             </Button>
           </div>
         </form>

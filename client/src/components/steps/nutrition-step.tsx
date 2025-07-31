@@ -844,7 +844,7 @@ export default function NutritionStep({
               disabled={isLoading}
               className="flex items-center space-x-2"
             >
-              <span>Continue to Review</span>
+              <span>Continue to Storage & Preparation</span>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
