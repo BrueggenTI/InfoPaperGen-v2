@@ -118,7 +118,6 @@ export default function ProductGenerator() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14">
             <div className="flex items-center space-x-4">
-              <h2 className="text-lg font-medium text-primary">Create Product Information</h2>
             </div>
             <div className="flex items-center space-x-4">
             </div>

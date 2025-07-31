@@ -2,7 +2,7 @@ import logoPath from "@assets/Brueggen LOGO NEW-RGB_1753871769341.png";
 
 export default function BruggenHeader() {
   return (
-    <header className="hero-bruggen py-4 px-4 mb-8">
+    <header className="hero-bruggen py-2 px-4 mb-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
