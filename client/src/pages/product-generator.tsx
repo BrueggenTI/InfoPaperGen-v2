@@ -11,13 +11,14 @@ import { ConditionsStep } from "@/components/steps/conditions-step";
 import ReviewStep from "@/components/steps/review-step";
 import StepIndicator from "@/components/ui/step-indicator";
 import DocumentPreview from "@/components/document-preview";
+import BruggenHeader from "@/components/bruggen-header";
 
 const STEPS = [
   { id: 1, name: "Product Details", component: ProductDetailsStep },
   { id: 2, name: "Ingredients", component: IngredientsStep },
-  { id: 3, name: "Nutrition", component: NutritionStep },
-  { id: 4, name: "Conditions & Notes", component: ConditionsStep },
-  { id: 5, name: "Review", component: ReviewStep },
+  { id: 3, name: "Nutrition Values", component: NutritionStep },
+  { id: 4, name: "Storage & Preparation", component: ConditionsStep },
+  { id: 5, name: "Review & Export", component: ReviewStep },
 ];
 
 export default function ProductGenerator() {
@@ -111,60 +112,64 @@ export default function ProductGenerator() {
 
   return (
     <>
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <BruggenHeader />
+      
+      {/* Navigation Bar */}
+      <nav className="bg-white border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <h1 className="text-xl font-semibold text-slate-900">Product Information Generator</h1>
+          <div className="flex justify-between items-center h-14">
+            <div className="flex items-center space-x-4">
+              <h2 className="text-lg font-medium text-primary">Create Product Documentation</h2>
             </div>
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => {
-                  if (sessionId) {
-                    window.location.href = `/preview?sessionId=${sessionId}`;
-                  }
-                }}
-                disabled={!sessionId}
-                className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                Preview
-              </button>
             </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Form Section */}
-          <div>
+          <div className="space-y-6">
             {/* Progress Steps */}
-            <StepIndicator 
-              currentStep={formData.currentStep} 
-              totalSteps={STEPS.length}
-              steps={STEPS}
-              onStepClick={goToStep}
-            />
+            <div className="card-bruggen p-6">
+              <StepIndicator 
+                currentStep={formData.currentStep} 
+                totalSteps={STEPS.length}
+                steps={STEPS}
+                onStepClick={goToStep}
+              />
+            </div>
 
             {/* Current Step Component */}
-            <CurrentStepComponent 
-              formData={formData} 
-              onUpdate={updateFormData}
-              onNext={() => goToStep(Math.min(formData.currentStep + 1, STEPS.length))}
-              onPrev={() => goToStep(Math.max(formData.currentStep - 1, 1))}
-              isLoading={updateSessionMutation.isPending}
-            />
+            <div className="card-bruggen">
+              <CurrentStepComponent 
+                formData={formData} 
+                onUpdate={updateFormData}
+                onNext={() => goToStep(Math.min(formData.currentStep + 1, STEPS.length))}
+                onPrev={() => goToStep(Math.max(formData.currentStep - 1, 1))}
+                isLoading={updateSessionMutation.isPending}
+              />
+            </div>
           </div>
 
-          {/* Live Preview Section - Below Form */}
-          <div>
-            <DocumentPreview formData={formData} />
+          {/* Live Preview Section - Side by Side */}
+          <div className="space-y-6">
+            <div className="sticky top-20">
+              <div className="card-bruggen">
+                <div className="p-6 border-b border-border">
+                  <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Live Preview
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">Real-time document preview</p>
+                </div>
+                <DocumentPreview formData={formData} />
+              </div>
+            </div>
           </div>
         </div>
       </div>

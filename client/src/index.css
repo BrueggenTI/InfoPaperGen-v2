@@ -3,49 +3,55 @@
 @tailwind utilities;
 
 :root {
+  /* Brüggen Color Scheme */
   --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(219, 14%, 95%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --foreground: hsl(0, 0%, 15%);
+  --muted: hsl(210, 40%, 98%);
+  --muted-foreground: hsl(215, 16%, 47%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --popover-foreground: hsl(0, 0%, 15%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(219, 27%, 89%);
-  --input: hsl(219, 27%, 89%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(219, 14%, 95%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(219, 14%, 95%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
-  --radius: 0.5rem;
+  --card-foreground: hsl(0, 0%, 15%);
+  --border: hsl(214, 32%, 91%);
+  --input: hsl(214, 32%, 91%);
+  
+  /* Brüggen Primary - Burgundy/Maroon */
+  --primary: hsl(343, 26%, 24%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  
+  /* Brüggen Secondary - Coral/Red Accent */
+  --secondary: hsl(5, 83%, 65%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  
+  --accent: hsl(210, 40%, 98%);
+  --accent-foreground: hsl(215, 16%, 47%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(210, 20%, 98%);
+  --ring: hsl(343, 26%, 24%);
+  --radius: 0.75rem;
 }
 
 .dark {
-  --background: hsl(240, 10%, 3.9%);
+  --background: hsl(343, 26%, 24%);
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
+  --muted: hsl(343, 26%, 20%);
+  --muted-foreground: hsl(215, 20%, 65%);
+  --popover: hsl(343, 26%, 24%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
+  --card: hsl(343, 26%, 24%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
+  --border: hsl(343, 26%, 20%);
+  --input: hsl(343, 26%, 20%);
+  --primary: hsl(0, 0%, 98%);
+  --primary-foreground: hsl(343, 26%, 24%);
+  --secondary: hsl(5, 83%, 65%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
+  --accent: hsl(343, 26%, 20%);
   --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive: hsl(0, 62%, 30%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
-  --radius: 0.5rem;
+  --ring: hsl(0, 0%, 98%);
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -54,7 +60,82 @@
   }
 
   body {
-    @apply font-sans antialiased bg-slate-50 text-foreground;
+    @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  /* Brüggen Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-primary;
+  }
+}
+
+@layer components {
+  /* Brüggen Button Styles */
+  .btn-bruggen {
+    @apply bg-secondary text-secondary-foreground rounded-full px-6 py-3 font-medium transition-colors shadow-lg;
+  }
+  
+  .btn-bruggen:hover {
+    background-color: hsl(5, 83%, 60%);
+  }
+  
+  .btn-bruggen-outline {
+    @apply border-2 border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground rounded-full px-6 py-3 font-medium transition-colors;
+  }
+  
+  .btn-bruggen-primary {
+    @apply bg-primary text-primary-foreground rounded-full px-6 py-3 font-medium transition-colors shadow-lg;
+  }
+  
+  .btn-bruggen-primary:hover {
+    background-color: hsl(343, 26%, 20%);
+  }
+  
+  /* Brüggen Card Styles */
+  .card-bruggen {
+    @apply bg-white rounded-2xl shadow-lg border border-border overflow-hidden hover:shadow-xl transition-shadow;
+  }
+  
+  /* Brüggen Hero Section */
+  .hero-bruggen {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%);
+  }
+  
+  /* Brüggen Section Divider */
+  .section-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-border to-transparent my-12;
+  }
+  
+  /* Brüggen Form Styling */
+  .form-bruggen .form-item {
+    @apply space-y-2;
+  }
+  
+  .form-bruggen label {
+    @apply font-medium text-primary;
+  }
+  
+  .form-bruggen input, .form-bruggen textarea, .form-bruggen select {
+    @apply rounded-lg border-2 border-input focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-colors;
+  }
+}
+
+@layer utilities {
+  /* Brüggen specific utilities */
+  .text-bruggen-primary {
+    color: hsl(var(--primary));
+  }
+  
+  .text-bruggen-secondary {
+    color: hsl(var(--secondary));
+  }
+  
+  .bg-bruggen-primary {
+    background-color: hsl(var(--primary));
+  }
+  
+  .bg-bruggen-secondary {
+    background-color: hsl(var(--secondary));
   }
 }

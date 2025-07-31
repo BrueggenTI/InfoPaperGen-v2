@@ -60,8 +60,8 @@ export default function ProductDetailsStep({
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Datei zu groß",
-        description: "Bitte wählen Sie eine Datei unter 10MB.",
+        title: "File too large",
+        description: "Please select a file under 10MB.",
         variant: "destructive",
       });
       return;
@@ -72,8 +72,8 @@ export default function ProductDetailsStep({
       const base64 = e.target?.result as string;
       onUpdate({ productImage: base64 });
       toast({
-        title: "Bild hochgeladen",
-        description: "Das Produktbild wurde erfolgreich hochgeladen.",
+        title: "Image uploaded",
+        description: "Product image uploaded successfully.",
       });
     };
     reader.readAsDataURL(file);
@@ -87,10 +87,10 @@ export default function ProductDetailsStep({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900 mb-2">Product Details</h2>
-        <p className="text-slate-600">Enter the basic information about your product.</p>
+        <h2 className="text-2xl font-semibold text-primary mb-2">Product Details</h2>
+        <p className="text-muted-foreground">Enter the basic information about your product.</p>
       </div>
 
       <Form {...form}>
