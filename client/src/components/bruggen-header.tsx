@@ -11,8 +11,8 @@ export default function BruggenHeader() {
               alt="Brüggen Logo" 
               className="h-10 w-auto"
             />
-            <div className="text-white">
-              <h1 className="text-xl font-semibold text-white">Create Product Information</h1>
+            <div>
+              <h1 className="text-xl font-semibold" style={{ color: '#661c31' }}>Create Product Information</h1>
             </div>
           </div>
           
