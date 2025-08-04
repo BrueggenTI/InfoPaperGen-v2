@@ -1,7 +1,7 @@
 import { ProductInfo } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { generatePDF } from "@/lib/pdf-generator";
+import { generateEnhancedPDF } from "@/lib/enhanced-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
@@ -117,7 +117,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
   const handleExportPDF = async () => {
     try {
-      await generatePDF(formData);
+      await generateEnhancedPDF(formData);
     } catch (error) {
       console.error("Error generating PDF:", error);
     }
