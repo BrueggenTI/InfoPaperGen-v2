@@ -1,13 +1,13 @@
 import jsPDF from "jspdf";
 import { ProductInfo } from "@shared/schema";
-import { calculateNutriScore, getNutriScoreImage } from "./nutri-score";
+import { calculateNutriScore } from "./nutri-score";
 import { getValidClaims } from "./claims-calculator";
 
 export async function generateEnhancedPDF(formData: ProductInfo) {
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 15;
+  const margin = 12;
   let yPosition = margin;
   
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
@@ -31,70 +31,55 @@ export async function generateEnhancedPDF(formData: ProductInfo) {
     if (options.maxWidth) {
       const lines = pdf.splitTextToSize(text, options.maxWidth);
       pdf.text(lines, x, y, { align: options.align || 'left' });
-      return lines.length * (options.fontSize || 10) * 0.35; // Return height used
+      return lines.length * (options.fontSize || 10) * 0.35;
     } else {
       pdf.text(text, x, y, { align: options.align || 'left' });
       return (options.fontSize || 10) * 0.35;
     }
   };
 
-  const addSection = (title: string) => {
-    yPosition += 8;
-    addText(title, margin, yPosition, { fontSize: 12, fontStyle: 'bold' });
-    yPosition += 6;
-  };
+  // Header - exactly like Live Preview with gray background box
+  pdf.setFillColor(248, 250, 252);
+  pdf.rect(margin, yPosition - 3, pageWidth - 2 * margin, 12, 'F');
+  pdf.setDrawColor(226, 232, 240);
+  pdf.rect(margin, yPosition - 3, pageWidth - 2 * margin, 12);
+  
+  addText("Brüggen", margin + 3, yPosition + 3, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+  addText("Product Information", pageWidth / 2, yPosition + 1, { fontSize: 12, fontStyle: 'bold', align: 'center', color: [51, 65, 85] });
+  addText(formData.productNumber || "Recipe Number", pageWidth / 2, yPosition + 5, { fontSize: 10, fontStyle: 'bold', align: 'center', color: [51, 65, 85] });
+  addText("Page 1", pageWidth - margin - 3, yPosition + 3, { fontSize: 8, align: 'right', color: [51, 65, 85] });
+  
+  yPosition += 18;
 
-  const checkPageBreak = (neededHeight: number) => {
-    if (yPosition + neededHeight > pageHeight - margin) {
-      pdf.addPage();
-      yPosition = margin;
-      return true;
-    }
-    return false;
-  };
-
-  // Header - styled like Live Preview
-  addText("Brüggen", margin, yPosition, { fontSize: 14, fontStyle: 'bold', color: [200, 50, 50] });
-  addText("Product Information", pageWidth / 2, yPosition, { fontSize: 16, fontStyle: 'bold', align: 'center' });
-  addText(new Date().toLocaleDateString('de-DE'), pageWidth - margin, yPosition, { fontSize: 10, align: 'right' });
-  yPosition += 10;
-
-  // Product Name - Large centered like Live Preview
-  yPosition += 5;
-  addText(formData.productName || "Product Name", pageWidth / 2, yPosition, { 
-    fontSize: 20, 
+  // Product Name Section - exactly like Live Preview with background
+  pdf.setFillColor(253, 254, 255);
+  pdf.rect(margin, yPosition - 2, pageWidth - 2 * margin, 12, 'F');
+  pdf.setDrawColor(226, 232, 240);
+  pdf.rect(margin, yPosition - 2, pageWidth - 2 * margin, 12);
+  
+  addText("PRODUCT NAME", pageWidth / 2, yPosition + 2, { fontSize: 8, color: [100, 116, 139], align: 'center' });
+  addText(formData.productName || "Product name will appear here...", pageWidth / 2, yPosition + 7, { 
+    fontSize: 11, 
     fontStyle: 'bold', 
-    align: 'center' 
+    align: 'center',
+    color: [217, 119, 6]
   });
-  yPosition += 15;
+  yPosition += 18;
 
-  // Product Details Section
-  if (formData.productNumber || formData.category || formData.packageSize) {
-    addSection("Product Details");
-    
-    if (formData.productNumber) {
-      addText(`Product Number: ${formData.productNumber}`, margin, yPosition, { fontStyle: 'bold' });
-      yPosition += 5;
-    }
-    
-    if (formData.category) {
-      addText(`Category: ${formData.category}`, margin, yPosition);
-      yPosition += 5;
-    }
-    
-    if (formData.packageSize) {
-      addText(`Package Size: ${formData.packageSize}`, margin, yPosition);
-      yPosition += 5;
-    }
-  }
-
-  // Ingredients Section - Formatted like Live Preview
+  // Ingredients Section - exactly like Live Preview with border box
   const finalIngredients = formData.ingredients || [];
   const baseIngredients = formData.baseProductIngredients || [];
   
   if (finalIngredients.length > 0 || baseIngredients.length > 0) {
-    checkPageBreak(30);
-    addSection("Ingredients");
+    const sectionHeight = 25;
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, sectionHeight);
+    
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+    pdf.line(margin, yPosition + 6, pageWidth - margin, yPosition + 6);
+    
+    addText("Ingredients", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
     
     const formatIngredientsForPDF = () => {
       const baseFormatted = baseIngredients
@@ -119,43 +104,56 @@ export async function generateEnhancedPDF(formData: ProductInfo) {
         })
         .join(', ');
       
-      return finalFormatted || "No ingredients specified";
+      return finalFormatted || "Ingredients will appear here after extraction...";
     };
 
     const ingredientsText = formatIngredientsForPDF();
-    const textHeight = addText(ingredientsText, margin, yPosition, { 
-      maxWidth: pageWidth - 2 * margin,
-      fontSize: 9
+    addText(ingredientsText, margin + 3, yPosition + 10, { 
+      maxWidth: pageWidth - 2 * margin - 6,
+      fontSize: 8,
+      color: [71, 85, 105]
     });
-    yPosition += textHeight + 2;
     
     if (baseIngredients.length > 0) {
-      addText("* percentage in ingredient", margin, yPosition, { fontSize: 8, color: [100, 100, 100] });
-      yPosition += 5;
+      addText("* percentage in ingredient", margin + 3, yPosition + sectionHeight - 4, { 
+        fontSize: 7, 
+        color: [100, 116, 139]
+      });
     }
+    
+    yPosition += sectionHeight + 5;
   }
 
-  // Ingredients Table - Like Live Preview
+  // Detailed Ingredients Table - exactly like Live Preview  
   if (finalIngredients.length > 0 || baseIngredients.length > 0) {
-    checkPageBreak(50);
-    addSection("Ingredients Table");
+    const tableStartY = yPosition;
     
-    // Table headers
-    const tableY = yPosition;
-    const colWidths = [80, 60, 45];
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6);
+    
+    addText("Detailed Ingredients Breakdown", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+    yPosition += 8;
+    
+    const colWidths = [90, 55, 40];
     const colX = [margin, margin + colWidths[0], margin + colWidths[0] + colWidths[1]];
     
-    // Header row
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(margin, tableY, colWidths[0] + colWidths[1] + colWidths[2], 8, 'F');
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition, colWidths[0] + colWidths[1] + colWidths[2], 6, 'F');
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition, colWidths[0] + colWidths[1] + colWidths[2], 6);
     
-    addText("Ingredients", colX[0] + 2, tableY + 5, { fontSize: 9, fontStyle: 'bold' });
-    addText("Percentage", colX[1] + 2, tableY + 5, { fontSize: 9, fontStyle: 'bold' });
-    addText("Origin", colX[2] + 2, tableY + 5, { fontSize: 9, fontStyle: 'bold' });
+    addText("Ingredients", colX[0] + 2, yPosition + 4, { fontSize: 8, fontStyle: 'bold', color: [71, 85, 105] });
+    addText("Percentage content per whole product", colX[1] + 2, yPosition + 4, { fontSize: 8, fontStyle: 'bold', color: [71, 85, 105] });
+    addText("Country of Origin", colX[2] + 2, yPosition + 4, { fontSize: 8, fontStyle: 'bold', color: [71, 85, 105] });
     
-    yPosition += 10;
+    pdf.line(colX[1], yPosition, colX[1], yPosition + 6);
+    pdf.line(colX[2], yPosition, colX[2], yPosition + 6);
     
-    // Table rows
+    yPosition += 8;
+    
+    // Generate table ingredients
     const generateTableIngredients = () => {
       const markedIngredientPercentage = finalIngredients.find(ing => ing.isMarkedAsBase)?.percentage || 0;
       const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
@@ -200,60 +198,86 @@ export async function generateEnhancedPDF(formData: ProductInfo) {
     const tableIngredients = generateTableIngredients();
     
     tableIngredients.forEach((ingredient, index) => {
-      checkPageBreak(6);
-      
       const rowY = yPosition;
+      const rowHeight = 5;
       
-      // Alternate row colors
-      if (index % 2 === 0) {
+      if (index % 2 === 1) {
         pdf.setFillColor(250, 250, 250);
-        pdf.rect(margin, rowY, colWidths[0] + colWidths[1] + colWidths[2], 6, 'F');
+        pdf.rect(margin, rowY, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, 'F');
       }
       
-      addText(ingredient.name, colX[0] + 2, rowY + 4, { 
-        fontSize: 8, 
-        fontStyle: ingredient.isFinalProduct ? 'bold' : 'normal'
-      });
-      addText(`${ingredient.percentage}%`, colX[1] + 2, rowY + 4, { fontSize: 8 });
-      addText(ingredient.origin, colX[2] + 2, rowY + 4, { fontSize: 8 });
+      pdf.setDrawColor(241, 245, 249);
+      pdf.rect(margin, rowY, colWidths[0] + colWidths[1] + colWidths[2], rowHeight);
       
-      yPosition += 6;
+      addText(ingredient.name, colX[0] + 2, rowY + 3, { 
+        fontSize: 7, 
+        fontStyle: ingredient.isFinalProduct ? 'bold' : 'normal',
+        color: ingredient.isFinalProduct ? [51, 65, 85] : [100, 116, 139]
+      });
+      addText(`${ingredient.percentage}%`, colX[1] + 2, rowY + 3, { fontSize: 7, color: [71, 85, 105] });
+      addText(ingredient.origin || "-", colX[2] + 2, rowY + 3, { fontSize: 7, color: [100, 116, 139] });
+      
+      pdf.line(colX[1], rowY, colX[1], rowY + rowHeight);
+      pdf.line(colX[2], rowY, colX[2], rowY + rowHeight);
+      
+      yPosition += rowHeight;
     });
     
-    // Table borders
-    for (let i = 0; i <= tableIngredients.length; i++) {
-      const lineY = tableY + (i * 6) + (i === 0 ? 8 : 0);
-      pdf.line(margin, lineY, margin + colWidths[0] + colWidths[1] + colWidths[2], lineY);
-    }
+    const tableEndY = yPosition;
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, tableStartY + 6, pageWidth - 2 * margin, tableEndY - tableStartY - 6);
     
-    for (let i = 0; i <= 3; i++) {
-      const lineX = i === 0 ? margin : colX[i - 1] + colWidths[i - 1];
-      pdf.line(lineX, tableY, lineX, yPosition);
-    }
+    yPosition += 5;
   }
 
-  // Nutrition Information Section - Like Live Preview
+  // Page Break for Nutrition Section - like Live Preview
   if (formData.nutrition) {
-    checkPageBreak(80);
-    addSection("Average Nutritional Value");
+    pdf.addPage();
+    yPosition = margin;
+    
+    // Page 2 Header
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition - 3, pageWidth - 2 * margin, 12, 'F');
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition - 3, pageWidth - 2 * margin, 12);
+    
+    addText("Brüggen", margin + 3, yPosition + 3, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+    addText("Product Information", pageWidth / 2, yPosition + 1, { fontSize: 12, fontStyle: 'bold', align: 'center', color: [51, 65, 85] });
+    addText(formData.productNumber || "Recipe Number", pageWidth / 2, yPosition + 5, { fontSize: 10, fontStyle: 'bold', align: 'center', color: [51, 65, 85] });
+    addText("Page 2", pageWidth - margin - 3, yPosition + 3, { fontSize: 8, align: 'right', color: [51, 65, 85] });
+    
+    yPosition += 20;
+    
+    // Nutrition section
+    const nutritionStartY = yPosition;
+    
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6);
+    
+    addText("Average Nutritional Value", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+    yPosition += 8;
     
     const nutrition = formData.nutrition;
     const calculatePerServing = (per100g: number) => (per100g * servingSize / 100).toFixed(1);
     
-    // Nutrition table
-    const nutritionY = yPosition;
-    const nutritionCols = [70, 50, 50];
+    const nutritionCols = [90, 50, 45];
     const nutritionColX = [margin, margin + nutritionCols[0], margin + nutritionCols[0] + nutritionCols[1]];
     
-    // Header
-    pdf.setFillColor(240, 240, 240);
-    pdf.rect(margin, nutritionY, nutritionCols[0] + nutritionCols[1] + nutritionCols[2], 8, 'F');
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition, nutritionCols[0] + nutritionCols[1] + nutritionCols[2], 6, 'F');
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition, nutritionCols[0] + nutritionCols[1] + nutritionCols[2], 6);
     
-    addText("", nutritionColX[0] + 2, nutritionY + 5, { fontSize: 9, fontStyle: 'bold' });
-    addText("per 100g", nutritionColX[1] + 2, nutritionY + 5, { fontSize: 9, fontStyle: 'bold' });
-    addText(`per ${servingSize}g`, nutritionColX[2] + 2, nutritionY + 5, { fontSize: 9, fontStyle: 'bold' });
+    addText("", nutritionColX[0] + 2, yPosition + 4, { fontSize: 8, fontStyle: 'bold', color: [71, 85, 105] });
+    addText("per 100g", nutritionColX[1] + 2, yPosition + 4, { fontSize: 8, fontStyle: 'bold', color: [71, 85, 105] });
+    addText(`per ${servingSize}g`, nutritionColX[2] + 2, yPosition + 4, { fontSize: 8, fontStyle: 'bold', color: [71, 85, 105] });
     
-    yPosition += 10;
+    pdf.line(nutritionColX[1], yPosition, nutritionColX[1], yPosition + 6);
+    pdf.line(nutritionColX[2], yPosition, nutritionColX[2], yPosition + 6);
+    
+    yPosition += 8;
     
     const nutritionRows = [
       { 
@@ -271,118 +295,146 @@ export async function generateEnhancedPDF(formData: ProductInfo) {
     ];
     
     nutritionRows.forEach((row, index) => {
-      checkPageBreak(6);
-      
       const rowY = yPosition;
+      const rowHeight = 5;
       
-      if (index % 2 === 0) {
+      if (index % 2 === 1) {
         pdf.setFillColor(250, 250, 250);
-        pdf.rect(margin, rowY, nutritionCols[0] + nutritionCols[1] + nutritionCols[2], 6, 'F');
+        pdf.rect(margin, rowY, nutritionCols[0] + nutritionCols[1] + nutritionCols[2], rowHeight, 'F');
       }
       
-      addText(row.label, nutritionColX[0] + 2, rowY + 4, { fontSize: 8 });
-      addText(row.value100g, nutritionColX[1] + 2, rowY + 4, { fontSize: 8 });
-      addText(row.valueServing, nutritionColX[2] + 2, rowY + 4, { fontSize: 8 });
+      pdf.setDrawColor(241, 245, 249);
+      pdf.rect(margin, rowY, nutritionCols[0] + nutritionCols[1] + nutritionCols[2], rowHeight);
       
-      yPosition += 6;
+      addText(row.label, nutritionColX[0] + 2, rowY + 3, { fontSize: 7, color: [71, 85, 105] });
+      addText(row.value100g, nutritionColX[1] + 2, rowY + 3, { fontSize: 7, color: [71, 85, 105] });
+      addText(row.valueServing, nutritionColX[2] + 2, rowY + 3, { fontSize: 7, color: [71, 85, 105] });
+      
+      pdf.line(nutritionColX[1], rowY, nutritionColX[1], rowY + rowHeight);
+      pdf.line(nutritionColX[2], rowY, nutritionColX[2], rowY + rowHeight);
+      
+      yPosition += rowHeight;
     });
     
-    // Nutrition table borders
-    for (let i = 0; i <= nutritionRows.length; i++) {
-      const lineY = nutritionY + (i * 6) + (i === 0 ? 8 : 0);
-      pdf.line(margin, lineY, margin + nutritionCols[0] + nutritionCols[1] + nutritionCols[2], lineY);
-    }
+    const nutritionEndY = yPosition;
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, nutritionStartY + 6, pageWidth - 2 * margin, nutritionEndY - nutritionStartY - 6);
     
-    for (let i = 0; i <= 3; i++) {
-      const lineX = i === 0 ? margin : nutritionColX[i - 1] + nutritionCols[i - 1];
-      pdf.line(lineX, nutritionY, lineX, yPosition);
-    }
-  }
+    yPosition += 5;
 
-  // Nutri-Score Section - Like Live Preview
-  if (formData.nutrition) {
-    checkPageBreak(25);
-    addSection("Nutri-Score");
-    
+    // Nutri-Score Section
     const nutriScoreResult = calculateNutriScore({
-      energy: formData.nutrition.energy,
-      fat: formData.nutrition.fat,
-      saturatedFat: formData.nutrition.saturatedFat,
-      carbohydrates: formData.nutrition.carbohydrates,
-      sugars: formData.nutrition.sugars,
-      fiber: formData.nutrition.fiber,
-      protein: formData.nutrition.protein,
-      salt: formData.nutrition.salt,
-      fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
+      energy: nutrition.energy,
+      fat: nutrition.fat,
+      saturatedFat: nutrition.saturatedFat,
+      carbohydrates: nutrition.carbohydrates,
+      sugars: nutrition.sugars,
+      fiber: nutrition.fiber,
+      protein: nutrition.protein,
+      salt: nutrition.salt,
+      fruitVegLegumeContent: nutrition.fruitVegLegumeContent || 0
     });
     
-    addText(`Grade: ${nutriScoreResult.nutriGrade}`, margin, yPosition, { fontSize: 12, fontStyle: 'bold' });
-    yPosition += 6;
-    addText(`Score: ${nutriScoreResult.finalScore}`, margin, yPosition, { fontSize: 10 });
-    yPosition += 10;
-  }
+    pdf.setDrawColor(226, 232, 240);
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6);
+    
+    addText("Nutri-Score", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+    yPosition += 8;
+    
+    pdf.setDrawColor(226, 232, 240);
+    pdf.rect(margin, yPosition, pageWidth - 2 * margin, 12);
+    
+    addText(`Grade: ${nutriScoreResult.nutriGrade}`, margin + 3, yPosition + 4, { fontSize: 9, fontStyle: 'bold', color: [71, 85, 105] });
+    addText(`Score: ${nutriScoreResult.finalScore}`, margin + 3, yPosition + 8, { fontSize: 8, color: [71, 85, 105] });
+    
+    yPosition += 17;
 
-  // Claims Section - Like Live Preview
-  if (formData.nutrition) {
+    // Claims Section
     const validClaims = getValidClaims({
-      protein: formData.nutrition.protein,
-      fiber: formData.nutrition.fiber,
-      salt: formData.nutrition.salt,
-      sugars: formData.nutrition.sugars,
-      fat: formData.nutrition.fat,
-      saturatedFat: formData.nutrition.saturatedFat
+      protein: nutrition.protein,
+      fiber: nutrition.fiber,
+      salt: nutrition.salt,
+      sugars: nutrition.sugars,
+      fat: nutrition.fat,
+      saturatedFat: nutrition.saturatedFat
     });
     
     if (validClaims.length > 0) {
-      checkPageBreak(20);
-      addSection("Nutrient Claims");
+      pdf.setDrawColor(226, 232, 240);
+      pdf.setFillColor(248, 250, 252);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6);
       
-      validClaims.forEach(claim => {
-        addText(`• ${claim}`, margin, yPosition, { fontSize: 9 });
-        yPosition += 5;
+      addText("Nutrient Claims", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+      yPosition += 8;
+      
+      const claimsHeight = validClaims.length * 4 + 4;
+      pdf.setDrawColor(226, 232, 240);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, claimsHeight);
+      
+      validClaims.forEach((claim, index) => {
+        addText(`• ${claim}`, margin + 3, yPosition + 3 + (index * 4), { fontSize: 8, color: [71, 85, 105] });
       });
+      
+      yPosition += claimsHeight + 5;
     }
-  }
 
-  // Storage & Preparation Section - Like Live Preview
-  if (formData.storageConditions || formData.preparation || formData.allergyAdvice) {
-    checkPageBreak(30);
-    
+    // Storage Conditions Section
     if (formData.storageConditions) {
-      addSection("Storage Conditions");
-      const storageHeight = addText(formData.storageConditions, margin, yPosition, { 
-        maxWidth: pageWidth - 2 * margin,
-        fontSize: 9
+      pdf.setDrawColor(226, 232, 240);
+      pdf.setFillColor(248, 250, 252);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6);
+      
+      addText("Storage Conditions", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+      yPosition += 8;
+      
+      const storageLines = pdf.splitTextToSize(formData.storageConditions, pageWidth - 2 * margin - 6);
+      const storageHeight = storageLines.length * 3 + 4;
+      pdf.setDrawColor(226, 232, 240);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, storageHeight);
+      
+      addText(formData.storageConditions, margin + 3, yPosition + 3, { 
+        maxWidth: pageWidth - 2 * margin - 6,
+        fontSize: 8,
+        color: [71, 85, 105]
       });
       yPosition += storageHeight + 5;
     }
     
-    if (formData.allergyAdvice) {
-      addSection("Allergy Advice");
-      const allergyHeight = addText(formData.allergyAdvice, margin, yPosition, { 
-        maxWidth: pageWidth - 2 * margin,
-        fontSize: 9
-      });
-      yPosition += allergyHeight + 5;
-    }
-    
+    // Preparation Section
     if (formData.preparation) {
-      addSection("Preparation");
-      const prepHeight = addText(formData.preparation, margin, yPosition, { 
-        maxWidth: pageWidth - 2 * margin,
-        fontSize: 9
+      pdf.setDrawColor(226, 232, 240);
+      pdf.setFillColor(248, 250, 252);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, 6);
+      
+      addText("Preparation", margin + 3, yPosition + 4, { fontSize: 10, fontStyle: 'bold', color: [51, 65, 85] });
+      yPosition += 8;
+      
+      const prepLines = pdf.splitTextToSize(formData.preparation, pageWidth - 2 * margin - 6);
+      const prepHeight = prepLines.length * 3 + 4;
+      pdf.setDrawColor(226, 232, 240);
+      pdf.rect(margin, yPosition, pageWidth - 2 * margin, prepHeight);
+      
+      addText(formData.preparation, margin + 3, yPosition + 3, { 
+        maxWidth: pageWidth - 2 * margin - 6,
+        fontSize: 8,
+        color: [71, 85, 105]
       });
       yPosition += prepHeight + 5;
     }
   }
 
-  // Footer - Like Live Preview
-  yPosition = pageHeight - 20;
-  addText(`Valid from: ${new Date().toLocaleDateString('de-DE')}`, margin, yPosition, { fontSize: 8, color: [100, 100, 100] });
+  // Footer - exactly like Live Preview at bottom of page
+  const footerY = pageHeight - 15;
+  addText(`Valid from: ${new Date().toLocaleDateString('de-DE')}`, margin, footerY, { fontSize: 8, color: [100, 116, 139] });
   
-  if (formData.preparedBy || formData.jobTitle) {
-    const preparedByText = `Prepared by: ${formData.preparedBy || 'Unknown'} (${formData.jobTitle || 'Position'})`;
-    addText(preparedByText, pageWidth - margin, yPosition, { fontSize: 8, color: [100, 100, 100], align: 'right' });
+  if (formData.preparedBy && formData.jobTitle) {
+    const preparedByText = `Prepared by: ${formData.preparedBy} (${formData.jobTitle})`;
+    addText(preparedByText, pageWidth - margin, footerY, { fontSize: 8, color: [100, 116, 139], align: 'right' });
   }
 
   // Save the PDF
