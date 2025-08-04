@@ -179,13 +179,11 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {/* Product Image */}
             {formData.productImage && (
               <div className="flex justify-center">
-                <div className="bg-white p-2 rounded-lg shadow-lg border border-slate-200">
-                  <img
-                    src={formData.productImage}
-                    alt="Product"
-                    className="max-w-xs max-h-32 object-contain rounded-lg"
-                  />
-                </div>
+                <img
+                  src={formData.productImage}
+                  alt="Product"
+                  className="max-w-xs max-h-32 object-contain"
+                />
               </div>
             )}
 
@@ -249,10 +247,8 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                               <span className="text-slate-600">{ingredient.name}</span>
                             )}
                           </td>
-                          <td className="p-2">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                              {ingredient.percentage}%
-                            </span>
+                          <td className="p-2 text-slate-700">
+                            {ingredient.percentage}%
                           </td>
                           <td className="p-2 text-slate-600">{ingredient.origin || "-"}</td>
                         </tr>
