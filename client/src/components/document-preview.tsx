@@ -216,9 +216,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 </div>
                 <div className="ml-2">
                   <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                    Quality Assurance: All raw materials and finished products meet current legal requirements. 
-                    Mycotoxins, heavy metals, pesticides and other contaminants are within admissible levels 
-                    according to applicable legislation.
+                    The quality of all raw materials used in the manufacture and the finished product meets the current applicable 
+                    legal requirements relating to these products. Admissible levels of mycotoxins, heavy metal contamination, 
+                    pesticides and other - in accordance with applicable legislation.
                   </p>
                 </div>
               </div>
