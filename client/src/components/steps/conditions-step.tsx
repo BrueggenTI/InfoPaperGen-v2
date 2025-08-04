@@ -290,11 +290,20 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
             <Button
               type="button"
               variant="outline"
-              onClick={onPrev}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onPrev();
+              }}
+              data-testid="button-previous-conditions"
             >
               Previous
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              data-testid="button-complete-conditions"
+            >
               Complete
             </Button>
           </div>

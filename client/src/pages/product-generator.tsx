@@ -193,9 +193,14 @@ export default function ProductGenerator() {
             ))}
           </div>
           <button 
-            onClick={() => goToStep(Math.min(formData.currentStep + 1, STEPS.length))}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              goToStep(Math.min(formData.currentStep + 1, STEPS.length));
+            }}
             disabled={formData.currentStep === STEPS.length}
             className="text-sm font-medium text-primary hover:text-primary/80 disabled:opacity-50"
+            data-testid="button-mobile-continue"
           >
             Continue
           </button>

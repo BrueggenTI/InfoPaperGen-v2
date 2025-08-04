@@ -211,8 +211,13 @@ export default function NutritionStep({
             <Button
               type="button"
               variant="outline"
-              onClick={() => nutritionImageInputRef.current?.click()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                nutritionImageInputRef.current?.click();
+              }}
               disabled={isLoading || extractNutritionMutation.isPending}
+              data-testid="button-upload-nutrition"
             >
               {extractNutritionMutation.isPending ? (
                 <>
@@ -831,9 +836,14 @@ export default function NutritionStep({
             <Button 
               type="button"
               variant="outline" 
-              onClick={onPrev}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onPrev();
+              }}
               disabled={isLoading}
               className="flex items-center space-x-2"
+              data-testid="button-previous-nutrition"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Back</span>
@@ -843,6 +853,7 @@ export default function NutritionStep({
               type="submit"
               disabled={isLoading}
               className="flex items-center space-x-2"
+              data-testid="button-next-nutrition"
             >
               <span>Continue to Storage & Preparation</span>
               <ChevronRight className="w-4 h-4" />

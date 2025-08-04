@@ -207,8 +207,13 @@ export default function ProductDetailsStep({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => productImageInputRef.current?.click()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    productImageInputRef.current?.click();
+                  }}
                   disabled={isLoading}
+                  data-testid="button-upload-product-image"
                 >
                   Upload Product Image
                 </Button>
@@ -240,6 +245,7 @@ export default function ProductDetailsStep({
               type="submit" 
               disabled={isLoading}
               className="flex items-center space-x-2"
+              data-testid="button-next-product-details"
             >
               <span>Continue to Ingredients</span>
               <ChevronRight className="w-4 h-4" />

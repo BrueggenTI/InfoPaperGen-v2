@@ -527,7 +527,11 @@ export default function IngredientsStep({
               </p>
               <Button
                 variant="outline"
-                onClick={() => finalRecipeInputRef.current?.click()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  finalRecipeInputRef.current?.click();
+                }}
                 disabled={extractFinalIngredientsMutation.isPending}
                 data-testid="button-upload-final-recipe"
               >
@@ -556,7 +560,11 @@ export default function IngredientsStep({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => finalRecipeInputRef.current?.click()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    finalRecipeInputRef.current?.click();
+                  }}
                   disabled={extractFinalIngredientsMutation.isPending}
                   data-testid="button-replace-final-recipe"
                 >
@@ -669,7 +677,11 @@ export default function IngredientsStep({
               </p>
               <Button
                 variant="outline"
-                onClick={() => baseRecipeInputRef.current?.click()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  baseRecipeInputRef.current?.click();
+                }}
                 disabled={extractBaseIngredientsMutation.isPending}
                 data-testid="button-upload-base-recipe"
               >
@@ -698,7 +710,11 @@ export default function IngredientsStep({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => baseRecipeInputRef.current?.click()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    baseRecipeInputRef.current?.click();
+                  }}
                   disabled={extractBaseIngredientsMutation.isPending}
                   data-testid="button-replace-base-recipe"
                 >
@@ -867,11 +883,28 @@ export default function IngredientsStep({
 
       {/* Navigation */}
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrev} disabled={isLoading}>
+        <Button 
+          variant="outline" 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onPrev();
+          }} 
+          disabled={isLoading}
+          data-testid="button-previous-ingredients"
+        >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Previous
         </Button>
-        <Button onClick={handleNext} disabled={isLoading}>
+        <Button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleNext();
+          }} 
+          disabled={isLoading}
+          data-testid="button-next-ingredients"
+        >
           Next
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
