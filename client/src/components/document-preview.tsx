@@ -121,15 +121,60 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
     }
   };
 
+  // Page Break Indicator Component
+  const PageBreakIndicator = ({ pageNumber }: { pageNumber: number }) => (
+    <div className="my-8 flex items-center justify-center">
+      <div className="flex-1 h-px bg-red-300 mx-4"></div>
+      <div className="bg-red-100 border border-red-300 px-4 py-2 rounded-lg">
+        <span className="text-red-700 text-sm font-medium">
+          📄 Page Break - Page {pageNumber} begins here
+        </span>
+      </div>
+      <div className="flex-1 h-px bg-red-300 mx-4"></div>
+    </div>
+  );
+
+  // Header Component for new pages
+  const DocumentHeader = ({ pageNumber }: { pageNumber: number }) => (
+    <div className="relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200">
+      {/* Logo */}
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <img 
+          src={brueggenLogo} 
+          alt="Brüggen Logo" 
+          className="h-10 w-auto drop-shadow-sm"
+        />
+      </div>
+      
+      {/* Centered Content */}
+      <div className="text-center">
+        <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
+          Product Information
+        </h1>
+        <div className="text-slate-800 font-semibold text-base">
+          {formData.productNumber || "Recipe Number"}
+        </div>
+      </div>
+      
+      {/* Page Number */}
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <div className="bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
+          <p className="text-xs font-medium text-slate-700">Page {pageNumber}</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
       <div className="flex justify-end mb-6">
         <Button
           onClick={handleExportPDF}
           className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
+          data-testid="button-download-pdf"
         >
           <Download className="w-4 h-4" />
-          <span>Export PDF</span>
+          <span>Download PDF</span>
         </Button>
       </div>
 
@@ -258,6 +303,12 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 </div>
               </div>
             )}
+
+            {/* Page Break Indicator - Around this point nutrition section would start on new page */}
+            {formData.nutrition && <PageBreakIndicator pageNumber={2} />}
+            
+            {/* Header for Page 2 */}
+            {formData.nutrition && <DocumentHeader pageNumber={2} />}
 
             {/* Nutritional Table - Only show if nutrition data exists */}
             {formData.nutrition && (
