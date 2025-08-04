@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ProductInfo } from "@shared/schema";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag, Languages } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag, Languages, X } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +52,10 @@ export default function IngredientsStep({
   // Upload refs
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
+  
+  // Track uploaded files
+  const [finalRecipeFile, setFinalRecipeFile] = useState<File | null>(null);
+  const [baseRecipeFile, setBaseRecipeFile] = useState<File | null>(null);
   
   const { toast } = useToast();
 
@@ -269,6 +273,7 @@ export default function IngredientsStep({
       return;
     }
 
+    setFinalRecipeFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
@@ -276,6 +281,20 @@ export default function IngredientsStep({
       extractFinalIngredientsMutation.mutate({ image: base64Data });
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveFinalImage = () => {
+    setFinalRecipeFile(null);
+    setFinalRecipeText("");
+    setFinalProductIngredients([{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false, language: 'original' }]);
+    onUpdate({ ingredients: [] });
+    if (finalRecipeInputRef.current) {
+      finalRecipeInputRef.current.value = "";
+    }
+    toast({
+      title: "Image removed",
+      description: "Final recipe image and extracted ingredients have been cleared.",
+    });
   };
 
   const handleBaseImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,6 +310,7 @@ export default function IngredientsStep({
       return;
     }
 
+    setBaseRecipeFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
@@ -298,6 +318,20 @@ export default function IngredientsStep({
       extractBaseIngredientsMutation.mutate({ image: base64Data });
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveBaseImage = () => {
+    setBaseRecipeFile(null);
+    setBaseRecipeText("");
+    setBaseProductIngredients([{ name: "", percentage: undefined, origin: "", language: 'original' }]);
+    onUpdate({ baseProductIngredients: [] });
+    if (baseRecipeInputRef.current) {
+      baseRecipeInputRef.current.value = "";
+    }
+    toast({
+      title: "Image removed",
+      description: "Base recipe image and extracted ingredients have been cleared.",
+    });
   };
 
   const handleFinalRecipeTextChange = (text: string) => {
@@ -478,26 +512,67 @@ export default function IngredientsStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
-            <input
-              ref={finalRecipeInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFinalImageUpload}
-              className="hidden"
-            />
-            <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-2">
-              Click here to upload an image of the Final Recipe
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => finalRecipeInputRef.current?.click()}
-              disabled={extractFinalIngredientsMutation.isPending}
-            >
-              {extractFinalIngredientsMutation.isPending ? "Extracting..." : "Upload Final Recipe"}
-            </Button>
-          </div>
+          {!finalRecipeFile ? (
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+              <input
+                ref={finalRecipeInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFinalImageUpload}
+                className="hidden"
+              />
+              <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm text-slate-600 mb-2">
+                Click here to upload an image of the Final Recipe
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => finalRecipeInputRef.current?.click()}
+                disabled={extractFinalIngredientsMutation.isPending}
+                data-testid="button-upload-final-recipe"
+              >
+                {extractFinalIngredientsMutation.isPending ? "Extracting..." : "Upload Final Recipe"}
+              </Button>
+            </div>
+          ) : (
+            <div className="border-2 border-slate-300 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <Camera className="w-5 h-5 text-green-600" />
+                  <span className="text-sm font-medium text-slate-700">Uploaded: {finalRecipeFile.name}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveFinalImage}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  data-testid="button-remove-final-recipe"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Remove
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => finalRecipeInputRef.current?.click()}
+                  disabled={extractFinalIngredientsMutation.isPending}
+                  data-testid="button-replace-final-recipe"
+                >
+                  <Upload className="w-4 h-4 mr-1" />
+                  Upload New Image
+                </Button>
+              </div>
+              <input
+                ref={finalRecipeInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFinalImageUpload}
+                className="hidden"
+              />
+            </div>
+          )}
 
           {finalRecipeText && (
             <div className="space-y-4">
@@ -579,26 +654,67 @@ export default function IngredientsStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
-            <input
-              ref={baseRecipeInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleBaseImageUpload}
-              className="hidden"
-            />
-            <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-2">
-              Click here to upload an image of the Base Recipe
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => baseRecipeInputRef.current?.click()}
-              disabled={extractBaseIngredientsMutation.isPending}
-            >
-              {extractBaseIngredientsMutation.isPending ? "Extracting..." : "Upload Base Recipe"}
-            </Button>
-          </div>
+          {!baseRecipeFile ? (
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+              <input
+                ref={baseRecipeInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBaseImageUpload}
+                className="hidden"
+              />
+              <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm text-slate-600 mb-2">
+                Click here to upload an image of the Base Recipe
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => baseRecipeInputRef.current?.click()}
+                disabled={extractBaseIngredientsMutation.isPending}
+                data-testid="button-upload-base-recipe"
+              >
+                {extractBaseIngredientsMutation.isPending ? "Extracting..." : "Upload Base Recipe"}
+              </Button>
+            </div>
+          ) : (
+            <div className="border-2 border-slate-300 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <Camera className="w-5 h-5 text-green-600" />
+                  <span className="text-sm font-medium text-slate-700">Uploaded: {baseRecipeFile.name}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveBaseImage}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  data-testid="button-remove-base-recipe"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Remove
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => baseRecipeInputRef.current?.click()}
+                  disabled={extractBaseIngredientsMutation.isPending}
+                  data-testid="button-replace-base-recipe"
+                >
+                  <Upload className="w-4 h-4 mr-1" />
+                  Upload New Image
+                </Button>
+              </div>
+              <input
+                ref={baseRecipeInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleBaseImageUpload}
+                className="hidden"
+              />
+            </div>
+          )}
 
           {baseRecipeText && (
             <div className="space-y-2">
