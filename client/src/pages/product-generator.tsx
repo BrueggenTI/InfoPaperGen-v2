@@ -172,7 +172,7 @@ export default function ProductGenerator() {
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">Real-time document preview</p>
               </div>
-              <DocumentPreview formData={formData} />
+              <DocumentPreview formData={formData} sessionId={sessionId || undefined} />
             </div>
           </div>
         </div>

@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import ProductGenerator from "@/pages/product-generator";
 import DocumentPreviewPage from "@/pages/document-preview-page";
+import PDFPreview from "@/pages/pdf-preview";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={ProductGenerator} />
       <Route path="/preview" component={() => <DocumentPreviewPage />} />
+      <Route path="/pdf-preview" component={PDFPreview} />
       <Route component={NotFound} />
     </Switch>
   );

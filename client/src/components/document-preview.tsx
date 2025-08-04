@@ -8,9 +8,11 @@ import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
+  sessionId?: string;
+  isPDFMode?: boolean;
 }
 
-export default function DocumentPreview({ formData }: DocumentPreviewProps) {
+export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
   const calculatePerServing = (per100g: number) => {
@@ -166,17 +168,19 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
   );
 
   return (
-    <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
-      <div className="flex justify-end mb-6">
-        <Button
-          onClick={handleExportPDF}
-          className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
-          data-testid="button-download-pdf"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download PDF</span>
-        </Button>
-      </div>
+    <div className={`p-6 ${isPDFMode ? 'bg-white' : 'bg-gradient-to-br from-slate-50 to-slate-100'} min-h-screen`}>
+      {!isPDFMode && (
+        <div className="flex justify-end mb-6">
+          <Button
+            onClick={handleExportPDF}
+            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
+            data-testid="button-download-pdf"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download PDF</span>
+          </Button>
+        </div>
+      )}
 
       {/* Document Preview */}
       <div className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">

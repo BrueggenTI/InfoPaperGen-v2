@@ -8,6 +8,7 @@ An AI-powered web application that generates professional Product Information Pa
 - Professional document formatting with company branding
 - Responsive design for various screen sizes
 - Real-time preview functionality
+- **PDF Generation Requirement**: Pixel-perfect PDF output matching live preview exactly, including images, CSS layouts (Flexbox/Grid), and fonts
 
 ### System Architecture
 The application is built as a full-stack JavaScript application following a clear separation of concerns.
@@ -22,7 +23,14 @@ The application is built as a full-stack JavaScript application following a clea
     - **Conditional Display**: Live Preview intelligently displays sections (e.g., nutrition table, Nutri-Score, claims, ingredients table) only when relevant data exists.
     - **Conditions & Notes**: Features a dedicated section for product type selection, automatic shelf-life calculation, and generation of storage conditions, allergy advice, and preparation instructions based on product type.
     - **Styling**: Consistent table design across all sections with titles above content, professional footer with "Valid from" date and "Prepared by" information.
+    - **PDF Generation**: Currently uses jsPDF for client-side PDF creation. Browser-based PDF generation (Puppeteer) attempted but not viable in Replit environment due to system library dependencies.
 - **Environment Management**: Robust environment variable management for sensitive data like API keys.
+
+### Recent Changes (2025-01-04)
+- **PDF Generation Enhancement Attempt**: Attempted to implement browser-based PDF generation using Puppeteer and html-pdf-node to achieve pixel-perfect PDF output matching the live preview. However, these solutions failed in the Replit environment due to missing system dependencies (libglib-2.0.so.0, libasound.so.2, libxkbcommon.so.0). 
+- **Fallback Implementation**: Returned to enhanced jsPDF client-side generation as the viable solution for the current environment.
+- **PDF Preview Route**: Created dedicated PDF preview route (/pdf-preview) with print-optimized styling for potential future browser-based PDF generation.
+- **Infrastructure**: Added PDF service architecture and API endpoints, though currently disabled due to environment constraints.
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.

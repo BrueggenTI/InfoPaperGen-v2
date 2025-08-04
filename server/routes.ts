@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { productInfoSchema } from "@shared/schema";
 import { extractIngredientsFromImage, extractNutritionFromImage, translateIngredients } from "./services/openai";
+// Browser-based PDF generation removed due to environment constraints
 import multer from "multer";
 
 const upload = multer({
@@ -149,6 +150,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(translationResult);
     } catch (error) {
       res.status(500).json({ message: "Error translating ingredients", error: (error as Error).message });
+    }
+  });
+
+  // Browser-based PDF generation endpoint (currently disabled)
+  app.post("/api/generate-pdf", async (req, res) => {
+    try {
+      res.status(501).json({ 
+        message: "Browser-based PDF generation is currently not available in this environment. Please use the client-side PDF download instead.",
+        error: "Service unavailable" 
+      });
+    } catch (error) {
+      console.error('Error in PDF generation endpoint:', error);
+      res.status(500).json({ message: "Error in PDF generation", error: (error as Error).message });
     }
   });
 
