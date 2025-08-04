@@ -153,7 +153,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                 <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
                   Product Information
                 </h1>
-                <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 py-1 rounded-full inline-block font-semibold text-base shadow-md">
+                <div className="text-slate-800 font-semibold text-base">
                   {formData.productNumber || "Recipe Number"}
                 </div>
               </div>
@@ -190,9 +190,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             )}
 
             {/* Ingredients Section */}
-            <div className="bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-              <div className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-3 py-2">
-                <h3 className="font-semibold text-base">Ingredients</h3>
+            <div className="border border-slate-200 rounded-lg">
+              <div className="px-3 py-2 border-b border-slate-200">
+                <h3 className="font-semibold text-base text-slate-800">Ingredients</h3>
               </div>
               <div className="p-3">
                 <div 
@@ -226,9 +226,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
 
             {/* Detailed Ingredients Table - Only show if ingredients exist */}
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
-              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-3 py-2">
-                  <h3 className="font-semibold text-base">Detailed Ingredients Breakdown</h3>
+              <div className="border border-slate-200 rounded-lg">
+                <div className="px-3 py-2 border-b border-slate-200">
+                  <h3 className="font-semibold text-base text-slate-800">Detailed Ingredients Breakdown</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
@@ -266,9 +266,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {/* Nutritional Table - Only show if nutrition data exists */}
             {formData.nutrition && (
             <>
-              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2">
-                  <h3 className="font-semibold text-base">Average Nutritional Value</h3>
+              <div className="border border-slate-200 rounded-lg">
+                <div className="px-3 py-2 border-b border-slate-200">
+                  <h3 className="font-semibold text-base text-slate-800">Average Nutritional Value</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
@@ -365,47 +365,49 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             </>
             )}
 
-            {/* Nutri-Score Display - Only show if nutrition data exists */}
-            {formData.nutrition && (() => {
-              const nutriScore = calculateNutriScore({
-                energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
-                fat: formData.nutrition.fat || 0,
-                saturatedFat: formData.nutrition.saturatedFat || 0,
-                carbohydrates: formData.nutrition.carbohydrates || 0,
-                sugars: formData.nutrition.sugars || 0,
-                fiber: formData.nutrition.fiber || 0,
-                protein: formData.nutrition.protein || 0,
-                salt: formData.nutrition.salt || 0,
-                fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
-              });
+            {/* Nutri-Score and Claims Side by Side - Only show if nutrition data exists */}
+            {formData.nutrition && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nutri-Score Display */}
+                {(() => {
+                  const nutriScore = calculateNutriScore({
+                    energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
+                    fat: formData.nutrition.fat || 0,
+                    saturatedFat: formData.nutrition.saturatedFat || 0,
+                    carbohydrates: formData.nutrition.carbohydrates || 0,
+                    sugars: formData.nutrition.sugars || 0,
+                    fiber: formData.nutrition.fiber || 0,
+                    protein: formData.nutrition.protein || 0,
+                    salt: formData.nutrition.salt || 0,
+                    fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
+                  });
 
-              return (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200 p-3 shadow-sm">
-                  <div className="text-center">
-                    <h3 className="font-semibold text-base text-green-800 mb-2">Nutri-Score Rating</h3>
-                    <div className="flex justify-center">
-                      <div className="bg-white p-2 rounded-lg shadow-md">
-                        <img 
-                          src={getNutriScoreImage(nutriScore.nutriGrade)} 
-                          alt={`Nutri-Score ${nutriScore.nutriGrade}`}
-                          className="h-16 w-auto"
-                        />
+                  return (
+                    <div className="border border-slate-200 rounded-lg p-3">
+                      <h3 className="font-semibold text-base text-slate-800 mb-2">Nutri-Score Rating</h3>
+                      <div className="text-center">
+                        <div className="flex justify-center">
+                          <div className="bg-white p-2 rounded-lg shadow-md border border-slate-200">
+                            <img 
+                              src={getNutriScoreImage(nutriScore.nutriGrade)} 
+                              alt={`Nutri-Score ${nutriScore.nutriGrade}`}
+                              className="h-16 w-auto"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-sm text-slate-700 mt-2 font-medium">
+                          Grade: {nutriScore.nutriGrade} • Score: {nutriScore.finalScore}
+                        </p>
                       </div>
                     </div>
-                    <p className="text-sm text-green-700 mt-2 font-medium">
-                      Grade: {nutriScore.nutriGrade} • Score: {nutriScore.totalScore}
-                    </p>
-                  </div>
-                </div>
-              );
-            })()}
+                  );
+                })()}
 
-            {/* Declarations - Calculated Claims - Only show if nutrition data exists */}
-            {formData.nutrition && (
-            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-              <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-3 py-2">
-                <h3 className="font-semibold text-base">Possible Declarations</h3>
-              </div>
+                {/* Declarations - Calculated Claims */}
+                <div className="border border-slate-200 rounded-lg">
+                  <div className="px-3 py-2 border-b border-slate-200">
+                    <h3 className="font-semibold text-base text-slate-800">Possible Declarations</h3>
+                  </div>
               <div className="p-3">
                 {(() => {
                   if (!formData.nutrition) return (
@@ -469,15 +471,16 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                     </div>
                   );
                 })()}
+                  </div>
+                </div>
               </div>
-            </div>
             )}
 
             {/* Storage Conditions - Only show if storage conditions exist */}
             {formData.storageConditions && (
-              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2">
-                  <h3 className="font-semibold text-base">Storage Conditions</h3>
+              <div className="border border-slate-200 rounded-lg">
+                <div className="px-3 py-2 border-b border-slate-200">
+                  <h3 className="font-semibold text-base text-slate-800">Storage Conditions</h3>
                 </div>
                 <div className="p-3">
                   <div className="flex items-start">
@@ -513,9 +516,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
 
             {/* Preparation - Only show if preparation exists */}
             {formData.preparation && (
-              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-2">
-                  <h3 className="font-semibold text-base">Preparation Instructions</h3>
+              <div className="border border-slate-200 rounded-lg">
+                <div className="px-3 py-2 border-b border-slate-200">
+                  <h3 className="font-semibold text-base text-slate-800">Preparation Instructions</h3>
                 </div>
                 <div className="p-3">
                   <div className="flex items-start">
