@@ -8,7 +8,7 @@ export async function generatePDF(formData: ProductInfo) {
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 15;
+  const margin = 20;
   let yPosition = margin;
   let currentPage = 1;
   
@@ -24,153 +24,185 @@ export async function generatePDF(formData: ProductInfo) {
     currentPage++;
     yPosition = margin;
     drawHeader();
-    yPosition += 30; // Space after header
+    yPosition += 35; // Space after header
   };
 
   // Helper function to check if we need a new page
   const checkPageBreak = (neededHeight: number) => {
-    if (yPosition + neededHeight > pageHeight - margin - 10) {
+    if (yPosition + neededHeight > pageHeight - margin - 20) {
       addNewPageWithHeader();
       return true;
     }
     return false;
   };
 
-  // Draw modern header matching live preview
+  // Draw header exactly like live preview
   const drawHeader = () => {
-    // Header background with gradient effect (simulated with light gray)
-    pdf.setFillColor(248, 250, 252); // bg-slate-50
-    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 25, 3, 3, 'F');
+    // Header background - gradient simulation with light gray
+    pdf.setFillColor(248, 250, 252); // from-slate-50
+    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 30, 4, 4, 'F');
+    
+    // Header border
     pdf.setDrawColor(203, 213, 225); // border-slate-200
-    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 25, 3, 3);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 30, 4, 4);
 
-    // Logo area (left)
+    // Logo text (left side)
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(51, 65, 85); // text-slate-800
+    pdf.text("Brüggen", margin + 10, yPosition + 12);
+
+    // Centered content
+    const centerX = pageWidth / 2;
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(51, 65, 85);
+    pdf.text("Product Information", centerX, yPosition + 15, { align: 'center' });
+    
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(51, 65, 85);
+    pdf.text(formData.productNumber || "Recipe Number", centerX, yPosition + 22, { align: 'center' });
+
+    // Page number (right side)
+    const pageNumX = pageWidth - margin - 35;
+    pdf.setFillColor(255, 255, 255);
+    pdf.roundedRect(pageNumX, yPosition + 8, 30, 14, 6, 6, 'F');
+    pdf.setDrawColor(203, 213, 225);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(pageNumX, yPosition + 8, 30, 14, 6, 6);
+    
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(71, 85, 105);
+    pdf.text(`Page ${currentPage}`, pageNumX + 15, yPosition + 17, { align: 'center' });
+
+    yPosition += 30;
+  };
+
+  // Draw section with exact styling from live preview
+  const drawSection = (title: string, content: () => void, minHeight = 0) => {
+    const startY = yPosition;
+    
+    // Section border and background
+    pdf.setFillColor(255, 255, 255);
+    pdf.setDrawColor(203, 213, 225); // border-slate-200
+    pdf.setLineWidth(0.5);
+    
+    // Title bar
+    pdf.setFillColor(255, 255, 255);
+    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 4, 4, 'F');
+    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 4, 4);
+    
+    // Title with bottom border
+    pdf.setDrawColor(203, 213, 225);
+    pdf.line(margin, yPosition + 18, pageWidth - margin, yPosition + 18);
+    
     pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(51, 65, 85); // text-slate-800
-    pdf.text("Brüggen", margin + 8, yPosition + 10);
-
-    // Centered title
-    const centerX = pageWidth / 2;
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(51, 65, 85);
-    pdf.text("Product Information", centerX, yPosition + 12, { align: 'center' });
+    pdf.text(title, margin + 12, yPosition + 12);
     
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(51, 65, 85);
-    pdf.text(formData.productNumber || "Recipe Number", centerX, yPosition + 18, { align: 'center' });
-
-    // Page number (right)
-    pdf.setFillColor(255, 255, 255);
-    pdf.roundedRect(pageWidth - margin - 25, yPosition + 5, 20, 8, 2, 2, 'F');
-    pdf.setDrawColor(203, 213, 225);
-    pdf.roundedRect(pageWidth - margin - 25, yPosition + 5, 20, 8, 2, 2);
+    yPosition += 18;
     
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(71, 85, 105);
-    pdf.text(`Page ${currentPage}`, pageWidth - margin - 15, yPosition + 10, { align: 'center' });
-
-    yPosition += 25;
-  };
-
-  // Draw section with rounded border like live preview
-  const drawSection = (title: string, content: () => void, bgColor = [255, 255, 255]) => {
-    const startY = yPosition;
-    
-    // Section header
-    pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 12, 2, 2, 'F');
-    pdf.setDrawColor(203, 213, 225);
-    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 12, 2, 2);
-    
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(51, 65, 85);
-    pdf.text(title, margin + 8, yPosition + 8);
-    
-    yPosition += 12;
-    
-    // Section content area
+    // Content area
     const contentStartY = yPosition;
     content();
     
-    // Draw border around entire section
-    const sectionHeight = yPosition - startY;
-    pdf.setDrawColor(203, 213, 225);
-    pdf.roundedRect(margin, startY, pageWidth - 2 * margin, sectionHeight, 2, 2);
+    // Calculate actual content height
+    const contentHeight = Math.max(yPosition - contentStartY, minHeight);
     
-    yPosition += 5; // Space after section
+    // Draw content area border
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(margin, contentStartY, pageWidth - 2 * margin, contentHeight, 'F');
+    pdf.setDrawColor(203, 213, 225);
+    pdf.rect(margin, contentStartY, pageWidth - 2 * margin, contentHeight);
+    
+    // Complete section border (rounded corners)
+    const totalHeight = 18 + contentHeight;
+    pdf.setDrawColor(203, 213, 225);
+    pdf.roundedRect(margin, startY, pageWidth - 2 * margin, totalHeight, 4, 4);
+    
+    yPosition = contentStartY + contentHeight + 8; // Space after section
   };
 
-  // Draw info box (like allergy advice)
-  const drawInfoBox = (title: string, content: string, borderColor = [248, 113, 113], bgColor = [254, 242, 242]) => {
-    checkPageBreak(25);
+  // Draw info box exactly like live preview
+  const drawInfoBox = (title: string, content: string, borderColor = [248, 113, 113], bgColor = [254, 242, 242], textColor = [153, 27, 27]) => {
+    checkPageBreak(30);
     
-    const lines = pdf.splitTextToSize(content, pageWidth - 2 * margin - 16);
-    const boxHeight = Math.max(20, lines.length * 4 + 12);
+    const lines = pdf.splitTextToSize(content, pageWidth - 2 * margin - 20);
+    const boxHeight = Math.max(25, lines.length * 5 + 20);
     
     // Background
     pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, boxHeight, 2, 2, 'F');
+    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, boxHeight, 4, 4, 'F');
     
-    // Left border accent
+    // Left accent border
     pdf.setFillColor(borderColor[0], borderColor[1], borderColor[2]);
-    pdf.rect(margin, yPosition, 4, boxHeight, 'F');
+    pdf.roundedRect(margin, yPosition, 4, boxHeight, 2, 2, 'F');
     
-    // Border
+    // Main border
     pdf.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, boxHeight, 2, 2);
+    pdf.setLineWidth(1);
+    pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, boxHeight, 4, 4);
+    
+    // Icon area (simulated)
+    pdf.setFillColor(borderColor[0], borderColor[1], borderColor[2]);
+    pdf.circle(margin + 15, yPosition + 12, 3, 'F');
     
     // Title
-    pdf.setFontSize(11);
+    pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(153, 27, 27);
-    pdf.text(title, margin + 12, yPosition + 8);
+    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+    pdf.text(title, margin + 25, yPosition + 10);
     
     // Content
-    pdf.setFontSize(8);
+    pdf.setFontSize(9);
     pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(153, 27, 27);
+    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
     
     lines.forEach((line: string, index: number) => {
-      pdf.text(line, margin + 12, yPosition + 14 + (index * 4));
+      pdf.text(line, margin + 25, yPosition + 18 + (index * 5));
     });
     
-    yPosition += boxHeight + 8;
+    yPosition += boxHeight + 12;
   };
 
   // Start PDF generation
   drawHeader();
-  yPosition += 8;
+  yPosition += 10;
 
-  // Product Name Section (matching live preview style)
-  checkPageBreak(20);
-  pdf.setFillColor(255, 255, 255);
-  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 2, 2, 'F');
+  // Product Name Section - exact styling from live preview
+  checkPageBreak(25);
+  pdf.setFillColor(255, 255, 255); // bg-white
+  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 22, 4, 4, 'F');
   pdf.setDrawColor(203, 213, 225);
-  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 2, 2);
+  pdf.setLineWidth(0.5);
+  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 22, 4, 4);
   
-  pdf.setFontSize(8);
+  // Gradient background simulation
+  pdf.setFillColor(248, 250, 252); // from-slate-50
+  pdf.roundedRect(margin + 1, yPosition + 1, pageWidth - 2 * margin - 2, 20, 3, 3, 'F');
+  
+  pdf.setFontSize(9);
   pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(100, 116, 139);
-  pdf.text("PRODUCT NAME", pageWidth / 2, yPosition + 6, { align: 'center' });
+  pdf.setTextColor(100, 116, 139); // text-slate-500
+  pdf.text("PRODUCT NAME", pageWidth / 2, yPosition + 8, { align: 'center' });
   
-  pdf.setFontSize(14);
+  pdf.setFontSize(16);
   pdf.setFont("helvetica", "bold");
-  pdf.setTextColor(217, 119, 6); // amber-600 color simulation
-  pdf.text(formData.productName || "Product name will appear here...", pageWidth / 2, yPosition + 13, { align: 'center' });
+  pdf.setTextColor(217, 119, 6); // amber-600
+  pdf.text(formData.productName || "Product name will appear here...", pageWidth / 2, yPosition + 16, { align: 'center' });
   
-  yPosition += 25;
+  yPosition += 30;
 
-  // Ingredients Section
+  // Ingredients Section - exact match to live preview
   if (formData.ingredients?.length || formData.baseProductIngredients?.length) {
     drawSection("Ingredients", () => {
-      yPosition += 5;
+      yPosition += 8;
       
-      // Format ingredients text (matching live preview logic)
+      // Format ingredients exactly like live preview
       const finalIngredients = formData.ingredients || [];
       const baseIngredients = formData.baseProductIngredients || [];
       
@@ -182,7 +214,6 @@ export async function generatePDF(formData: ProductInfo) {
             const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
             let ingredientText = `${ingredient.name}${percentage}`;
             
-            // Check if this ingredient is marked as base recipe
             if (ingredient.isMarkedAsBase && baseIngredients.length > 0) {
               const baseFormatted = baseIngredients
                 .filter(baseIng => baseIng.name.trim() !== "")
@@ -206,52 +237,48 @@ export async function generatePDF(formData: ProductInfo) {
         ingredientsText = "Ingredients will appear here after extraction...";
       }
       
-      pdf.setFontSize(9);
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(71, 85, 105);
+      pdf.setTextColor(71, 85, 105); // text-slate-700
       
-      const maxWidth = pageWidth - 2 * margin - 16;
+      const maxWidth = pageWidth - 2 * margin - 24;
       const lines = pdf.splitTextToSize(ingredientsText, maxWidth);
       
       lines.forEach((line: string, index: number) => {
-        if (index > 0) checkPageBreak(5);
-        pdf.text(line, margin + 8, yPosition + 4 + (index * 5));
+        if (index > 0) checkPageBreak(6);
+        pdf.text(line, margin + 12, yPosition + 4 + (index * 6));
       });
       
-      yPosition += Math.max(lines.length * 5, 10) + 5;
+      yPosition += Math.max(lines.length * 6, 12) + 8;
       
       // Percentage note
-      pdf.setFontSize(7);
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "italic");
-      pdf.setTextColor(100, 116, 139);
-      pdf.text("* percentage in ingredient", margin + 8, yPosition);
-      yPosition += 8;
+      pdf.setTextColor(100, 116, 139); // text-slate-500
+      pdf.text("* percentage in ingredient", margin + 12, yPosition);
+      yPosition += 10;
     });
 
-    // Quality assurance info box
+    // Quality assurance info box - exact blue styling from live preview
     drawInfoBox("Quality Assurance", 
       "The quality of all raw materials used in the manufacture and the finished product meets the current applicable legal requirements relating to these products. Admissible levels of mycotoxins, heavy metal contamination, pesticides and other - in accordance with applicable legislation.",
-      [96, 165, 250], [239, 246, 255]);
+      [96, 165, 250], [239, 246, 255], [30, 64, 175]); // Blue colors
   }
 
-  // Detailed Ingredients Table (if ingredients exist)
+  // Detailed Ingredients Table - exact match to live preview
   if ((formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim()))) {
-    // Generate table data (matching live preview logic)
     const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
       const finalIngredients = formData.ingredients || [];
       const baseIngredients = formData.baseProductIngredients || [];
       const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
 
-      // Get marked ingredient percentage
       const markedIngredient = finalIngredients.find(ing => ing.isMarkedAsBase);
       const markedIngredientPercentage = markedIngredient?.percentage || 0;
 
-      // Add final product ingredients
       finalIngredients
         .filter(ing => ing.name.trim())
         .forEach(ing => {
           if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-            // First add the marked ingredient itself
             tableIngredients.push({
               name: ing.name,
               percentage: ing.percentage || 0,
@@ -259,7 +286,6 @@ export async function generatePDF(formData: ProductInfo) {
               isFinalProduct: true
             });
             
-            // Then add base product ingredients with recalculated percentages
             baseIngredients
               .filter(baseIng => baseIng.name.trim())
               .forEach(baseIng => {
@@ -274,7 +300,6 @@ export async function generatePDF(formData: ProductInfo) {
                 });
               });
           } else {
-            // Add regular final product ingredient
             tableIngredients.push({
               name: ing.name,
               percentage: ing.percentage || 0,
@@ -291,138 +316,143 @@ export async function generatePDF(formData: ProductInfo) {
     
     if (tableIngredients.length > 0) {
       drawSection("Detailed Ingredients Breakdown", () => {
-        yPosition += 5;
+        yPosition += 8;
+        
+        const rowHeight = 12;
+        const colWidths = [90, 80, 60];
         
         // Table header
-        pdf.setFillColor(248, 250, 252);
-        pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 8, 'F');
+        pdf.setFillColor(248, 250, 252); // bg-slate-50
+        pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight, 'F');
         pdf.setDrawColor(203, 213, 225);
-        pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 8);
+        pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight);
         
-        pdf.setFontSize(8);
+        pdf.setFontSize(9);
         pdf.setFont("helvetica", "bold");
         pdf.setTextColor(71, 85, 105);
         
-        const col1Width = 80;
-        const col2Width = 60;
-        const col3Width = 40;
+        pdf.text("Ingredients", margin + 12, yPosition + 8);
+        pdf.text("Percentage content per whole product", margin + 12 + colWidths[0], yPosition + 8);
+        pdf.text("Country of Origin", margin + 12 + colWidths[0] + colWidths[1], yPosition + 8);
         
-        pdf.text("Ingredients", margin + 8, yPosition + 5);
-        pdf.text("Percentage content per whole product", margin + 8 + col1Width, yPosition + 5);
-        pdf.text("Country of Origin", margin + 8 + col1Width + col2Width, yPosition + 5);
-        
-        yPosition += 8;
+        yPosition += rowHeight;
         
         // Table rows
         tableIngredients.forEach((ingredient, index) => {
-          checkPageBreak(6);
+          checkPageBreak(rowHeight + 2);
           
+          // Alternating row colors
           if (index % 2 === 0) {
             pdf.setFillColor(248, 250, 252);
-            pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 6, 'F');
+            pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight, 'F');
           }
           
           pdf.setDrawColor(203, 213, 225);
-          pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 6);
+          pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight);
           
-          pdf.setFontSize(7);
+          pdf.setFontSize(8);
           pdf.setFont("helvetica", ingredient.isFinalProduct ? "bold" : "normal");
           pdf.setTextColor(ingredient.isFinalProduct ? 51 : 100, ingredient.isFinalProduct ? 65 : 116, ingredient.isFinalProduct ? 85 : 139);
           
-          pdf.text(ingredient.name, margin + 8, yPosition + 4);
-          pdf.text(`${ingredient.percentage}%`, margin + 8 + col1Width, yPosition + 4);
-          pdf.text(ingredient.origin || "-", margin + 8 + col1Width + col2Width, yPosition + 4);
+          pdf.text(ingredient.name, margin + 12, yPosition + 8);
+          pdf.text(`${ingredient.percentage}%`, margin + 12 + colWidths[0], yPosition + 8);
+          pdf.text(ingredient.origin || "-", margin + 12 + colWidths[0] + colWidths[1], yPosition + 8);
           
-          yPosition += 6;
+          yPosition += rowHeight;
         });
         
-        yPosition += 5;
+        yPosition += 8;
       });
     }
   }
 
-  // Page break for nutrition section
+  // Page break for nutrition section if needed
   if (formData.nutrition) {
-    if (yPosition > pageHeight / 2) {
+    if (yPosition > pageHeight * 0.6) {
       addNewPageWithHeader();
     }
   }
 
-  // Nutritional Table
+  // Nutritional Table - exact match to live preview
   if (formData.nutrition) {
     drawSection("Average Nutritional Value", () => {
-      yPosition += 5;
+      yPosition += 8;
+      
+      const rowHeight = 12;
+      const colWidth = (pageWidth - 2 * margin - 16) / 3;
       
       // Table header
       pdf.setFillColor(248, 250, 252);
-      pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 8, 'F');
+      pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight, 'F');
       pdf.setDrawColor(203, 213, 225);
-      pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 8);
+      pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight);
       
-      pdf.setFontSize(8);
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
       pdf.setTextColor(71, 85, 105);
       
-      const colWidth = (pageWidth - 2 * margin - 10) / 3;
+      pdf.text("Nutrient", margin + 12, yPosition + 8);
+      pdf.text("per 100 g of product", margin + 12 + colWidth, yPosition + 8, { align: 'center' });
+      pdf.text(`per ${servingSize} g of product`, margin + 12 + 2 * colWidth, yPosition + 8, { align: 'center' });
       
-      pdf.text("Nutrient", margin + 8, yPosition + 5);
-      pdf.text("per 100 g of product", margin + 8 + colWidth, yPosition + 5, { align: 'center' });
-      pdf.text(`per ${servingSize} g of product`, margin + 8 + 2 * colWidth, yPosition + 5, { align: 'center' });
+      yPosition += rowHeight;
       
-      yPosition += 8;
-      
-      // Nutrition rows
+      // Nutrition rows - exact match to live preview
       const nutritionRows = [
-        ["Energy", `${formData.nutrition.energy?.kj || 0} kJ / ${formData.nutrition.energy?.kcal || 0} kcal`, `${calculatePerServing(formData.nutrition.energy?.kj || 0)} kJ / ${calculatePerServing(formData.nutrition.energy?.kcal || 0)} kcal`],
-        ["Fat", `${formData.nutrition.fat || 0} g`, `${calculatePerServing(formData.nutrition.fat || 0)} g`],
-        ["  of which saturates", `${formData.nutrition.saturatedFat || 0} g`, `${calculatePerServing(formData.nutrition.saturatedFat || 0)} g`],
-        ["Carbohydrates", `${formData.nutrition.carbohydrates || 0} g`, `${calculatePerServing(formData.nutrition.carbohydrates || 0)} g`],
-        ["  of which sugars", `${formData.nutrition.sugars || 0} g`, `${calculatePerServing(formData.nutrition.sugars || 0)} g`],
-        ["Fibre", `${formData.nutrition.fiber || 0} g`, `${calculatePerServing(formData.nutrition.fiber || 0)} g`],
-        ["Protein", `${formData.nutrition.protein || 0} g`, `${calculatePerServing(formData.nutrition.protein || 0)} g`],
-        ["Salt", `${formData.nutrition.salt || 0} g`, `${calculatePerServing(formData.nutrition.salt || 0)} g`]
+        ["Energy", `${formData.nutrition.energy?.kj || 0} kJ / ${formData.nutrition.energy?.kcal || 0} kcal`, `${calculatePerServing(formData.nutrition.energy?.kj || 0)} kJ / ${calculatePerServing(formData.nutrition.energy?.kcal || 0)} kcal`, true],
+        ["Fat", `${formData.nutrition.fat || 0} g`, `${calculatePerServing(formData.nutrition.fat || 0)} g`, true],
+        ["of which saturates", `${formData.nutrition.saturatedFat || 0} g`, `${calculatePerServing(formData.nutrition.saturatedFat || 0)} g`, false],
+        ["Carbohydrates", `${formData.nutrition.carbohydrates || 0} g`, `${calculatePerServing(formData.nutrition.carbohydrates || 0)} g`, true],
+        ["of which sugars", `${formData.nutrition.sugars || 0} g`, `${calculatePerServing(formData.nutrition.sugars || 0)} g`, false],
+        ["Fibre", `${formData.nutrition.fiber || 0} g`, `${calculatePerServing(formData.nutrition.fiber || 0)} g`, true],
+        ["Protein", `${formData.nutrition.protein || 0} g`, `${calculatePerServing(formData.nutrition.protein || 0)} g`, true],
+        ["Salt", `${formData.nutrition.salt || 0} g`, `${calculatePerServing(formData.nutrition.salt || 0)} g`, true]
       ];
 
       nutritionRows.forEach((row, index) => {
-        checkPageBreak(6);
+        checkPageBreak(rowHeight + 2);
         
+        // Alternating row colors
         if (index % 2 === 0) {
           pdf.setFillColor(248, 250, 252);
-          pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 6, 'F');
+          pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight, 'F');
         }
         
         pdf.setDrawColor(203, 213, 225);
-        pdf.rect(margin + 5, yPosition, pageWidth - 2 * margin - 10, 6);
+        pdf.rect(margin + 8, yPosition, pageWidth - 2 * margin - 16, rowHeight);
         
-        pdf.setFontSize(7);
-        pdf.setFont("helvetica", row[0].startsWith("  ") ? "normal" : "bold");
-        pdf.setTextColor(row[0].startsWith("  ") ? 100 : 51, row[0].startsWith("  ") ? 116 : 65, row[0].startsWith("  ") ? 139 : 85);
+        pdf.setFontSize(8);
+        const isBold = row[3] as boolean;
+        pdf.setFont("helvetica", isBold ? "bold" : "normal");
+        pdf.setTextColor(isBold ? 51 : 100, isBold ? 65 : 116, isBold ? 85 : 139);
         
-        pdf.text(row[0], margin + 8, yPosition + 4);
-        pdf.text(row[1], margin + 8 + colWidth, yPosition + 4, { align: 'center' });
-        pdf.text(row[2], margin + 8 + 2 * colWidth, yPosition + 4, { align: 'center' });
+        const indent = isBold ? 0 : 8;
+        pdf.text(row[0] as string, margin + 12 + indent, yPosition + 8);
+        pdf.text(row[1] as string, margin + 12 + colWidth, yPosition + 8, { align: 'center' });
+        pdf.text(row[2] as string, margin + 12 + 2 * colWidth, yPosition + 8, { align: 'center' });
         
-        yPosition += 6;
+        yPosition += rowHeight;
       });
       
-      yPosition += 5;
+      yPosition += 8;
     });
 
-    // Nutri-Score and Claims side by side
-    checkPageBreak(45);
+    // Nutri-Score and Claims side by side - exact match to live preview
+    checkPageBreak(50);
     
-    const leftWidth = (pageWidth - 2 * margin - 10) / 2;
+    const halfWidth = (pageWidth - 2 * margin - 10) / 2;
     
     // Nutri-Score section
     pdf.setFillColor(255, 255, 255);
-    pdf.roundedRect(margin, yPosition, leftWidth, 35, 2, 2, 'F');
+    pdf.roundedRect(margin, yPosition, halfWidth, 40, 4, 4, 'F');
     pdf.setDrawColor(203, 213, 225);
-    pdf.roundedRect(margin, yPosition, leftWidth, 35, 2, 2);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(margin, yPosition, halfWidth, 40, 4, 4);
     
-    pdf.setFontSize(11);
+    pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(51, 65, 85);
-    pdf.text("Nutri-Score Rating", margin + 5, yPosition + 8);
+    pdf.text("Nutri-Score Rating", margin + 8, yPosition + 12);
     
     const nutriScore = calculateNutriScore({
       energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
@@ -436,22 +466,39 @@ export async function generatePDF(formData: ProductInfo) {
       fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
     });
     
-    pdf.setFontSize(9);
+    // Nutri-Score visual representation
+    const scoreColors = {
+      'A': [26, 135, 84],   // green
+      'B': [101, 163, 13],  // light green
+      'C': [234, 179, 8],   // yellow
+      'D': [249, 115, 22],  // orange
+      'E': [220, 38, 38]    // red
+    };
+    
+    const gradeColor = scoreColors[nutriScore.nutriGrade as keyof typeof scoreColors] || [156, 163, 175];
+    pdf.setFillColor(gradeColor[0], gradeColor[1], gradeColor[2]);
+    pdf.circle(margin + halfWidth/2, yPosition + 24, 8, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.text(nutriScore.nutriGrade, margin + halfWidth/2, yPosition + 28, { align: 'center' });
+    
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor(71, 85, 105);
-    pdf.text(`Grade: ${nutriScore.nutriGrade} • Score: ${nutriScore.finalScore}`, margin + 5, yPosition + 20);
+    pdf.text(`Grade: ${nutriScore.nutriGrade} • Score: ${nutriScore.finalScore}`, margin + 8, yPosition + 35);
 
     // Claims section
-    const rightX = margin + leftWidth + 10;
+    const rightX = margin + halfWidth + 10;
     pdf.setFillColor(255, 255, 255);
-    pdf.roundedRect(rightX, yPosition, leftWidth, 35, 2, 2, 'F');
+    pdf.roundedRect(rightX, yPosition, halfWidth, 40, 4, 4, 'F');
     pdf.setDrawColor(203, 213, 225);
-    pdf.roundedRect(rightX, yPosition, leftWidth, 35, 2, 2);
+    pdf.roundedRect(rightX, yPosition, halfWidth, 40, 4, 4);
     
-    pdf.setFontSize(11);
+    pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(51, 65, 85);
-    pdf.text("Possible Declarations", rightX + 5, yPosition + 8);
+    pdf.text("Possible Declarations", rightX + 8, yPosition + 12);
     
     const claimsResult = calculateClaims({
       protein: formData.nutrition.protein || 0,
@@ -481,87 +528,106 @@ export async function generatePDF(formData: ProductInfo) {
     }
 
     if (claimsToShow.length > 0) {
-      pdf.setFontSize(7);
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(71, 85, 105);
-      claimsToShow.slice(0, 4).forEach((claim, index) => {
-        pdf.text(`${claim.label}: ${claim.claim}`, rightX + 5, yPosition + 15 + (index * 4));
+      claimsToShow.slice(0, 3).forEach((claim, index) => {
+        pdf.text(`${claim.label}: ${claim.claim}`, rightX + 8, yPosition + 20 + (index * 5));
       });
     } else {
-      pdf.setFontSize(7);
+      pdf.setFontSize(8);
       pdf.setFont("helvetica", "italic");
       pdf.setTextColor(100, 116, 139);
-      pdf.text("No nutritional claims available", rightX + 5, yPosition + 18);
+      pdf.text("No nutritional claims available", rightX + 8, yPosition + 22);
     }
 
-    yPosition += 45;
+    yPosition += 50;
   }
 
-  // Storage Conditions
+  // Storage Conditions - exact match to live preview
   if (formData.storageConditions) {
     drawSection("Storage Conditions", () => {
-      yPosition += 5;
-      pdf.setFontSize(9);
+      yPosition += 8;
+      
+      // Icon simulation
+      pdf.setFillColor(59, 130, 246); // blue-500
+      pdf.circle(margin + 15, yPosition + 8, 3, 'F');
+      
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(71, 85, 105);
-      const storageLines = pdf.splitTextToSize(formData.storageConditions, pageWidth - 2 * margin - 16);
+      const storageLines = pdf.splitTextToSize(formData.storageConditions, pageWidth - 2 * margin - 40);
       storageLines.forEach((line: string, index: number) => {
-        if (index > 0) checkPageBreak(5);
-        pdf.text(line, margin + 8, yPosition + 4 + (index * 5));
+        if (index > 0) checkPageBreak(6);
+        pdf.text(line, margin + 25, yPosition + 6 + (index * 6));
       });
-      yPosition += storageLines.length * 5 + 5;
+      yPosition += storageLines.length * 6 + 8;
     });
   }
 
-  // Allergy Advice
+  // Allergy Advice - exact red styling from live preview
   const allergyText = formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products.";
-  drawInfoBox("Allergy Advice", allergyText);
+  drawInfoBox("Allergy Advice", allergyText, [248, 113, 113], [254, 242, 242], [153, 27, 27]);
 
-  // Preparation
+  // Preparation - exact match to live preview
   if (formData.preparation) {
     drawSection("Preparation Instructions", () => {
-      yPosition += 5;
-      pdf.setFontSize(9);
+      yPosition += 8;
+      
+      // Icon simulation
+      pdf.setFillColor(147, 51, 234); // purple-500
+      pdf.circle(margin + 15, yPosition + 8, 3, 'F');
+      
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(71, 85, 105);
-      const prepLines = pdf.splitTextToSize(formData.preparation, pageWidth - 2 * margin - 16);
+      const prepLines = pdf.splitTextToSize(formData.preparation, pageWidth - 2 * margin - 40);
       prepLines.forEach((line: string, index: number) => {
-        if (index > 0) checkPageBreak(5);
-        pdf.text(line, margin + 8, yPosition + 4 + (index * 5));
+        if (index > 0) checkPageBreak(6);
+        pdf.text(line, margin + 25, yPosition + 6 + (index * 6));
       });
-      yPosition += prepLines.length * 5 + 5;
+      yPosition += prepLines.length * 6 + 8;
     });
   }
 
-  // Footer
-  checkPageBreak(20);
-  pdf.setFillColor(241, 245, 249);
-  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 15, 2, 2, 'F');
+  // Footer - exact match to live preview
+  checkPageBreak(25);
+  pdf.setFillColor(241, 245, 249); // from-slate-100
+  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 4, 4, 'F');
   pdf.setDrawColor(203, 213, 225);
-  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 15, 2, 2);
+  pdf.setLineWidth(0.5);
+  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, 18, 4, 4);
   
-  pdf.setFontSize(9);
+  // Date icon simulation
+  pdf.setFillColor(100, 116, 139);
+  pdf.circle(margin + 15, yPosition + 9, 2, 'F');
+  
+  pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
   pdf.setTextColor(71, 85, 105);
-  pdf.text(`Valid from: ${new Date().toLocaleDateString('en-GB')}`, margin + 8, yPosition + 8);
+  pdf.text(`Valid from: ${new Date().toLocaleDateString('en-GB')}`, margin + 25, yPosition + 12);
   
   if (formData.preparedBy || formData.jobTitle) {
+    // Person icon simulation
+    pdf.setFillColor(100, 116, 139);
+    pdf.circle(pageWidth / 2 + 15, yPosition + 9, 2, 'F');
+    
     const preparedByText = formData.preparedBy && formData.jobTitle 
       ? `${formData.preparedBy}, ${formData.jobTitle}`
       : formData.preparedBy || formData.jobTitle || "";
-    pdf.text(`Prepared by: ${preparedByText}`, pageWidth / 2, yPosition + 8);
+    pdf.text(`Prepared by: ${preparedByText}`, pageWidth / 2 + 25, yPosition + 12);
   }
 
-  yPosition += 20;
+  yPosition += 25;
 
-  // Disclaimer
-  pdf.setFontSize(7);
+  // Disclaimer - exact match to live preview
+  pdf.setFontSize(8);
   pdf.setFont("helvetica", "italic");
   pdf.setTextColor(100, 116, 139);
   const disclaimerText = "The purpose of this product information is to describe a sample made in the laboratory. Nutritional values are calculated. Minor variations may occur due to different production conditions during manufacture.";
-  const disclaimerLines = pdf.splitTextToSize(disclaimerText, pageWidth - 2 * margin - 10);
+  const disclaimerLines = pdf.splitTextToSize(disclaimerText, pageWidth - 2 * margin);
   disclaimerLines.forEach((line: string, index: number) => {
-    pdf.text(line, margin + 5, yPosition + (index * 4));
+    pdf.text(line, margin, yPosition + (index * 5));
   });
 
   // Save PDF
