@@ -30,6 +30,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
         const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
+        // Use current displayed name (which could be translated)
         return `${ingredient.name}${percentage}`;
       })
       .join(', ');
@@ -39,6 +40,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
         const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
+        // Use current displayed name (which could be translated)
         const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
         
         // Check if this ingredient is marked as base recipe

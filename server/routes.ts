@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { productInfoSchema } from "@shared/schema";
-import { extractIngredientsFromImage, extractNutritionFromImage } from "./services/openai";
+import { extractIngredientsFromImage, extractNutritionFromImage, translateIngredients } from "./services/openai";
 import multer from "multer";
 
 const upload = multer({
@@ -122,6 +122,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ nutrition: extractedNutrition });
     } catch (error) {
       res.status(500).json({ message: "Error extracting nutrition", error: (error as Error).message });
+    }
+  });
+
+  // Translate ingredients
+  app.post("/api/translate-ingredients", async (req, res) => {
+    try {
+      const { ingredients, targetLanguage, sourceLanguage } = req.body;
+      
+      if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+        res.status(400).json({ message: "No ingredients provided" });
+        return;
+      }
+
+      if (!targetLanguage) {
+        res.status(400).json({ message: "Target language is required" });
+        return;
+      }
+
+      const translationResult = await translateIngredients({
+        ingredients,
+        targetLanguage,
+        sourceLanguage
+      });
+      
+      res.json(translationResult);
+    } catch (error) {
+      res.status(500).json({ message: "Error translating ingredients", error: (error as Error).message });
     }
   });
 

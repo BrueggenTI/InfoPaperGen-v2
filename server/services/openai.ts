@@ -79,6 +79,64 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
   }
 }
 
+// Translation interfaces
+interface TranslationRequest {
+  ingredients: { name: string; percentage?: number; origin?: string }[];
+  targetLanguage: string;
+  sourceLanguage?: string;
+}
+
+interface TranslatedIngredient {
+  originalName: string;
+  translatedName: string;
+}
+
+interface TranslationResponse {
+  translatedIngredients: TranslatedIngredient[];
+}
+
+export async function translateIngredients(request: TranslationRequest): Promise<TranslationResponse> {
+  try {
+    const ingredientNames = request.ingredients.map(ing => ing.name);
+    
+    const prompt = `Translate the following food ingredient names from ${request.sourceLanguage || 'the original language'} to ${request.targetLanguage}. 
+    
+Ingredients to translate:
+${ingredientNames.map((name, index) => `${index + 1}. ${name}`).join('\n')}
+
+Please provide accurate food industry translations. Maintain technical precision and use standard food industry terminology. Return the result in JSON format with this structure:
+{ "translatedIngredients": [{ "originalName": "original name", "translatedName": "translated name" }] }
+
+Important guidelines:
+- Keep chemical and technical names accurate
+- Use standard food industry terminology
+- Maintain nutritional and regulatory accuracy
+- If a term doesn't have a direct translation, keep the original term`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert food scientist and translator specializing in food ingredient terminology. Provide accurate, technical translations that maintain regulatory and nutritional precision."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1000,
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    return result as TranslationResponse;
+  } catch (error) {
+    console.error("Error translating ingredients:", error);
+    throw new Error("Failed to translate ingredients");
+  }
+}
+
 export async function extractNutritionFromImage(base64Image: string): Promise<ExtractedNutrition> {
   try {
     const response = await openai.chat.completions.create({

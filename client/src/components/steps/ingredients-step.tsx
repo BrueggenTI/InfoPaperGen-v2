@@ -5,16 +5,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ProductInfo } from "@shared/schema";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag, Languages } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface Ingredient {
   name: string;
+  originalName?: string;
+  translatedName?: string;
   percentage?: number;
   origin?: string;
   isMarkedAsBase?: boolean;
+  language?: 'original' | 'english';
 }
 
 interface IngredientsStepProps {
@@ -33,10 +36,10 @@ export default function IngredientsStep({
   isLoading = false,
 }: IngredientsStepProps) {
   const [finalProductIngredients, setFinalProductIngredients] = useState<Ingredient[]>(
-    formData.ingredients || [{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false }]
+    formData.ingredients || [{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false, language: 'original' }]
   );
   const [baseProductIngredients, setBaseProductIngredients] = useState<Ingredient[]>(
-    formData.baseProductIngredients || [{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false }]
+    formData.baseProductIngredients || [{ name: "", percentage: undefined, origin: "", language: 'original' }]
   );
   
   // Text versions for manual editing after AI extraction
@@ -77,7 +80,9 @@ export default function IngredientsStep({
     onSuccess: (data) => {
       const ingredientsWithMarking = (data.ingredients || []).map((ing: any) => ({
         ...ing,
-        isMarkedAsBase: false
+        originalName: ing.name,
+        isMarkedAsBase: false,
+        language: 'original' as const
       }));
       setFinalProductIngredients(ingredientsWithMarking);
       onUpdate({ ingredients: ingredientsWithMarking });
@@ -111,7 +116,8 @@ export default function IngredientsStep({
     onSuccess: (data) => {
       const ingredientsWithMarking = (data.ingredients || []).map((ing: any) => ({
         ...ing,
-        isMarkedAsBase: false
+        originalName: ing.name,
+        language: 'original' as const
       }));
       setBaseProductIngredients(ingredientsWithMarking);
       onUpdate({ baseProductIngredients: ingredientsWithMarking });
@@ -129,6 +135,122 @@ export default function IngredientsStep({
       toast({
         title: "Error",
         description: "Error extracting Base Recipe ingredients.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Translation mutations
+  const translateFinalIngredientsMutation = useMutation({
+    mutationFn: async ({ targetLanguage, sourceLanguage }: { targetLanguage: string; sourceLanguage?: string }) => {
+      const res = await apiRequest("POST", "/api/translate-ingredients", {
+        ingredients: finalProductIngredients.filter(ing => ing.name.trim()),
+        targetLanguage,
+        sourceLanguage
+      });
+      return await res.json();
+    },
+    onSuccess: (data, variables) => {
+      const translatedIngredients = finalProductIngredients.map(ing => {
+        const translation = data.translatedIngredients?.find((t: any) => t.originalName === ing.name);
+        if (translation && variables.targetLanguage === 'English') {
+          return {
+            ...ing,
+            name: translation.translatedName,
+            originalName: ing.originalName || ing.name,
+            translatedName: translation.translatedName,
+            language: 'english' as const,
+            isMarkedAsBase: ing.isMarkedAsBase ?? false
+          };
+        } else if (variables.targetLanguage === 'original' && ing.originalName) {
+          return {
+            ...ing,
+            name: ing.originalName,
+            language: 'original' as const,
+            isMarkedAsBase: ing.isMarkedAsBase ?? false
+          };
+        }
+        return {
+          ...ing,
+          language: ing.language ?? 'original' as const,
+          isMarkedAsBase: ing.isMarkedAsBase ?? false
+        };
+      });
+      
+      setFinalProductIngredients(translatedIngredients);
+      onUpdate({ ingredients: translatedIngredients });
+      
+      // Update text representation
+      const text = translatedIngredients.map((ing: Ingredient) => 
+        `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
+      ).join(', ');
+      setFinalRecipeText(text);
+      
+      toast({
+        title: "Translation completed",
+        description: `Final recipe ingredients have been translated to ${variables.targetLanguage === 'English' ? 'English' : 'original language'}.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Translation failed",
+        description: "Error translating final recipe ingredients.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const translateBaseIngredientsMutation = useMutation({
+    mutationFn: async ({ targetLanguage, sourceLanguage }: { targetLanguage: string; sourceLanguage?: string }) => {
+      const res = await apiRequest("POST", "/api/translate-ingredients", {
+        ingredients: baseProductIngredients.filter(ing => ing.name.trim()),
+        targetLanguage,
+        sourceLanguage
+      });
+      return await res.json();
+    },
+    onSuccess: (data, variables) => {
+      const translatedIngredients = baseProductIngredients.map(ing => {
+        const translation = data.translatedIngredients?.find((t: any) => t.originalName === ing.name);
+        if (translation && variables.targetLanguage === 'English') {
+          return {
+            ...ing,
+            name: translation.translatedName,
+            originalName: ing.originalName || ing.name,
+            translatedName: translation.translatedName,
+            language: 'english' as const
+          };
+        } else if (variables.targetLanguage === 'original' && ing.originalName) {
+          return {
+            ...ing,
+            name: ing.originalName,
+            language: 'original' as const
+          };
+        }
+        return {
+          ...ing,
+          language: ing.language ?? 'original' as const
+        };
+      });
+      
+      setBaseProductIngredients(translatedIngredients);
+      onUpdate({ baseProductIngredients: translatedIngredients });
+      
+      // Update text representation
+      const text = translatedIngredients.map((ing: Ingredient) => 
+        `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
+      ).join(', ');
+      setBaseRecipeText(text);
+      
+      toast({
+        title: "Translation completed",
+        description: `Base recipe ingredients have been translated to ${variables.targetLanguage === 'English' ? 'English' : 'original language'}.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Translation failed",
+        description: "Error translating base recipe ingredients.",
         variant: "destructive",
       });
     },
@@ -188,9 +310,11 @@ export default function IngredientsStep({
       const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
       return {
         name,
+        originalName: name,
         percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
         origin: "",
-        isMarkedAsBase: false
+        isMarkedAsBase: false,
+        language: 'original' as const
       };
     }).filter(ing => ing.name);
     
@@ -208,9 +332,10 @@ export default function IngredientsStep({
       const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
       return {
         name,
+        originalName: name,
         percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
         origin: "",
-        isMarkedAsBase: false
+        language: 'original' as const
       };
     }).filter(ing => ing.name);
     
@@ -297,10 +422,18 @@ export default function IngredientsStep({
         const isMarked = !ing.isMarkedAsBase;
         // Update marked ingredient tracker
         setMarkedIngredient(isMarked ? ingredientName : null);
-        return { ...ing, isMarkedAsBase: isMarked };
+        return { 
+          ...ing, 
+          isMarkedAsBase: isMarked,
+          language: ing.language ?? 'original' as const
+        };
       }
       // Remove mark from other ingredients (only one can be marked)
-      return { ...ing, isMarkedAsBase: false };
+      return { 
+        ...ing, 
+        isMarkedAsBase: false,
+        language: ing.language ?? 'original' as const
+      };
     });
     
     setFinalProductIngredients(updatedIngredients);
@@ -308,15 +441,21 @@ export default function IngredientsStep({
   };
 
   const handleNext = () => {
-    // Ensure all ingredients have the isMarkedAsBase property set
+    // Ensure all ingredients have the required properties set
     const processedIngredients = finalProductIngredients.map(ing => ({
       ...ing,
-      isMarkedAsBase: ing.isMarkedAsBase ?? false
+      isMarkedAsBase: ing.isMarkedAsBase ?? false,
+      language: ing.language ?? 'original' as const
+    }));
+    
+    const processedBaseIngredients = baseProductIngredients.map(ing => ({
+      ...ing,
+      language: ing.language ?? 'original' as const
     }));
     
     onUpdate({
       ingredients: processedIngredients,
-      baseProductIngredients: baseProductIngredients,
+      baseProductIngredients: processedBaseIngredients,
     });
     onNext();
   };
@@ -363,12 +502,42 @@ export default function IngredientsStep({
           {finalRecipeText && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Extracted Final Recipe Ingredients (editable):</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Extracted Final Recipe Ingredients (editable):</label>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => translateFinalIngredientsMutation.mutate({ 
+                        targetLanguage: 'English',
+                        sourceLanguage: 'German'
+                      })}
+                      disabled={translateFinalIngredientsMutation.isPending || !finalProductIngredients.some(ing => ing.name.trim())}
+                      data-testid="button-translate-final-english"
+                    >
+                      <Languages className="w-4 h-4 mr-1" />
+                      {translateFinalIngredientsMutation.isPending ? "Translating..." : "Translate to English"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => translateFinalIngredientsMutation.mutate({ 
+                        targetLanguage: 'original'
+                      })}
+                      disabled={translateFinalIngredientsMutation.isPending || !finalProductIngredients.some(ing => ing.originalName)}
+                      data-testid="button-translate-final-original"
+                    >
+                      <Languages className="w-4 h-4 mr-1" />
+                      Back to Original
+                    </Button>
+                  </div>
+                </div>
                 <Textarea
                   value={finalRecipeText}
                   onChange={(e) => handleFinalRecipeTextChange(e.target.value)}
                   placeholder="Granola (90,7%), Coconut chips (5%), pineapple chips (4,3%)"
                   rows={3}
+                  data-testid="textarea-final-recipe"
                 />
               </div>
               
@@ -433,12 +602,42 @@ export default function IngredientsStep({
 
           {baseRecipeText && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Extracted Base Recipe Ingredients (editable):</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Extracted Base Recipe Ingredients (editable):</label>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => translateBaseIngredientsMutation.mutate({ 
+                      targetLanguage: 'English',
+                      sourceLanguage: 'German'
+                    })}
+                    disabled={translateBaseIngredientsMutation.isPending || !baseProductIngredients.some(ing => ing.name.trim())}
+                    data-testid="button-translate-base-english"
+                  >
+                    <Languages className="w-4 h-4 mr-1" />
+                    {translateBaseIngredientsMutation.isPending ? "Translating..." : "Translate to English"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => translateBaseIngredientsMutation.mutate({ 
+                      targetLanguage: 'original'
+                    })}
+                    disabled={translateBaseIngredientsMutation.isPending || !baseProductIngredients.some(ing => ing.originalName)}
+                    data-testid="button-translate-base-original"
+                  >
+                    <Languages className="w-4 h-4 mr-1" />
+                    Back to Original
+                  </Button>
+                </div>
+              </div>
               <Textarea
                 value={baseRecipeText}
                 onChange={(e) => handleBaseRecipeTextChange(e.target.value)}
                 placeholder="whole grain oat flakes (23,0%), high-fiber oat bran (20,0%), corn fiber (17,5%)"
                 rows={4}
+                data-testid="textarea-base-recipe"
               />
             </div>
           )}
@@ -516,10 +715,11 @@ export default function IngredientsStep({
                                 ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
                               );
                               setFinalProductIngredients(updatedFinalIngredients);
-                              // Ensure all ingredients have the isMarkedAsBase property set
+                              // Ensure all ingredients have the required properties set
                               const processedIngredients = updatedFinalIngredients.map(ing => ({
                                 ...ing,
-                                isMarkedAsBase: ing.isMarkedAsBase ?? false
+                                isMarkedAsBase: ing.isMarkedAsBase ?? false,
+                                language: ing.language ?? 'original' as const
                               }));
                               onUpdate({ ingredients: processedIngredients });
                             } else {
@@ -528,7 +728,12 @@ export default function IngredientsStep({
                                 ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
                               );
                               setBaseProductIngredients(updatedBaseIngredients);
-                              onUpdate({ baseProductIngredients: updatedBaseIngredients });
+                              // Ensure all base ingredients have the required properties set
+                              const processedBaseIngredients = updatedBaseIngredients.map(ing => ({
+                                ...ing,
+                                language: ing.language ?? 'original' as const
+                              }));
+                              onUpdate({ baseProductIngredients: processedBaseIngredients });
                             }
                           }}
                           placeholder="Enter country"

@@ -17,6 +17,35 @@ An AI-powered web application that generates professional Product Information Pa
 
 ## Recent Changes
 
+### 2025-01-31 - Ingredient Translation Functionality
+- **Added comprehensive ingredient translation system to support German-to-English translation and back**
+- **New Features**:
+  - Translation buttons for both Final Recipe and Base Recipe ingredients
+  - Two-way translation: Original Language ↔ English
+  - Real-time translation using OpenAI GPT-4o for accurate food industry terminology
+  - Translation state management with originalName, translatedName, and language tracking
+  - Updated ingredient schema to support translation metadata
+- **UI Enhancements**:
+  - "Translate to English" and "Back to Original" buttons in both ingredient sections
+  - Loading states during translation with proper error handling
+  - Toast notifications for successful translations and error feedback
+  - Disabled state management to prevent conflicts during translation
+- **Technical Implementation**:
+  - New OpenAI translation service with food-specific prompts and terminology
+  - Updated Ingredient interface to support translation fields
+  - Enhanced API endpoint `/api/translate-ingredients` for translation requests
+  - Document preview automatically displays translated ingredient names
+  - Form state preservation with automatic text representation updates
+- **Files Modified**:
+  - `shared/schema.ts` - Extended ingredient schema with translation fields
+  - `server/services/openai.ts` - Added translateIngredients function
+  - `server/routes.ts` - Added translation API endpoint
+  - `client/src/components/steps/ingredients-step.tsx` - Added translation UI and mutations
+  - `client/src/components/document-preview.tsx` - Updated to display translated names
+- **Language Support**: German ↔ English with specialized food industry terminology
+- **User Workflow**: Extract ingredients → Translate to English → Edit if needed → Translate back to original
+- **Result**: Complete bilingual ingredient management with professional food industry translation accuracy
+
 ### 2025-01-31 - Always Display Allergy Advice in Templates
 - **Modified both document preview templates to always show Allergy Advice section**
 - **Changes Made**:
