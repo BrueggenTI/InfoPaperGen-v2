@@ -22,11 +22,11 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
   const formatIngredients = () => {
     const finalIngredients = formData.ingredients || [];
     const baseIngredients = formData.baseProductIngredients || [];
-    
+
     if (finalIngredients.length === 0 && baseIngredients.length === 0) {
       return "Ingredients will appear here after extraction...";
     }
-    
+
     // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
     const baseFormatted = baseIngredients
       .filter(ingredient => ingredient.name.trim() !== "")
@@ -44,16 +44,16 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
         const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
         // Use current displayed name (which could be translated)
         const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
-        
+
         // Check if this ingredient is marked as base recipe
         if (ingredient.isMarkedAsBase && baseFormatted) {
           return `${ingredientText} [${baseFormatted}]`;
         }
-        
+
         return ingredientText;
       })
       .join(', ');
-    
+
     return finalFormatted || "Ingredients will appear here after extraction...";
   };
 
@@ -86,7 +86,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
             origin: ing.origin || "",
             isFinalProduct: true
           });
-          
+
           // Then add base product ingredients with recalculated percentages
           baseIngredients
             .filter(baseIng => baseIng.name.trim())
@@ -117,9 +117,18 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
   const handleExportPDF = async () => {
     try {
-      await generateEnhancedPDF(formData);
+      // Try enhanced PDF first, fallback to browser-based PDF
+      try {
+        await generateEnhancedPDF(formData);
+      } catch (enhancedError) {
+        console.warn('Enhanced PDF failed, trying browser-based PDF:', enhancedError);
+
+        // Import the browser PDF generator dynamically
+        const { generateBrowserPDF } = await import('@/lib/browser-pdf-generator');
+        await generateBrowserPDF(sessionId);
+      }
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error('Error generating PDF:', error);
     }
   };
 
@@ -147,7 +156,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
           className="h-10 w-auto drop-shadow-sm"
         />
       </div>
-      
+
       {/* Centered Content */}
       <div className="text-center">
         <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
@@ -157,7 +166,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
           {formData.productNumber || "Recipe Number"}
         </div>
       </div>
-      
+
       {/* Page Number */}
       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
         <div className="bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
@@ -196,7 +205,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                   className="h-10 w-auto drop-shadow-sm"
                 />
               </div>
-              
+
               {/* Centered Content */}
               <div className="text-center">
                 <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
@@ -206,7 +215,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                   {formData.productNumber || "Recipe Number"}
                 </div>
               </div>
-              
+
               {/* Page Number */}
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <div className="bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
@@ -310,7 +319,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
             {/* Page Break Indicator - Around this point nutrition section would start on new page */}
             {formData.nutrition && <PageBreakIndicator pageNumber={2} />}
-            
+
             {/* Header for Page 2 */}
             {formData.nutrition && <DocumentHeader pageNumber={2} />}
 
@@ -489,7 +498,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                 ];
 
                 const claimsToShow = allPossibleClaims.filter(item => item.claim);
-                
+
                 // Add wholegrain and other manual declarations
                 if (formData.declarations?.wholegrain) {
                   claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
@@ -599,7 +608,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                     <span className="ml-2 text-slate-600">{new Date().toLocaleDateString('en-GB')}</span>
                   </div>
                 </div>
-                
+
                 {/* Prepared By */}
                 {(formData.preparedBy || formData.jobTitle) && (
                   <div className="flex items-center">

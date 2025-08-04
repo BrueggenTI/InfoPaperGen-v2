@@ -153,16 +153,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Browser-based PDF generation endpoint (currently disabled)
+  // Browser-based PDF generation endpoint
   app.post("/api/generate-pdf", async (req, res) => {
     try {
-      res.status(501).json({ 
-        message: "Browser-based PDF generation is currently not available in this environment. Please use the client-side PDF download instead.",
-        error: "Service unavailable" 
+      const { url, sessionId } = req.body;
+      
+      if (!url || !sessionId) {
+        res.status(400).json({ message: "URL and sessionId are required" });
+        return;
+      }
+
+      const puppeteer = require('puppeteer');
+      
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu'
+        ]
       });
+
+      const page = await browser.newPage();
+      
+      // Set viewport for consistent rendering
+      await page.setViewport({ width: 1200, height: 800 });
+      
+      // Navigate to the PDF preview page
+      await page.goto(url, { 
+        waitUntil: 'networkidle0',
+        timeout: 30000 
+      });
+
+      // Generate PDF
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '0.5in',
+          right: '0.5in',
+          bottom: '0.5in',
+          left: '0.5in'
+        }
+      });
+
+      await browser.close();
+
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="product-info-${sessionId}.pdf"`);
+      res.send(pdfBuffer);
+
     } catch (error) {
       console.error('Error in PDF generation endpoint:', error);
-      res.status(500).json({ message: "Error in PDF generation", error: (error as Error).message });
+      res.status(500).json({ message: "Error generating PDF", error: (error as Error).message });
     }
   });
 
