@@ -135,42 +135,42 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
 
       {/* Document Preview */}
       <div className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="p-8">
-          <div className="space-y-6">
+        <div className="p-3">
+          <div className="space-y-2">
             {/* Modern Header */}
-            <div className="relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-6 border border-slate-200">
+            <div className="relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200">
               {/* Logo */}
-              <div className="absolute left-6 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <img 
                   src={brueggenLogo} 
                   alt="Brüggen Logo" 
-                  className="h-14 w-auto drop-shadow-sm"
+                  className="h-10 w-auto drop-shadow-sm"
                 />
               </div>
               
               {/* Centered Content */}
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-slate-800 mb-2 tracking-wide">
+                <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
                   Product Information
                 </h1>
-                <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-6 py-2 rounded-full inline-block font-semibold text-lg shadow-md">
+                <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 py-1 rounded-full inline-block font-semibold text-base shadow-md">
                   {formData.productNumber || "Recipe Number"}
                 </div>
               </div>
               
               {/* Page Number */}
-              <div className="absolute right-6 top-1/2 transform -translate-y-1/2">
-                <div className="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
-                  <p className="text-sm font-medium text-slate-700">Page 1</p>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
+                  <p className="text-xs font-medium text-slate-700">Page 1</p>
                 </div>
               </div>
             </div>
 
             {/* Product Name Section */}
-            <div className="bg-gradient-to-r from-white to-slate-50 rounded-lg p-6 border border-slate-200 shadow-sm">
+            <div className="bg-gradient-to-r from-white to-slate-50 rounded-lg p-3 border border-slate-200 shadow-sm">
               <div className="text-center">
-                <span className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2 block">Product Name</span>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                <span className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1 block">Product Name</span>
+                <h2 className="text-lg font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
                   {formData.productName || "Product name will appear here..."}
                 </h2>
               </div>
@@ -178,12 +178,12 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
 
             {/* Product Image */}
             {formData.productImage && (
-              <div className="flex justify-center mb-6">
-                <div className="bg-white p-4 rounded-xl shadow-lg border border-slate-200">
+              <div className="flex justify-center">
+                <div className="bg-white p-2 rounded-lg shadow-lg border border-slate-200">
                   <img
                     src={formData.productImage}
                     alt="Product"
-                    className="max-w-xs max-h-48 object-contain rounded-lg"
+                    className="max-w-xs max-h-32 object-contain rounded-lg"
                   />
                 </div>
               </div>
@@ -191,30 +191,30 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
 
             {/* Ingredients Section */}
             <div className="bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-              <div className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-4 py-3">
-                <h3 className="font-semibold text-lg">Ingredients</h3>
+              <div className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-3 py-2">
+                <h3 className="font-semibold text-base">Ingredients</h3>
               </div>
-              <div className="p-4">
+              <div className="p-3">
                 <div 
                   className="text-sm leading-relaxed text-slate-700"
                   dangerouslySetInnerHTML={{
                     __html: formatIngredients()
                   }}
                 />
-                <div className="text-xs text-slate-500 italic mt-2 pt-2 border-t border-slate-200">
+                <div className="text-xs text-slate-500 italic mt-1 pt-1 border-t border-slate-200">
                   * percentage in ingredient
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-2 rounded-r-lg">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="w-5 h-5 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="ml-3">
+                <div className="ml-2">
                   <p className="text-xs text-blue-800 leading-relaxed font-medium">
                     Quality Assurance: All raw materials and finished products meet current legal requirements. 
                     Mycotoxins, heavy metals, pesticides and other contaminants are within admissible levels 
@@ -227,34 +227,34 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {/* Detailed Ingredients Table - Only show if ingredients exist */}
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-4 py-3">
-                  <h3 className="font-semibold text-lg">Detailed Ingredients Breakdown</h3>
+                <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white px-3 py-2">
+                  <h3 className="font-semibold text-base">Detailed Ingredients Breakdown</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="p-3 text-left font-semibold text-slate-700">Ingredients</th>
-                        <th className="p-3 text-left font-semibold text-slate-700">Percentage content per whole product</th>
-                        <th className="p-3 text-left font-semibold text-slate-700">Country of Origin</th>
+                        <th className="p-2 text-left font-semibold text-slate-700">Ingredients</th>
+                        <th className="p-2 text-left font-semibold text-slate-700">Percentage content per whole product</th>
+                        <th className="p-2 text-left font-semibold text-slate-700">Country of Origin</th>
                       </tr>
                     </thead>
                     <tbody>
                       {generateIngredientsTable().map((ingredient, index) => (
                         <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                          <td className="p-3">
+                          <td className="p-2">
                             {ingredient.isFinalProduct ? (
                               <strong className="text-slate-800">{ingredient.name}</strong>
                             ) : (
                               <span className="text-slate-600">{ingredient.name}</span>
                             )}
                           </td>
-                          <td className="p-3">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                          <td className="p-2">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
                               {ingredient.percentage}%
                             </span>
                           </td>
-                          <td className="p-3 text-slate-600">{ingredient.origin || "-"}</td>
+                          <td className="p-2 text-slate-600">{ingredient.origin || "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -267,94 +267,94 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {formData.nutrition && (
             <>
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3">
-                  <h3 className="font-semibold text-lg">Average Nutritional Value</h3>
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2">
+                  <h3 className="font-semibold text-base">Average Nutritional Value</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="p-3 text-left font-semibold text-slate-700">
+                        <th className="p-2 text-left font-semibold text-slate-700">
                           Nutrient
                         </th>
-                        <th className="p-3 text-center font-semibold text-slate-700">
+                        <th className="p-2 text-center font-semibold text-slate-700">
                           per 100 g of product
                         </th>
-                        <th className="p-3 text-center font-semibold text-slate-700">
+                        <th className="p-2 text-center font-semibold text-slate-700">
                           per {servingSize} g of product
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 font-medium text-slate-800">Energy</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 font-medium text-slate-800">Energy</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.energy?.kj || 0} kJ / {formData.nutrition?.energy?.kcal || 0} kcal
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.energy?.kj || 0)} kJ / {calculatePerServing(formData.nutrition?.energy?.kcal || 0)} kcal
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 font-medium text-slate-800">Fat</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 font-medium text-slate-800">Fat</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.fat || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.fat || 0)} g
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 pl-6 text-slate-600">of which saturates</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 pl-4 text-slate-600">of which saturates</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.saturatedFat || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.saturatedFat || 0)} g
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 font-medium text-slate-800">Carbohydrates</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 font-medium text-slate-800">Carbohydrates</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.carbohydrates || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.carbohydrates || 0)} g
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 pl-6 text-slate-600">of which sugars</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 pl-4 text-slate-600">of which sugars</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.sugars || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.sugars || 0)} g
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 font-medium text-slate-800">Fibre</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 font-medium text-slate-800">Fibre</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.fiber || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.fiber || 0)} g
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 font-medium text-slate-800">Protein</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 font-medium text-slate-800">Protein</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.protein || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.protein || 0)} g
                         </td>
                       </tr>
                       <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-3 font-medium text-slate-800">Salt</td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 font-medium text-slate-800">Salt</td>
+                        <td className="p-2 text-center text-slate-700">
                           {formData.nutrition?.salt || 0} g
                         </td>
-                        <td className="p-3 text-center text-slate-700">
+                        <td className="p-2 text-center text-slate-700">
                           {calculatePerServing(formData.nutrition?.salt || 0)} g
                         </td>
                       </tr>
@@ -380,19 +380,19 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               });
 
               return (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200 p-6 shadow-sm">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200 p-3 shadow-sm">
                   <div className="text-center">
-                    <h3 className="font-semibold text-lg text-green-800 mb-4">Nutri-Score Rating</h3>
+                    <h3 className="font-semibold text-base text-green-800 mb-2">Nutri-Score Rating</h3>
                     <div className="flex justify-center">
-                      <div className="bg-white p-4 rounded-xl shadow-md">
+                      <div className="bg-white p-2 rounded-lg shadow-md">
                         <img 
                           src={getNutriScoreImage(nutriScore.nutriGrade)} 
                           alt={`Nutri-Score ${nutriScore.nutriGrade}`}
-                          className="h-20 w-auto"
+                          className="h-16 w-auto"
                         />
                       </div>
                     </div>
-                    <p className="text-sm text-green-700 mt-3 font-medium">
+                    <p className="text-sm text-green-700 mt-2 font-medium">
                       Grade: {nutriScore.nutriGrade} • Score: {nutriScore.totalScore}
                     </p>
                   </div>
@@ -403,10 +403,10 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {/* Declarations - Calculated Claims - Only show if nutrition data exists */}
             {formData.nutrition && (
             <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-              <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-3">
-                <h3 className="font-semibold text-lg">Possible Declarations</h3>
+              <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-3 py-2">
+                <h3 className="font-semibold text-base">Possible Declarations</h3>
               </div>
-              <div className="p-4">
+              <div className="p-3">
                 {(() => {
                   if (!formData.nutrition) return (
                     <div className="text-center text-slate-500 py-8">
@@ -459,9 +459,9 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
                   return (
                     <div className="grid gap-2">
                       {claimsToShow.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                        <div key={index} className="flex items-center justify-between p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                           <span className="text-sm font-medium text-slate-700">{item.label}</span>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                             {item.claim}
                           </span>
                         </div>
@@ -476,10 +476,10 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {/* Storage Conditions - Only show if storage conditions exist */}
             {formData.storageConditions && (
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3">
-                  <h3 className="font-semibold text-lg">Storage Conditions</h3>
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-2">
+                  <h3 className="font-semibold text-base">Storage Conditions</h3>
                 </div>
-                <div className="p-4">
+                <div className="p-3">
                   <div className="flex items-start">
                     <div className="flex-shrink-0 mr-3">
                       <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -496,14 +496,14 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
 
             {/* Allergy Advice - Always show in template */}
             <div className="bg-red-50 border-l-4 border-red-400 rounded-r-lg shadow-sm">
-              <div className="flex items-start p-4">
-                <div className="flex-shrink-0 mr-3">
-                  <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-start p-3">
+                <div className="flex-shrink-0 mr-2">
+                  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg text-red-800 mb-2">Allergy Advice</h3>
+                  <h3 className="font-semibold text-base text-red-800 mb-1">Allergy Advice</h3>
                   <div className="text-sm text-red-800 leading-relaxed whitespace-pre-line">
                     {formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
                   </div>
@@ -514,10 +514,10 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             {/* Preparation - Only show if preparation exists */}
             {formData.preparation && (
               <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3">
-                  <h3 className="font-semibold text-lg">Preparation Instructions</h3>
+                <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-2">
+                  <h3 className="font-semibold text-base">Preparation Instructions</h3>
                 </div>
-                <div className="p-4">
+                <div className="p-3">
                   <div className="flex items-start">
                     <div className="flex-shrink-0 mr-3">
                       <svg className="w-5 h-5 text-purple-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,7 +533,7 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
             )}
 
             {/* Valid From Date and Prepared By Section - Footer */}
-            <div className="mt-8 bg-gradient-to-r from-slate-100 to-slate-50 rounded-lg p-6 border border-slate-200 shadow-sm">
+            <div className="mt-4 bg-gradient-to-r from-slate-100 to-slate-50 rounded-lg p-3 border border-slate-200 shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 {/* Valid From Date */}
                 <div className="flex items-center">
