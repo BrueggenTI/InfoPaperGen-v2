@@ -89,7 +89,12 @@ export default function ProductGenerator() {
 
   useEffect(() => {
     if (sessionData && typeof sessionData === 'object' && sessionData !== null && 'sessionData' in sessionData) {
-      setFormData(sessionData.sessionData as ProductInfo);
+      const newSessionData = sessionData.sessionData as ProductInfo;
+      // Preserve the current step to prevent jumping back when session updates
+      setFormData(prevFormData => ({
+        ...newSessionData,
+        currentStep: prevFormData.currentStep
+      }));
     }
   }, [sessionData]);
 
