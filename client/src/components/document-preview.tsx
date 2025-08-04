@@ -523,26 +523,24 @@ export default function DocumentPreview({ formData }: DocumentPreviewProps) {
               </div>
             )}
 
-            {/* Storage Conditions - Only show if storage conditions exist */}
-            {formData.storageConditions && (
-              <div className="border border-slate-200 rounded-lg">
-                <div className="px-3 py-2 border-b border-slate-200">
-                  <h3 className="font-semibold text-base text-slate-800">Storage Conditions</h3>
-                </div>
-                <div className="p-3">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                    </div>
-                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                      {formData.storageConditions}
-                    </div>
+            {/* Storage Conditions - Always show */}
+            <div className="border border-slate-200 rounded-lg">
+              <div className="px-3 py-2 border-b border-slate-200">
+                <h3 className="font-semibold text-base text-slate-800">Storage Conditions</h3>
+              </div>
+              <div className="p-3">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    {formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Allergy Advice - Always show in template */}
             <div className="bg-red-50 border-l-4 border-red-400 rounded-r-lg shadow-sm">
