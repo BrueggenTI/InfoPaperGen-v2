@@ -156,12 +156,43 @@ export async function generatePDFWithPuppeteer(
 
     console.log('⏳ Warte auf vollständiges Laden der Seite...');
 
-    // Einfache und stabile Warte-Strategie  
+    // Mehrstufige Wartestrategie für vollständige Datenladung
     try {
+      // 1. Warte auf Live Preview Container
       await page.waitForSelector('#document-preview-content', { timeout: 15000 });
-      console.log('✅ Hauptinhalt gefunden');
+      console.log('✅ Live Preview Container gefunden');
+
+      // 2. Warte auf Session-Daten-Ladung (prüfe auf gefüllte Inhalte)
+      await page.waitForFunction(() => {
+        // Prüfe ob Produktname und andere Daten geladen sind
+        const productNameElements = document.querySelectorAll('[data-testid*="product"], h1, h2, h3');
+        const hasProductData = Array.from(productNameElements).some(el => 
+          el.textContent && el.textContent.trim().length > 10 && 
+          !el.textContent.includes('will appear') && 
+          !el.textContent.includes('Live Preview')
+        );
+        
+        // Prüfe auf Tabellen mit echten Daten
+        const tables = document.querySelectorAll('table');
+        const hasTableData = Array.from(tables).some(table => {
+          const rows = table.querySelectorAll('tr');
+          return rows.length > 1; // Mehr als nur Header-Zeile
+        });
+
+        console.log(`Content check: hasProductData=${hasProductData}, hasTableData=${hasTableData}, tables=${tables.length}`);
+        return hasProductData || hasTableData;
+      }, { timeout: 10000, polling: 1000 });
+      
+      console.log('✅ Daten-Content erfolgreich geladen');
+
+      // 3. Zusätzliche Wartezeit für finales Rendering
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('✅ Finale Rendering-Zeit abgewartet');
+
     } catch (error) {
-      console.log('⚠️ Hauptinhalt-Timeout - verwende verfügbare Inhalte');
+      console.log('⚠️ Content-Load-Timeout - verwende verfügbare Inhalte');
+      // Fallback: Mindest-Wartezeit für grundlegendes Laden
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     // Zusätzliche Wartezeit für finales Rendering
@@ -247,8 +278,7 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
         right: '10mm'
       },
       // Performance-Optimierungen für PDF-Generierung
-      preferCSSPageSize: true,
-      printBackground: true
+      preferCSSPageSize: true
     });
 
     // Dateiname für Download
