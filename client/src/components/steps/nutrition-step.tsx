@@ -277,7 +277,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.energy.kj || ''}
+                    value={watchedValues.energy?.kj || ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('energy.kj', value);
@@ -290,7 +290,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.energy.kcal || ''}
+                    value={watchedValues.energy?.kcal || ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('energy.kcal', value);
@@ -307,7 +307,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={calculatePerServing(watchedValues.energy.kj) || ''}
+                    value={calculatePerServing(watchedValues.energy?.kj) || ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       const per100g = (value * 100) / servingSize;
@@ -321,7 +321,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={calculatePerServing(watchedValues.energy.kcal) || ''}
+                    value={calculatePerServing(watchedValues.energy?.kcal) || ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       const per100g = (value * 100) / servingSize;
@@ -642,33 +642,33 @@ export default function NutritionStep({
       {/* Nutri-Score Calculation */}
       {(() => {
         const nutriScoreResult = calculateNutriScore({
-          energy: watchedValues.energy,
-          fat: watchedValues.fat,
-          saturatedFat: watchedValues.saturatedFat,
-          carbohydrates: watchedValues.carbohydrates,
-          sugars: watchedValues.sugars,
-          fiber: watchedValues.fiber,
-          protein: watchedValues.protein,
-          salt: watchedValues.salt,
+          energy: watchedValues.energy || { kj: 0, kcal: 0 },
+          fat: watchedValues.fat || 0,
+          saturatedFat: watchedValues.saturatedFat || 0,
+          carbohydrates: watchedValues.carbohydrates || 0,
+          sugars: watchedValues.sugars || 0,
+          fiber: watchedValues.fiber || 0,
+          protein: watchedValues.protein || 0,
+          salt: watchedValues.salt || 0,
           fruitVegLegumeContent: watchedValues.fruitVegLegumeContent || 0
         });
 
         const claimsResult = calculateClaims({
-          protein: watchedValues.protein,
-          fiber: watchedValues.fiber,
-          salt: watchedValues.salt,
-          sugars: watchedValues.sugars,
-          fat: watchedValues.fat,
-          saturatedFat: watchedValues.saturatedFat
+          protein: watchedValues.protein || 0,
+          fiber: watchedValues.fiber || 0,
+          salt: watchedValues.salt || 0,
+          sugars: watchedValues.sugars || 0,
+          fat: watchedValues.fat || 0,
+          saturatedFat: watchedValues.saturatedFat || 0
         });
 
         const validClaims = getValidClaims({
-          protein: watchedValues.protein,
-          fiber: watchedValues.fiber,
-          salt: watchedValues.salt,
-          sugars: watchedValues.sugars,
-          fat: watchedValues.fat,
-          saturatedFat: watchedValues.saturatedFat
+          protein: watchedValues.protein || 0,
+          fiber: watchedValues.fiber || 0,
+          salt: watchedValues.salt || 0,
+          sugars: watchedValues.sugars || 0,
+          fat: watchedValues.fat || 0,
+          saturatedFat: watchedValues.saturatedFat || 0
         });
 
         return (
