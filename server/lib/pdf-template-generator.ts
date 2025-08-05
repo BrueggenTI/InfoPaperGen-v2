@@ -2,8 +2,8 @@
 import { ProductInfo } from '@shared/schema';
 import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
 import { calculateClaims } from './claims-calculator-server';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * HTML-Template-Generator für PDF-Erstellung

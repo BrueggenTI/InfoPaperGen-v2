@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer';
 import { Request, Response } from 'express';
 import { generatePDFTemplate } from './pdf-template-generator';
 import { ProductInfo } from '@shared/schema';
+import * as fs from 'fs'; // Import the 'fs' module
 
 /**
  * Puppeteer-basierte PDF-Generierung für Replit
@@ -39,10 +40,10 @@ export async function generatePDFWithPuppeteer(
   options: PuppeteerPDFOptions = {}
 ): Promise<Buffer> {
   let browser;
-  
+
   try {
     console.log('🚀 Starte Puppeteer Browser...');
-    
+
     // Optimierte Browser-Konfiguration für maximale Performance
     const launchOptions: any = {
       headless: true,
@@ -99,7 +100,7 @@ export async function generatePDFWithPuppeteer(
     let browserPath = null;
     for (const path of possiblePaths) {
       try {
-        if (path && require('fs').existsSync(path)) {
+        if (path && fs.existsSync(path)) {
           browserPath = path;
           break;
         }
@@ -130,7 +131,7 @@ export async function generatePDFWithPuppeteer(
     // Performance-Optimierungen für die Seite
     await page.setDefaultNavigationTimeout(60000);
     await page.setDefaultTimeout(30000);
-    
+
     // Erlaube ALLE Ressourcen für vollständigen Inhalt
     await page.setRequestInterception(true);
     page.on('request', (req) => {
@@ -149,7 +150,7 @@ export async function generatePDFWithPuppeteer(
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
     console.log(`🌐 Besuche URL: ${url}`);
-    
+
     // Seite laden mit optimierten Optionen für schnellere Ladezeit
     await page.goto(url, {
       waitUntil: ['networkidle2', 'domcontentloaded'], // networkidle2 statt networkidle0 für bessere Performance
@@ -173,7 +174,7 @@ export async function generatePDFWithPuppeteer(
           !el.textContent.includes('will appear') && 
           !el.textContent.includes('Live Preview')
         );
-        
+
         // Prüfe auf Tabellen mit echten Daten
         const tables = document.querySelectorAll('table');
         const hasTableData = Array.from(tables).some(table => {
@@ -184,7 +185,7 @@ export async function generatePDFWithPuppeteer(
         console.log(`Content check: hasProductData=${hasProductData}, hasTableData=${hasTableData}, tables=${tables.length}`);
         return hasProductData || hasTableData;
       }, { timeout: 10000, polling: 1000 });
-      
+
       console.log('✅ Daten-Content erfolgreich geladen');
 
       // 3. Zusätzliche Wartezeit für finales Rendering
@@ -299,7 +300,7 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
 
   } catch (error) {
     console.error('❌ Fehler im PDF-Download-Handler:', error);
-    
+
     res.status(500).json({
       error: 'PDF-Generierung fehlgeschlagen',
       message: error instanceof Error ? error.message : 'Unbekannter Server-Fehler'
@@ -333,7 +334,7 @@ export async function checkPuppeteerSetup(): Promise<boolean> {
  */
 export async function handleDirectPDFGeneration(req: Request, res: Response): Promise<void> {
   const startTime = Date.now();
-  
+
   try {
     const { formData, sessionId } = req.body;
 
@@ -406,7 +407,7 @@ export async function handleDirectPDFGeneration(req: Request, res: Response): Pr
   } catch (error) {
     const duration = Date.now() - startTime;
     console.error(`❌ Fehler im direkten PDF-Generierungs-Handler nach ${duration}ms:`, error);
-    
+
     // Detailliertere Error-Response
     const errorResponse = {
       error: 'PDF-Generierung fehlgeschlagen',
@@ -432,10 +433,10 @@ export async function generatePDFFromHTML(
 ): Promise<Buffer> {
   let browser;
   const startTime = Date.now();
-  
+
   try {
     console.log('🚀 Starte Puppeteer Browser für HTML-Template...');
-    
+
     // Optimierte Browser-Konfiguration für maximale Performance
     const launchOptions: any = {
       headless: true,
@@ -482,7 +483,7 @@ export async function generatePDFFromHTML(
     let browserPath = null;
     for (const path of possiblePaths) {
       try {
-        if (path && require('fs').existsSync(path)) {
+        if (path && fs.existsSync(path)) {
           browserPath = path;
           break;
         }
@@ -516,12 +517,12 @@ export async function generatePDFFromHTML(
     // HTML-Inhalt direkt setzen (kein externes Laden erforderlich)
     console.log('📝 Setze HTML-Template-Inhalt...');
     const contentStartTime = Date.now();
-    
+
     await page.setContent(htmlContent, {
       waitUntil: ['domcontentloaded'], // Nur DOM laden, nicht alle Ressourcen
       timeout: 15000
     });
-    
+
     console.log(`⏱️ Content gesetzt in ${Date.now() - contentStartTime}ms`);
 
     // Minimale Wartezeit für finales Rendering
@@ -548,11 +549,11 @@ export async function generatePDFFromHTML(
 
     // PDF generieren
     const pdfBuffer = Buffer.from(await page.pdf(defaultOptions));
-    
+
     console.log(`⏱️ PDF generiert in ${Date.now() - pdfStartTime}ms`);
     console.log(`✅ PDF aus HTML-Template erfolgreich generiert! Gesamt: ${Date.now() - startTime}ms`);
     console.log(`📊 PDF-Größe: ${(pdfBuffer.length / 1024).toFixed(1)} KB`);
-    
+
     return pdfBuffer;
 
   } catch (error) {
