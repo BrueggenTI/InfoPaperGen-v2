@@ -12,6 +12,34 @@ import { calculateClaims } from './claims-calculator-server';
 
 export function generatePDFTemplate(formData: ProductInfo): string {
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
+  
+  // Brüggen Logo as base64 - the actual logo provided by user
+  // Function to get base64 image from file system
+  const fs = require('fs');
+  const path = require('path');
+  
+  const getImageBase64 = (filename: string): string => {
+    try {
+      const imagePath = path.join(process.cwd(), 'attached_assets', filename);
+      const imageBuffer = fs.readFileSync(imagePath);
+      return imageBuffer.toString('base64');
+    } catch (error) {
+      console.error(`Error loading image ${filename}:`, error);
+      return '';
+    }
+  };
+  
+  // Brüggen Logo as base64 - the actual logo provided by user
+  const brueggenLogoBase64 = `data:image/png;base64,${getImageBase64('Brueggen LOGO NEW-RGB_1754403378420.png')}`;
+  
+  // Nutri-Score images as base64 from actual files
+  const nutriScoreImages = {
+    'A': `data:image/jpeg;base64,${getImageBase64('Nutri_Score_1_1753880672878.jpg')}`,
+    'B': `data:image/jpeg;base64,${getImageBase64('Nutri_Score_2_1753880672879.jpg')}`,
+    'C': `data:image/jpeg;base64,${getImageBase64('Nutri_Score_3_1753880672880.jpg')}`,
+    'D': `data:image/jpeg;base64,${getImageBase64('Nutri_Score_4_1753880672881.jpg')}`,
+    'E': `data:image/jpeg;base64,${getImageBase64('Nutri_Score_5_1753880672882.jpg')}`
+  };
 
   const calculatePerServing = (per100g: number) => {
     return (per100g * servingSize / 100).toFixed(1);
@@ -135,15 +163,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
     const currentColor = nutriScoreColors[nutriScore.nutriGrade as keyof typeof nutriScoreColors] || '#85BB2F';
 
-    // Create base64 Nutri-Score images mapping
-    const nutriScoreImages = {
-      'A': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABXAOIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAABCBAYFBwgJAwEL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwQ==',
-      'B': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABXAOIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERURGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A9/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z',
-      'C': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABXAOIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERURGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A9/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z',
-      'D': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABXAOIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERURGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A9/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z',
-      'E': 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABXAOIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERURGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A9/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z'
-    };
-
     const nutriScoreImage = nutriScoreImages[nutriScore.nutriGrade as keyof typeof nutriScoreImages] || nutriScoreImages['C'];
 
     nutriScoreHtml = `
@@ -257,19 +276,19 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 12px;
+            padding: 8px 12px;
             border-bottom: 2px solid #cbd5e1;
-            border-radius: 8px 8px 0 0;
+            border-radius: 6px 6px 0 0;
             margin-bottom: 12px;
+            height: 40px;
+            display: flex;
+            align-items: center;
         }
         
         .logo {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 35px;
+            height: 30px;
             width: auto;
+            margin-right: 10px;
         }
         
         .header-content {
@@ -571,12 +590,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     <div class="document-container">
         <!-- Page 1 Header -->
         <div class="header">
-            <div style="width: 60px; height: 40px; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA2MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjk3MzE2Ii8+Cjx0ZXh0IHg9IjMwIiB5PSIyNCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJyw7xnZ2VuPC90ZXh0Pgo8L3N2Zz4K') center center / contain no-repeat;"></div>
-            <div class="header-content">
-                <h1>Product Information</h1>
-                <div class="product-number">${formData.productNumber || "Recipe Number"}</div>
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; margin-right: 10px;" />
+            <div class="header-content" style="flex: 1; text-align: center;">
+                <h1 style="margin: 0; font-size: 16px;">Product Information</h1>
+                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe Number"}</div>
             </div>
-            <div class="page-number">Page 1</div>
+            <div class="page-number" style="font-size: 11px;">Page 1</div>
         </div>
 
         <!-- Product Name Section -->
@@ -661,12 +680,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Page 2 Header (if nutrition exists) -->
         ${formData.nutrition ? `
         <div class="header">
-            <div style="width: 60px; height: 40px; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA2MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjk3MzE2Ii8+Cjx0ZXh0IHg9IjMwIiB5PSIyNCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJyw7xnZ2VuPC90ZXh0Pgo8L3N2Zz4K') center center / contain no-repeat;"></div>
-            <div class="header-content">
-                <h1>Product Information</h1>
-                <div class="product-number">${formData.productNumber || "Recipe Number"}</div>
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; margin-right: 10px;" />
+            <div class="header-content" style="flex: 1; text-align: center;">
+                <h1 style="margin: 0; font-size: 16px;">Product Information</h1>
+                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe Number"}</div>
             </div>
-            <div class="page-number">Page 2</div>
+            <div class="page-number" style="font-size: 11px;">Page 2</div>
         </div>
         ` : ''}
 
