@@ -23,8 +23,22 @@ export async function downloadPDFFromServer(options: DirectPDFOptions): Promise<
 
   try {
     console.log('📄 Starte direkte PDF-Generierung mit Formular-Daten...');
+    console.log('📋 Formular-Daten:', {
+      productName: formData.productName,
+      hasNutrition: !!formData.nutrition,
+      ingredientsCount: formData.ingredients?.length || 0,
+      sessionId: sessionId
+    });
 
-    // API-Aufruf zur direkten PDF-Generierung
+    // Validate required data
+    if (!formData.productName) {
+      throw new Error('Produktname ist erforderlich für die PDF-Generierung');
+    }
+
+    // API-Aufruf zur direkten PDF-Generierung mit verbesserter Timeout-Behandlung
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s Timeout
+
     const response = await fetch('/api/generate-pdf', {
       method: 'POST',
       headers: {
@@ -34,14 +48,22 @@ export async function downloadPDFFromServer(options: DirectPDFOptions): Promise<
         formData: formData,
         sessionId: sessionId
       }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeoutId);
     console.log('📡 Server-Antwort erhalten:', response.status);
 
     // Überprüfe Response-Status
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Server-Fehler: ${response.status} ${response.statusText}`);
+      let errorMessage = `Server-Fehler: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        // JSON-Parse-Fehler ignorieren und Standard-Message verwenden
+      }
+      throw new Error(errorMessage);
     }
 
     // Content-Type überprüfen
@@ -55,9 +77,15 @@ export async function downloadPDFFromServer(options: DirectPDFOptions): Promise<
     // PDF-Blob erstellen
     const pdfBlob = await response.blob();
     
+    // Dateiname generieren
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const productName = formData.productName ? 
+      formData.productName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() : 
+      'product';
+    
     // Dateiname aus Response-Header extrahieren (falls vorhanden)
     const contentDisposition = response.headers.get('content-disposition');
-    let filename = `product-information-${sessionId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf`;
+    let filename = `${productName}-${sessionId.slice(0, 8)}-${timestamp}.pdf`;
     
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
@@ -94,12 +122,16 @@ export async function downloadPDFFromServer(options: DirectPDFOptions): Promise<
     let userMessage = 'Beim Erstellen des PDFs ist ein Fehler aufgetreten.';
     
     if (error instanceof Error) {
-      if (error.message.includes('Server-Fehler: 500')) {
+      if (error.name === 'AbortError') {
+        userMessage = 'Die PDF-Generierung hat zu lange gedauert. Bitte versuchen Sie es erneut.';
+      } else if (error.message.includes('Server-Fehler: 500')) {
         userMessage = 'Server-Fehler bei der PDF-Generierung. Bitte versuchen Sie es erneut.';
-      } else if (error.message.includes('Network')) {
+      } else if (error.message.includes('Network') || error.message.includes('fetch')) {
         userMessage = 'Netzwerk-Fehler. Bitte überprüfen Sie Ihre Internetverbindung.';
       } else if (error.message.includes('kein PDF-Dokument')) {
         userMessage = 'Der Server konnte kein PDF erstellen. Bitte kontaktieren Sie den Support.';
+      } else if (error.message.includes('erforderlich')) {
+        userMessage = error.message; // Validation error
       }
     }
     

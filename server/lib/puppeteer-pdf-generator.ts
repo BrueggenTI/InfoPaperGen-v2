@@ -332,9 +332,12 @@ export async function checkPuppeteerSetup(): Promise<boolean> {
  * @param res - Express Response
  */
 export async function handleDirectPDFGeneration(req: Request, res: Response): Promise<void> {
+  const startTime = Date.now();
+  
   try {
     const { formData, sessionId } = req.body;
 
+    // Verbesserte Validierung
     if (!formData) {
       res.status(400).json({ error: 'Formular-Daten sind erforderlich' });
       return;
@@ -345,54 +348,74 @@ export async function handleDirectPDFGeneration(req: Request, res: Response): Pr
       return;
     }
 
+    if (!formData.productName) {
+      res.status(400).json({ error: 'Produktname ist erforderlich' });
+      return;
+    }
+
     console.log(`📄 Starte direkte PDF-Generierung für Session: ${sessionId}`);
     console.log(`📋 Formular-Daten erhalten:`, {
       productName: formData.productName,
       hasNutrition: !!formData.nutrition,
-      ingredientsCount: formData.ingredients?.length || 0
+      ingredientsCount: formData.ingredients?.length || 0,
+      hasBaseIngredients: formData.baseProductIngredients?.length || 0
     });
 
     // HTML-Template aus Formular-Daten generieren
+    console.log('🔄 Generiere HTML-Template...');
     const htmlTemplate = generatePDFTemplate(formData as ProductInfo);
 
-    // PDF mit Puppeteer aus HTML-Template generieren
+    // PDF mit Puppeteer aus HTML-Template generieren (optimierte Einstellungen)
+    console.log('🔄 Starte Puppeteer PDF-Generierung...');
     const pdfBuffer = await generatePDFFromHTML(htmlTemplate, {
       format: 'A4',
       printBackground: true,
       displayHeaderFooter: false,
       margin: {
-        top: '15mm',
-        bottom: '15mm',
-        left: '15mm',
-        right: '15mm'
+        top: '10mm',
+        bottom: '10mm',
+        left: '10mm',
+        right: '10mm'
       },
-      preferCSSPageSize: true
+      preferCSSPageSize: true,
+      landscape: false
     });
 
     // Dateiname für Download
     const timestamp = new Date().toISOString().slice(0, 10);
     const productName = formData.productName ? 
-      formData.productName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() : 
+      formData.productName.replace(/[^a-zA-Z0-9äöüÄÖÜß\s]/g, '').replace(/\s+/g, '-').toLowerCase() : 
       'product';
     const filename = `${productName}-${sessionId.slice(0, 8)}-${timestamp}.pdf`;
+
+    // Performance-Logging
+    const duration = Date.now() - startTime;
+    console.log(`⏱️ PDF-Generierung abgeschlossen in ${duration}ms`);
 
     // Response-Headers für PDF-Download setzen
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('Cache-Control', 'no-cache');
 
     // PDF-Buffer an Client senden
     res.send(pdfBuffer);
 
-    console.log(`✅ Direktes PDF erfolgreich gesendet: ${filename}`);
+    console.log(`✅ Direktes PDF erfolgreich gesendet: ${filename} (${(pdfBuffer.length / 1024).toFixed(1)} KB)`);
 
   } catch (error) {
-    console.error('❌ Fehler im direkten PDF-Generierungs-Handler:', error);
+    const duration = Date.now() - startTime;
+    console.error(`❌ Fehler im direkten PDF-Generierungs-Handler nach ${duration}ms:`, error);
     
-    res.status(500).json({
+    // Detailliertere Error-Response
+    const errorResponse = {
       error: 'PDF-Generierung fehlgeschlagen',
-      message: error instanceof Error ? error.message : 'Unbekannter Server-Fehler'
-    });
+      message: error instanceof Error ? error.message : 'Unbekannter Server-Fehler',
+      duration: duration,
+      timestamp: new Date().toISOString()
+    };
+
+    res.status(500).json(errorResponse);
   }
 }
 
@@ -408,11 +431,12 @@ export async function generatePDFFromHTML(
   options: PuppeteerPDFOptions = {}
 ): Promise<Buffer> {
   let browser;
+  const startTime = Date.now();
   
   try {
     console.log('🚀 Starte Puppeteer Browser für HTML-Template...');
     
-    // Optimierte Browser-Konfiguration
+    // Optimierte Browser-Konfiguration für maximale Performance
     const launchOptions: any = {
       headless: true,
       args: [
@@ -430,11 +454,50 @@ export async function generatePDFFromHTML(
         '--disable-web-security',
         '--enable-automation',
         '--memory-pressure-off',
-        '--max_old_space_size=4096'
+        '--max_old_space_size=4096',
+        '--disable-background-networking',
+        '--disable-client-side-phishing-detection',
+        '--disable-component-update',
+        '--disable-hang-monitor',
+        '--disable-popup-blocking',
+        '--disable-prompt-on-repost',
+        '--disable-sync',
+        '--disable-translate',
+        '--metrics-recording-only',
+        '--no-default-browser-check',
+        '--safebrowsing-disable-auto-update'
       ]
     };
 
+    // Versuche verschiedene Browser-Pfade für Replit
+    const possiblePaths = [
+      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+      process.env.PUPPETEER_EXECUTABLE_PATH,
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome'
+    ].filter(Boolean);
+
+    let browserPath = null;
+    for (const path of possiblePaths) {
+      try {
+        if (path && require('fs').existsSync(path)) {
+          browserPath = path;
+          break;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+
+    if (browserPath) {
+      console.log(`🔍 Verwende Browser: ${browserPath}`);
+      launchOptions.executablePath = browserPath;
+    }
+
     browser = await puppeteer.launch(launchOptions);
+    console.log(`⏱️ Browser gestartet in ${Date.now() - startTime}ms`);
 
     console.log('📄 Erstelle neue Seite für HTML-Template...');
     const page = await browser.newPage();
@@ -446,17 +509,26 @@ export async function generatePDFFromHTML(
       deviceScaleFactor: 1
     });
 
+    // Optimierte Timeouts
+    await page.setDefaultNavigationTimeout(15000);
+    await page.setDefaultTimeout(10000);
+
     // HTML-Inhalt direkt setzen (kein externes Laden erforderlich)
     console.log('📝 Setze HTML-Template-Inhalt...');
+    const contentStartTime = Date.now();
+    
     await page.setContent(htmlContent, {
-      waitUntil: ['networkidle0', 'domcontentloaded'],
-      timeout: 30000
+      waitUntil: ['domcontentloaded'], // Nur DOM laden, nicht alle Ressourcen
+      timeout: 15000
     });
+    
+    console.log(`⏱️ Content gesetzt in ${Date.now() - contentStartTime}ms`);
 
-    // Kurze Wartezeit für finales Rendering
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Minimale Wartezeit für finales Rendering
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     console.log('📋 Generiere PDF aus HTML-Template...');
+    const pdfStartTime = Date.now();
 
     // Standard PDF-Optionen
     const defaultOptions: PuppeteerPDFOptions = {
@@ -464,10 +536,10 @@ export async function generatePDFFromHTML(
       printBackground: true,
       displayHeaderFooter: false,
       margin: {
-        top: '15mm',
-        bottom: '15mm',
-        left: '15mm',
-        right: '15mm'
+        top: '10mm',
+        bottom: '10mm',
+        left: '10mm',
+        right: '10mm'
       },
       preferCSSPageSize: true,
       landscape: false,
@@ -476,17 +548,22 @@ export async function generatePDFFromHTML(
 
     // PDF generieren
     const pdfBuffer = Buffer.from(await page.pdf(defaultOptions));
-
-    console.log('✅ PDF aus HTML-Template erfolgreich generiert!');
+    
+    console.log(`⏱️ PDF generiert in ${Date.now() - pdfStartTime}ms`);
+    console.log(`✅ PDF aus HTML-Template erfolgreich generiert! Gesamt: ${Date.now() - startTime}ms`);
+    console.log(`📊 PDF-Größe: ${(pdfBuffer.length / 1024).toFixed(1)} KB`);
+    
     return pdfBuffer;
 
   } catch (error) {
-    console.error('❌ Fehler bei der HTML-Template-PDF-Generierung:', error);
+    console.error(`❌ Fehler bei der HTML-Template-PDF-Generierung nach ${Date.now() - startTime}ms:`, error);
     throw new Error(`PDF-Generierung aus HTML fehlgeschlagen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
   } finally {
     if (browser) {
+      const closeStartTime = Date.now();
       console.log('🔒 Schließe Browser...');
       await browser.close();
+      console.log(`⏱️ Browser geschlossen in ${Date.now() - closeStartTime}ms`);
     }
   }
 }
