@@ -141,22 +141,26 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     }
   };
 
-  // Page Break Indicator Component
+  // Page Break Indicator Component - CSS für PDF-Seitenumbruch
   const PageBreakIndicator = ({ pageNumber }: { pageNumber: number }) => (
-    <div className="my-8 flex items-center justify-center">
-      <div className="flex-1 h-px bg-red-300 mx-4"></div>
-      <div className="bg-red-100 border border-red-300 px-4 py-2 rounded-lg">
-        <span className="text-red-700 text-sm font-medium">
-          📄 Page Break - Page {pageNumber} begins here
-        </span>
-      </div>
-      <div className="flex-1 h-px bg-red-300 mx-4"></div>
+    <div className={`${isPDFMode ? 'page-break-before' : 'my-8 flex items-center justify-center'}`}>
+      {!isPDFMode && (
+        <>
+          <div className="flex-1 h-px bg-red-300 mx-4"></div>
+          <div className="bg-red-100 border border-red-300 px-4 py-2 rounded-lg">
+            <span className="text-red-700 text-sm font-medium">
+              📄 Page Break - Page {pageNumber} begins here
+            </span>
+          </div>
+          <div className="flex-1 h-px bg-red-300 mx-4"></div>
+        </>
+      )}
     </div>
   );
 
   // Header Component for new pages
   const DocumentHeader = ({ pageNumber }: { pageNumber: number }) => (
-    <div className="relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200">
+    <div className={`relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200 ${isPDFMode ? 'avoid-break' : ''}`}>
       {/* Logo */}
       <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
         <img 
@@ -301,7 +305,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
             {/* Detailed Ingredients Table - Only show if ingredients exist */}
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
-              <div className="border border-slate-200 rounded-lg">
+              <div className={`border border-slate-200 rounded-lg ${isPDFMode ? 'avoid-break' : ''}`}>
                 <div className="px-3 py-2 border-b border-slate-200">
                   <h3 className="font-semibold text-base text-slate-800">Detailed Ingredients Breakdown</h3>
                 </div>
@@ -345,7 +349,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
             {/* Nutritional Table - Only show if nutrition data exists */}
             {formData.nutrition && (
             <>
-              <div className="border border-slate-200 rounded-lg">
+              <div className={`border border-slate-200 rounded-lg ${isPDFMode ? 'avoid-break' : ''}`}>
                 <div className="px-3 py-2 border-b border-slate-200">
                   <h3 className="font-semibold text-base text-slate-800">Average Nutritional Value</h3>
                 </div>

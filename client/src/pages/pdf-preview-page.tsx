@@ -65,7 +65,25 @@ export default function PDFPreviewPage() {
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }
-          .page-break { page-break-before: always; }
+          .page-break-before { page-break-before: always; }
+          .page-break-after { page-break-after: always; }
+          .avoid-break { page-break-inside: avoid; }
+        }
+        
+        /* CSS für Puppeteer PDF-Generierung */
+        .page-break-before {
+          page-break-before: always;
+          break-before: page;
+        }
+        
+        .page-break-after {
+          page-break-after: always;
+          break-after: page;
+        }
+        
+        .avoid-break {
+          page-break-inside: avoid;
+          break-inside: avoid;
         }
         
         /* PDF-optimierte Schriftarten */
@@ -73,6 +91,15 @@ export default function PDFPreviewPage() {
           font-family: 'Helvetica', 'Arial', sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
+          margin: 0;
+          padding: 0;
+        }
+        
+        /* Container für PDF-Seiten */
+        .pdf-page {
+          min-height: 100vh;
+          padding: 20mm;
+          box-sizing: border-box;
         }
         
         /* Bessere Darstellung für PDF */
@@ -86,6 +113,12 @@ export default function PDFPreviewPage() {
         table {
           border-collapse: collapse;
           width: 100%;
+          page-break-inside: auto;
+        }
+        
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
         }
         
         th, td {
@@ -97,6 +130,11 @@ export default function PDFPreviewPage() {
         /* Gradient-Fallbacks für PDF */
         .gradient-fallback {
           background: #f59e0b !important;
+        }
+        
+        /* Verstecke visuelle Page-Break-Indikatoren im PDF */
+        .page-break-indicator {
+          display: none;
         }
       `}</style>
       

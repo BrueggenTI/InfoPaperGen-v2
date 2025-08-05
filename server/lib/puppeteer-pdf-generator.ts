@@ -223,11 +223,23 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
     const pdfBuffer = await generatePDFWithPuppeteer(previewUrl, {
       format: 'A4',
       printBackground: true,
+      displayHeaderFooter: true,
+      headerTemplate: `
+        <div style="width: 100%; font-size: 10px; margin: 0 15mm; text-align: center; color: #666; border-bottom: 1px solid #ddd; padding-bottom: 3mm;">
+          <span style="float: left;">Product Information</span>
+          <span style="float: right;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+        </div>
+      `,
+      footerTemplate: `
+        <div style="width: 100%; font-size: 8px; text-align: center; color: #999; margin: 0 15mm; border-top: 1px solid #ddd; padding-top: 3mm;">
+          Generated on ${new Date().toLocaleDateString('de-DE')} | Valid from: ${new Date().toLocaleDateString('de-DE')} | Prepared by: Brüggen KG
+        </div>
+      `,
       margin: {
-        top: '10mm',
-        bottom: '10mm',
-        left: '10mm',
-        right: '10mm'
+        top: '25mm',
+        bottom: '25mm', 
+        left: '15mm',
+        right: '15mm'
       }
     });
 
