@@ -26,11 +26,16 @@ The application is built as a full-stack JavaScript application following a clea
     - **PDF Generation**: Currently uses jsPDF for client-side PDF creation. Browser-based PDF generation (Puppeteer) attempted but not viable in Replit environment due to system library dependencies.
 - **Environment Management**: Robust environment variable management for sensitive data like API keys.
 
-### Recent Changes (2025-01-04)
-- **PDF Generation Enhancement**: Implemented enhanced jsPDF-based PDF generation that replicates the Live Preview layout exactly. The new generator creates professional PDFs with proper sectioning, tables, formatting, and styling that matches the web interface.
-- **Browser-based PDF Attempt**: Attempted to implement browser-based PDF generation using Puppeteer and html-pdf-node, but these solutions failed in the Replit environment due to missing system dependencies.
-- **Enhanced Layout Matching**: New PDF generator includes proper headers, ingredient formatting with base product integration, nutrition tables, Nutri-Score display, claims sections, and storage/preparation information exactly as shown in Live Preview.
-- **Button Event Handling**: Fixed all navigation and upload button functionality by implementing proper event handling with preventDefault and stopPropagation to resolve intermittent clicking issues.
+### Recent Changes (2025-01-05)
+- **Visual PDF Generator Implementation**: Completely replaced existing PDF generation with new visual capture technology using html2canvas + jsPDF combination. This creates pixel-perfect PDF exports that capture the exact visual appearance of the Live Preview, including all CSS styling, images, layouts, and dynamic content.
+- **Enhanced User Experience**: New PDF generation provides:
+  - Exact visual reproduction of Live Preview
+  - High-quality image capture with 2x scaling
+  - Proper handling of CORS and external images
+  - Multi-page support for large content
+  - Professional PDF metadata
+  - Automatic image loading detection
+- **Technical Implementation**: Created comprehensive visual-pdf-generator.ts with multiple export modes (single page, multi-page, enhanced with pre-loading) and robust error handling with German user interface.
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.

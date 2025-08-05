@@ -1,7 +1,7 @@
 import { ProductInfo } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { generateEnhancedPDF } from "@/lib/enhanced-pdf-generator";
+import { generateEnhancedVisualPDF } from "@/lib/visual-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
@@ -117,18 +117,19 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
   const handleExportPDF = async () => {
     try {
-      // Try enhanced PDF first, fallback to browser-based PDF
-      try {
-        await generateEnhancedPDF(formData);
-      } catch (enhancedError) {
-        console.warn('Enhanced PDF failed, trying browser-based PDF:', enhancedError);
-
-        // Import the browser PDF generator dynamically
-        const { generateBrowserPDF } = await import('@/lib/browser-pdf-generator');
-        await generateBrowserPDF(sessionId);
-      }
+      // Verwende die neue visuelle PDF-Generierung
+      // Diese erfasst die komplette Live-Preview inklusive aller Styles und Bilder
+      await generateEnhancedVisualPDF('document-preview-content', {
+        filename: `product-information-${formData.productName || 'document'}.pdf`,
+        quality: 0.95,
+        scale: 2,
+        useCORS: true,
+        allowTaint: false
+      });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Fehler beim Generieren des visuellen PDFs:', error);
+      // Zeige benutzerfreundliche Fehlermeldung
+      alert('Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
     }
   };
 
@@ -192,7 +193,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       )}
 
       {/* Document Preview */}
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div id="document-preview-content" className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
         <div className="p-3">
           <div className="space-y-2">
             {/* Modern Header */}
