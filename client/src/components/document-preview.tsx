@@ -160,7 +160,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
   // Header Component for new pages
   const DocumentHeader = ({ pageNumber }: { pageNumber: number }) => (
-    <div className={`relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200 ${isPDFMode ? 'avoid-break' : ''}`}>
+    <div className={`relative ${isPDFMode ? 'bg-white p-4 border-b-2 border-slate-300 avoid-break' : 'bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200'}`}>
       {/* Logo */}
       <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
         <img 
@@ -182,7 +182,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
       {/* Page Number */}
       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-        <div className="bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
+        <div className={`${isPDFMode ? 'bg-transparent' : 'bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200'}`}>
           <p className="text-xs font-medium text-slate-700">Page {pageNumber}</p>
         </div>
       </div>
@@ -190,7 +190,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
   );
 
   return (
-    <div className={`p-6 ${isPDFMode ? 'bg-white' : 'bg-gradient-to-br from-slate-50 to-slate-100'} min-h-screen`}>
+    <div className={`${isPDFMode ? 'p-4 bg-white' : 'p-6 bg-gradient-to-br from-slate-50 to-slate-100'} min-h-screen`}>
       {!isPDFMode && (
         <div className="flex justify-end mb-6">
           <Button
@@ -215,11 +215,11 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       )}
 
       {/* Document Preview */}
-      <div id="document-preview-content" className="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="p-3">
-          <div className="space-y-2">
+      <div id="document-preview-content" className={`bg-white ${isPDFMode ? '' : 'rounded-xl shadow-2xl border border-slate-200'} overflow-hidden`}>
+        <div className={isPDFMode ? 'p-0' : 'p-3'}>
+          <div className={isPDFMode ? 'space-y-4' : 'space-y-2'}>
             {/* Modern Header */}
-            <div className="relative bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200">
+            <div className={`relative ${isPDFMode ? 'bg-white p-4 border-b-2 border-slate-300' : 'bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200'}`}>
               {/* Logo */}
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                 <img 
@@ -241,7 +241,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
               {/* Page Number */}
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200">
+                <div className={`${isPDFMode ? 'bg-transparent' : 'bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200'}`}>
                   <p className="text-xs font-medium text-slate-700">Page 1</p>
                 </div>
               </div>
@@ -305,8 +305,8 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
             {/* Detailed Ingredients Table - Only show if ingredients exist */}
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
-              <div className={`border border-slate-200 rounded-lg ${isPDFMode ? 'avoid-break' : ''}`}>
-                <div className="px-3 py-2 border-b border-slate-200">
+              <div className={`${isPDFMode ? 'mt-6 avoid-break' : 'border border-slate-200 rounded-lg'}`}>
+                <div className={`${isPDFMode ? 'pb-2 border-b-2 border-slate-400' : 'px-3 py-2 border-b border-slate-200'}`}>
                   <h3 className="font-semibold text-base text-slate-800">Detailed Ingredients Breakdown</h3>
                 </div>
                 <div className="overflow-x-auto">
@@ -349,8 +349,8 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
             {/* Nutritional Table - Only show if nutrition data exists */}
             {formData.nutrition && (
             <>
-              <div className={`border border-slate-200 rounded-lg ${isPDFMode ? 'avoid-break' : ''}`}>
-                <div className="px-3 py-2 border-b border-slate-200">
+              <div className={`${isPDFMode ? 'mt-6 avoid-break' : 'border border-slate-200 rounded-lg'}`}>
+                <div className={`${isPDFMode ? 'pb-2 border-b-2 border-slate-400' : 'px-3 py-2 border-b border-slate-200'}`}>
                   <h3 className="font-semibold text-base text-slate-800">Average Nutritional Value</h3>
                 </div>
                 <div className="overflow-x-auto">

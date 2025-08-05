@@ -270,10 +270,10 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
         </div>
       `,
       margin: {
-        top: '25mm',
-        bottom: '25mm', 
-        left: '15mm',
-        right: '15mm'
+        top: '10mm',
+        bottom: '10mm', 
+        left: '10mm',
+        right: '10mm'
       },
       // Performance-Optimierungen für PDF-Generierung
       preferCSSPageSize: true,

@@ -57,6 +57,12 @@ The application is built as a full-stack JavaScript application following a clea
   - **Resource blocking**: Implemented request interception to block unnecessary resources
   - **Reduced wait times**: Optimized fallback timers (10s→5s, 2s→1s)
   - **Browser flags**: Added 16 additional performance-focused Chrome flags
+- **PDF Layout & Content Optimizations (2025-08-05)**: Fixed PDF generation issues:
+  - **Reduced margins**: Decreased from 25mm to 10mm (60% reduction) for better content utilization
+  - **Removed visual elements**: Eliminated box shadows, borders, and rounded corners in PDF mode
+  - **Header optimization**: Brüggen logo section redesigned as clean document header with border
+  - **Table visibility**: Enhanced table rendering for proper display in generated PDFs
+  - **Content spacing**: Improved section spacing and layout for better PDF appearance
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.
