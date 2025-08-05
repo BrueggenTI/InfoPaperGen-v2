@@ -117,23 +117,28 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     return tableIngredients;
   };
 
-  const handleExportPDF = async () => {
+  const handleDownloadPDF = async () => {
     if (!sessionId) {
-      alert('Session-ID fehlt. Bitte laden Sie die Seite neu.');
+      alert('Keine Session-ID verfügbar. Bitte laden Sie die Seite neu.');
+      return;
+    }
+
+    if (!formData) {
+      alert('Keine Formular-Daten verfügbar. Bitte füllen Sie das Formular aus.');
       return;
     }
 
     setIsGeneratingPDF(true);
-    
+
     try {
-      // Verwende die neue serverseitige PDF-Generierung mit Puppeteer
-      // Diese erstellt ein echtes PDF mit auswählbarem Text und funktionalen Links
+      // Verwende die neue direkte PDF-Generierung mit Formular-Daten
+      // Diese erstellt ein sauberes PDF nur mit den ausgefüllten Formular-Informationen
       await downloadPDFFromServer({
-        sessionId: sessionId,
-        baseUrl: window.location.origin
+        formData: formData,
+        sessionId: sessionId
       });
     } catch (error) {
-      console.error('Fehler beim Generieren des Server-PDFs:', error);
+      console.error('Fehler beim Generieren des PDFs:', error);
       // Zeige benutzerfreundliche Fehlermeldung
       alert(error instanceof Error ? error.message : 'Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
     } finally {
@@ -194,7 +199,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       {!isPDFMode && (
         <div className="flex justify-end mb-6">
           <Button
-            onClick={handleExportPDF}
+            onClick={handleDownloadPDF}
             disabled={isGeneratingPDF}
             className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
             data-testid="button-download-pdf"

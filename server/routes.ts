@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { productInfoSchema } from "@shared/schema";
 import { extractIngredientsFromImage, extractNutritionFromImage, translateIngredients } from "./services/openai";
-import { handlePDFDownload } from "./lib/puppeteer-pdf-generator";
+import { handlePDFDownload, handleDirectPDFGeneration } from "./lib/puppeteer-pdf-generator";
 import multer from "multer";
 
 const upload = multer({
@@ -155,6 +155,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Enhanced Puppeteer-based PDF generation endpoint
   app.post("/api/download-pdf", handlePDFDownload);
+
+  // Direct PDF generation from form data
+  app.post("/api/generate-pdf", handleDirectPDFGeneration);
 
   const httpServer = createServer(app);
   return httpServer;

@@ -1,36 +1,38 @@
 /**
- * Server-basierte PDF-Generierung mit Puppeteer
+ * Server-basierte PDF-Generierung mit direkten Formular-Daten
  * 
  * Diese Datei implementiert die Frontend-Integration für die serverseitige
- * PDF-Generierung mit Puppeteer. Sie kommuniziert mit der /api/download-pdf
- * Route und löst den direkten PDF-Download im Browser aus.
+ * PDF-Generierung. Die Formular-Daten werden direkt an den Server gesendet
+ * und dort in ein sauberes PDF-Template konvertiert.
  */
 
-export interface ServerPDFOptions {
+import { ProductInfo } from "@shared/schema";
+
+export interface DirectPDFOptions {
+  formData: ProductInfo;
   sessionId: string;
-  baseUrl?: string;
 }
 
 /**
- * Generiert und lädt ein PDF über die serverseitige Puppeteer-API herunter
+ * Generiert und lädt ein PDF direkt mit Formular-Daten herunter
  * 
- * @param options - Konfigurationsoptionen für den PDF-Download
+ * @param options - Formular-Daten und Session-ID
  */
-export async function downloadPDFFromServer(options: ServerPDFOptions): Promise<void> {
-  const { sessionId, baseUrl } = options;
+export async function downloadPDFFromServer(options: DirectPDFOptions): Promise<void> {
+  const { formData, sessionId } = options;
 
   try {
-    console.log('📄 Starte serverseitige PDF-Generierung...');
+    console.log('📄 Starte direkte PDF-Generierung mit Formular-Daten...');
 
-    // API-Aufruf zur PDF-Generierung
-    const response = await fetch('/api/download-pdf', {
+    // API-Aufruf zur direkten PDF-Generierung
+    const response = await fetch('/api/generate-pdf', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sessionId: sessionId,
-        url: baseUrl || window.location.origin
+        formData: formData,
+        sessionId: sessionId
       }),
     });
 
@@ -55,7 +57,7 @@ export async function downloadPDFFromServer(options: ServerPDFOptions): Promise<
     
     // Dateiname aus Response-Header extrahieren (falls vorhanden)
     const contentDisposition = response.headers.get('content-disposition');
-    let filename = `product-information-${sessionId.slice(0, 8)}.pdf`;
+    let filename = `product-information-${sessionId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf`;
     
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
@@ -109,27 +111,27 @@ export async function downloadPDFFromServer(options: ServerPDFOptions): Promise<
 /**
  * Erweiterte PDF-Download-Funktion mit Progress-Feedback
  * 
- * @param options - Konfigurationsoptionen
+ * @param options - Formular-Daten und Session-ID
  * @param onProgress - Callback für Progress-Updates (optional)
  */
 export async function downloadPDFWithProgress(
-  options: ServerPDFOptions,
+  options: DirectPDFOptions,
   onProgress?: (stage: string, progress: number) => void
 ): Promise<void> {
-  const { sessionId, baseUrl } = options;
+  const { formData, sessionId } = options;
 
   try {
     // Schritt 1: Request senden
-    onProgress?.('Sende Anfrage an Server...', 20);
+    onProgress?.('Sende Formulardaten an Server...', 20);
     
-    const response = await fetch('/api/download-pdf', {
+    const response = await fetch('/api/generate-pdf', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sessionId: sessionId,
-        url: baseUrl || window.location.origin
+        formData: formData,
+        sessionId: sessionId
       }),
     });
 
@@ -142,7 +144,7 @@ export async function downloadPDFWithProgress(
     }
 
     // Schritt 3: PDF-Daten laden
-    onProgress?.('Lade PDF-Daten...', 60);
+    onProgress?.('PDF wird generiert...', 60);
     
     const pdfBlob = await response.blob();
 
@@ -150,7 +152,7 @@ export async function downloadPDFWithProgress(
     onProgress?.('Bereite Download vor...', 80);
     
     const contentDisposition = response.headers.get('content-disposition');
-    let filename = `product-information-${sessionId.slice(0, 8)}.pdf`;
+    let filename = `product-information-${sessionId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf`;
     
     if (contentDisposition) {
       const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
@@ -185,18 +187,18 @@ export async function downloadPDFWithProgress(
 }
 
 /**
- * Hilfsfunktion: Überprüft die Server-Verfügbarkeit
+ * Hilfsfunktion: Überprüft die Server-Verfügbarkeit für direkte PDF-Generierung
  */
 export async function checkServerPDFAvailability(): Promise<boolean> {
   try {
-    const response = await fetch('/api/download-pdf', {
+    const response = await fetch('/api/generate-pdf', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sessionId: 'test',
-        url: 'test'
+        formData: {},
+        sessionId: 'test'
       }),
     });
 

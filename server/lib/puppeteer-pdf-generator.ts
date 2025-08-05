@@ -1,5 +1,7 @@
 import puppeteer from 'puppeteer';
 import { Request, Response } from 'express';
+import { generatePDFTemplate } from './pdf-template-generator';
+import { ProductInfo } from '@shared/schema';
 
 /**
  * Puppeteer-basierte PDF-Generierung für Replit
@@ -319,5 +321,172 @@ export async function checkPuppeteerSetup(): Promise<boolean> {
   } catch (error) {
     console.error('Puppeteer Setup-Fehler:', error);
     return false;
+  }
+}
+
+
+/**
+ * Express-Route-Handler für direkte PDF-Generierung aus Formular-Daten
+ * 
+ * @param req - Express Request mit formData im Body
+ * @param res - Express Response
+ */
+export async function handleDirectPDFGeneration(req: Request, res: Response): Promise<void> {
+  try {
+    const { formData, sessionId } = req.body;
+
+    if (!formData) {
+      res.status(400).json({ error: 'Formular-Daten sind erforderlich' });
+      return;
+    }
+
+    if (!sessionId) {
+      res.status(400).json({ error: 'Session ID ist erforderlich' });
+      return;
+    }
+
+    console.log(`📄 Starte direkte PDF-Generierung für Session: ${sessionId}`);
+    console.log(`📋 Formular-Daten erhalten:`, {
+      productName: formData.productName,
+      hasNutrition: !!formData.nutrition,
+      ingredientsCount: formData.ingredients?.length || 0
+    });
+
+    // HTML-Template aus Formular-Daten generieren
+    const htmlTemplate = generatePDFTemplate(formData as ProductInfo);
+
+    // PDF mit Puppeteer aus HTML-Template generieren
+    const pdfBuffer = await generatePDFFromHTML(htmlTemplate, {
+      format: 'A4',
+      printBackground: true,
+      displayHeaderFooter: false,
+      margin: {
+        top: '15mm',
+        bottom: '15mm',
+        left: '15mm',
+        right: '15mm'
+      },
+      preferCSSPageSize: true
+    });
+
+    // Dateiname für Download
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const productName = formData.productName ? 
+      formData.productName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() : 
+      'product';
+    const filename = `${productName}-${sessionId.slice(0, 8)}-${timestamp}.pdf`;
+
+    // Response-Headers für PDF-Download setzen
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    // PDF-Buffer an Client senden
+    res.send(pdfBuffer);
+
+    console.log(`✅ Direktes PDF erfolgreich gesendet: ${filename}`);
+
+  } catch (error) {
+    console.error('❌ Fehler im direkten PDF-Generierungs-Handler:', error);
+    
+    res.status(500).json({
+      error: 'PDF-Generierung fehlgeschlagen',
+      message: error instanceof Error ? error.message : 'Unbekannter Server-Fehler'
+    });
+  }
+}
+
+/**
+ * Generiert ein PDF-Dokument direkt aus HTML-String
+ * 
+ * @param htmlContent - HTML-Inhalt als String
+ * @param options - PDF-Generierungsoptionen
+ * @returns PDF-Buffer
+ */
+export async function generatePDFFromHTML(
+  htmlContent: string, 
+  options: PuppeteerPDFOptions = {}
+): Promise<Buffer> {
+  let browser;
+  
+  try {
+    console.log('🚀 Starte Puppeteer Browser für HTML-Template...');
+    
+    // Optimierte Browser-Konfiguration
+    const launchOptions: any = {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-default-apps',
+        '--disable-features=TranslateUI,VizDisplayCompositor',
+        '--disable-web-security',
+        '--enable-automation',
+        '--memory-pressure-off',
+        '--max_old_space_size=4096'
+      ]
+    };
+
+    browser = await puppeteer.launch(launchOptions);
+
+    console.log('📄 Erstelle neue Seite für HTML-Template...');
+    const page = await browser.newPage();
+
+    // Viewport für konsistente Darstellung
+    await page.setViewport({
+      width: 1200,
+      height: 1600,
+      deviceScaleFactor: 1
+    });
+
+    // HTML-Inhalt direkt setzen (kein externes Laden erforderlich)
+    console.log('📝 Setze HTML-Template-Inhalt...');
+    await page.setContent(htmlContent, {
+      waitUntil: ['networkidle0', 'domcontentloaded'],
+      timeout: 30000
+    });
+
+    // Kurze Wartezeit für finales Rendering
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    console.log('📋 Generiere PDF aus HTML-Template...');
+
+    // Standard PDF-Optionen
+    const defaultOptions: PuppeteerPDFOptions = {
+      format: 'A4',
+      printBackground: true,
+      displayHeaderFooter: false,
+      margin: {
+        top: '15mm',
+        bottom: '15mm',
+        left: '15mm',
+        right: '15mm'
+      },
+      preferCSSPageSize: true,
+      landscape: false,
+      ...options
+    };
+
+    // PDF generieren
+    const pdfBuffer = Buffer.from(await page.pdf(defaultOptions));
+
+    console.log('✅ PDF aus HTML-Template erfolgreich generiert!');
+    return pdfBuffer;
+
+  } catch (error) {
+    console.error('❌ Fehler bei der HTML-Template-PDF-Generierung:', error);
+    throw new Error(`PDF-Generierung aus HTML fehlgeschlagen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
+  } finally {
+    if (browser) {
+      console.log('🔒 Schließe Browser...');
+      await browser.close();
+    }
   }
 }
