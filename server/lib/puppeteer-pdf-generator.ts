@@ -156,52 +156,13 @@ export async function generatePDFWithPuppeteer(
 
     console.log('⏳ Warte auf vollständiges Laden der Seite...');
 
-    // Warte auf vollständigen Content-Load
-    await page.evaluate(() => {
-      return new Promise<void>((resolve) => {
-        console.log('🔍 Prüfe Seiteninhalt...');
-        
-        // Warte auf alle wichtigen Elemente
-        const checkContent = () => {
-          const tables = document.querySelectorAll('table');
-          const images = document.querySelectorAll('img');
-          const mainContent = document.querySelector('#document-preview-content');
-          
-          console.log(`Gefunden: ${tables.length} Tabellen, ${images.length} Bilder`);
-          
-          // Prüfe Bilder
-          const imagesLoaded = Array.from(images).every(img => img.complete);
-          
-          // Prüfe ob Hauptinhalt vorhanden ist
-          const hasMainContent = !!mainContent;
-          
-          return hasMainContent && imagesLoaded;
-        };
-        
-        // Sofort prüfen
-        if (checkContent()) {
-          console.log('✅ Alle Inhalte bereits geladen');
-          resolve();
-          return;
-        }
-        
-        // Interval für kontinuierliche Prüfung
-        const checkInterval = setInterval(() => {
-          if (checkContent()) {
-            console.log('✅ Inhalte vollständig geladen');
-            clearInterval(checkInterval);
-            resolve();
-          }
-        }, 500);
-        
-        // Fallback nach 10 Sekunden
-        setTimeout(() => {
-          console.log('⚠️ Content-Load-Timeout erreicht');
-          clearInterval(checkInterval);
-          resolve();
-        }, 10000);
-      });
-    });
+    // Einfache und stabile Warte-Strategie  
+    try {
+      await page.waitForSelector('#document-preview-content', { timeout: 15000 });
+      console.log('✅ Hauptinhalt gefunden');
+    } catch (error) {
+      console.log('⚠️ Hauptinhalt-Timeout - verwende verfügbare Inhalte');
+    }
 
     // Zusätzliche Wartezeit für finales Rendering
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -287,7 +248,7 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
       },
       // Performance-Optimierungen für PDF-Generierung
       preferCSSPageSize: true,
-      omitBackground: false
+      printBackground: true
     });
 
     // Dateiname für Download
