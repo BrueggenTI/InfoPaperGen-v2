@@ -41,7 +41,7 @@ export async function generatePDFWithPuppeteer(
   try {
     console.log('🚀 Starte Puppeteer Browser...');
     
-    // Browser starten mit automatischer Erkennung des verfügbaren Browsers
+    // Optimierte Browser-Konfiguration für maximale Performance
     const launchOptions: any = {
       headless: true,
       args: [
@@ -63,7 +63,24 @@ export async function generatePDFWithPuppeteer(
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
         '--run-all-compositor-stages-before-draw',
-        '--memory-pressure-off'
+        '--memory-pressure-off',
+        // Performance-Optimierungen
+        '--max_old_space_size=4096',
+        '--js-flags="--max-old-space-size=4096"',
+        '--disable-background-networking',
+        '--disable-client-side-phishing-detection',
+        '--disable-component-update',
+        '--disable-hang-monitor',
+        '--disable-popup-blocking',
+        '--disable-prompt-on-repost',
+        '--disable-sync',
+        '--disable-translate',
+        '--metrics-recording-only',
+        '--no-default-browser-check',
+        '--safebrowsing-disable-auto-update',
+        '--enable-automation',
+        '--password-store=basic',
+        '--use-mock-keychain'
       ]
     };
 
@@ -101,11 +118,28 @@ export async function generatePDFWithPuppeteer(
     console.log('📄 Erstelle neue Seite...');
     const page = await browser.newPage();
 
-    // Viewport für optimale Darstellung setzen
+    // Optimiertes Viewport für bessere Performance
     await page.setViewport({
       width: 1200,
       height: 1600,
-      deviceScaleFactor: 2
+      deviceScaleFactor: 1 // Reduziert für bessere Performance
+    });
+
+    // Performance-Optimierungen für die Seite
+    await page.setDefaultNavigationTimeout(60000);
+    await page.setDefaultTimeout(30000);
+    
+    // Blockiere unnötige Ressourcen für bessere Performance
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      const resourceType = req.resourceType();
+      if (['stylesheet', 'font', 'image'].includes(resourceType)) {
+        req.continue(); // CSS, Fonts und Bilder sind wichtig für PDF
+      } else if (['media', 'websocket', 'other'].includes(resourceType)) {
+        req.abort(); // Blockiere unnötige Ressourcen
+      } else {
+        req.continue();
+      }
     });
 
     // User-Agent setzen (hilft bei einigen CORS-Problemen)
@@ -113,10 +147,10 @@ export async function generatePDFWithPuppeteer(
 
     console.log(`🌐 Besuche URL: ${url}`);
     
-    // Seite laden mit erweiterten Optionen
+    // Seite laden mit optimierten Optionen für schnellere Ladezeit
     await page.goto(url, {
-      waitUntil: ['networkidle0', 'domcontentloaded'],
-      timeout: 30000
+      waitUntil: ['networkidle2', 'domcontentloaded'], // networkidle2 statt networkidle0 für bessere Performance
+      timeout: 60000 // Verdoppeltes Timeout für komplexe Seiten
     });
 
     console.log('⏳ Warte auf vollständiges Laden der Seite...');
@@ -152,15 +186,15 @@ export async function generatePDFWithPuppeteer(
           }
         });
 
-        // Fallback nach 10 Sekunden
+        // Optimierter Fallback nach 5 Sekunden für bessere Performance
         setTimeout(() => {
           resolve();
-        }, 10000);
+        }, 5000);
       });
     });
 
-    // Zusätzliche Wartezeit für CSS-Animationen und dynamische Inhalte
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Reduzierte Wartezeit für bessere Performance 
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     console.log('📋 Generiere PDF...');
 
@@ -240,7 +274,10 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
         bottom: '25mm', 
         left: '15mm',
         right: '15mm'
-      }
+      },
+      // Performance-Optimierungen für PDF-Generierung
+      preferCSSPageSize: true,
+      omitBackground: false
     });
 
     // Dateiname für Download
