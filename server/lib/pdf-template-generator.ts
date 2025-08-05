@@ -72,6 +72,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       .filter(ing => ing.name.trim())
       .forEach(ing => {
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
+          // Add the marked ingredient first
           tableIngredients.push({
             name: ing.name,
             percentage: ing.percentage || 0,
@@ -79,6 +80,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             isFinalProduct: true
           });
 
+          // Add base ingredients under the marked ingredient
           baseIngredients
             .filter(baseIng => baseIng.name.trim())
             .forEach(baseIng => {
@@ -86,7 +88,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
                 : 0;
               tableIngredients.push({
-                name: baseIng.name,
+                name: `  ${baseIng.name}`, // Indent base ingredients
                 percentage: wholeProductPercentage,
                 origin: baseIng.origin || "",
                 isFinalProduct: false
@@ -122,13 +124,24 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
     });
 
+    // Generate Nutri-Score visual based on grade
+    const nutriScoreColors = {
+      'A': '#038153',
+      'B': '#85BB2F', 
+      'C': '#FECB02',
+      'D': '#EE8100',
+      'E': '#E63E11'
+    };
+
+    const currentColor = nutriScoreColors[nutriScore.nutriGrade as keyof typeof nutriScoreColors] || '#85BB2F';
+
     nutriScoreHtml = `
       <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
         <h3 style="font-weight: 600; font-size: 16px; color: #1e293b; margin-bottom: 8px;">Nutri-Score Rating</h3>
         <div style="text-align: center;">
           <div style="display: flex; justify-content: center;">
             <div style="background: white; padding: 8px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
-              <div style="height: 64px; width: auto; background: ${getNutriScoreColor(nutriScore.nutriGrade)}; color: white; font-weight: bold; font-size: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; min-width: 80px;">
+              <div style="height: 64px; width: 80px; background: ${currentColor}; color: white; font-weight: bold; font-size: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
                 ${nutriScore.nutriGrade}
               </div>
             </div>
@@ -140,7 +153,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       </div>
     `;
 
-    // Claims berechnen
+    // Claims berechnen - nur ausgewählte anzeigen
     const claimsResult = calculateClaims({
       protein: formData.nutrition.protein || 0,
       fiber: formData.nutrition.fiber || 0,
@@ -150,17 +163,29 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       saturatedFat: formData.nutrition.saturatedFat || 0
     });
 
-    const allPossibleClaims = [
-      { label: "Source of fibre / High fibre", claim: claimsResult.fiber.bestClaim },
-      { label: "Source of protein / High protein", claim: claimsResult.protein.bestClaim },
-      { label: "Low/Free salt", claim: claimsResult.salt.bestClaim },
-      { label: "Low/Free sugar", claim: claimsResult.sugar.bestClaim },
-      { label: "Low/Free fat", claim: claimsResult.fat.bestClaim },
-      { label: "Low saturated fat", claim: claimsResult.saturatedFat.bestClaim }
-    ];
+    const claimsToShow = [];
 
-    const claimsToShow = allPossibleClaims.filter(item => item.claim);
+    // Nur Claims anzeigen, die wirklich verfügbar sind
+    if (claimsResult.fiber.bestClaim) {
+      claimsToShow.push({ label: "Source of fibre / High fibre", claim: claimsResult.fiber.bestClaim });
+    }
+    if (claimsResult.protein.bestClaim) {
+      claimsToShow.push({ label: "Source of protein / High protein", claim: claimsResult.protein.bestClaim });
+    }
+    if (claimsResult.salt.bestClaim) {
+      claimsToShow.push({ label: "Low/Free salt", claim: claimsResult.salt.bestClaim });
+    }
+    if (claimsResult.sugar.bestClaim) {
+      claimsToShow.push({ label: "Low/Free sugar", claim: claimsResult.sugar.bestClaim });
+    }
+    if (claimsResult.fat.bestClaim) {
+      claimsToShow.push({ label: "Low/Free fat", claim: claimsResult.fat.bestClaim });
+    }
+    if (claimsResult.saturatedFat.bestClaim) {
+      claimsToShow.push({ label: "Low saturated fat", claim: claimsResult.saturatedFat.bestClaim });
+    }
 
+    // Nur ausgewählte Declarations hinzufügen
     if (formData.declarations?.wholegrain) {
       claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
     }
@@ -215,7 +240,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             color: #333;
             background: white;
             margin: 0;
-            padding: 20px;
+            padding: 5mm; /* Kleinere Ränder */
         }
         
         .document-container {
@@ -227,10 +252,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 16px;
+            padding: 12px;
             border-bottom: 2px solid #cbd5e1;
             border-radius: 8px 8px 0 0;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         
         .logo {
@@ -238,7 +263,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            height: 40px;
+            height: 35px;
             width: auto;
         }
         
@@ -247,7 +272,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .header h1 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #1e293b;
             margin-bottom: 4px;
@@ -257,7 +282,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .product-number {
             color: #1e293b;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 14px;
         }
         
         .page-number {
@@ -277,7 +302,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         
         .product-name-label {
@@ -301,7 +326,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .product-image {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         
         .product-image img {
@@ -313,24 +338,25 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .section {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             overflow: hidden;
+            page-break-inside: avoid;
         }
         
         .section-header {
-            padding: 12px;
+            padding: 10px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
         
         .section-title {
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
             color: #1e293b;
         }
         
         .section-content {
-            padding: 12px;
+            padding: 10px;
         }
         
         .ingredients-content {
@@ -353,7 +379,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             border-left: 4px solid #3b82f6;
             padding: 8px;
             border-radius: 0 8px 8px 0;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            page-break-inside: avoid;
         }
         
         .warning-content {
@@ -383,12 +410,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         table {
             width: 100%;
-            font-size: 12px;
+            font-size: 11px;
             border-collapse: collapse;
         }
         
         th {
-            padding: 8px;
+            padding: 6px;
             text-align: left;
             font-weight: 600;
             color: #374151;
@@ -397,9 +424,15 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         td {
-            padding: 8px;
+            padding: 6px;
             border-bottom: 1px solid #f1f5f9;
             color: #374151;
+        }
+        
+        .base-ingredient {
+            color: #6b7280;
+            font-style: italic;
+            padding-left: 20px;
         }
         
         tr:hover {
@@ -409,23 +442,24 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .grid-two-cols {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
         
         .claims-section {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
+            page-break-inside: avoid;
         }
         
         .claims-header {
-            padding: 12px;
+            padding: 10px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
         
         .claims-content {
-            padding: 12px;
+            padding: 10px;
         }
         
         .allergy-advice {
@@ -433,13 +467,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             border-left: 4px solid #ef4444;
             border-radius: 0 8px 8px 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            page-break-inside: avoid;
         }
         
         .allergy-content {
             display: flex;
             align-items: flex-start;
-            padding: 12px;
+            padding: 10px;
         }
         
         .allergy-icon {
@@ -452,32 +487,33 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .allergy-text-container h3 {
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
             color: #991b1b;
             margin-bottom: 4px;
         }
         
         .allergy-text {
-            font-size: 14px;
+            font-size: 13px;
             color: #991b1b;
             line-height: 1.5;
             white-space: pre-line;
         }
         
         .footer-section {
-            margin-top: 16px;
+            margin-top: 12px;
             background: linear-gradient(to right, #f1f5f9, #f8fafc);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            page-break-inside: avoid;
         }
         
         .footer-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            font-size: 14px;
+            gap: 12px;
+            font-size: 13px;
         }
         
         .footer-item {
@@ -486,10 +522,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .footer-icon {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             color: #6b7280;
-            margin-right: 12px;
+            margin-right: 10px;
             flex-shrink: 0;
         }
         
@@ -504,11 +540,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .disclaimer {
-            font-size: 12px;
+            font-size: 11px;
             color: #6b7280;
             font-style: italic;
             line-height: 1.5;
-            margin-top: 16px;
+            margin-top: 12px;
         }
         
         .page-break {
@@ -520,7 +556,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         @media print {
-            body { margin: 0; }
+            body { margin: 0; padding: 5mm; }
             .page-break { page-break-before: always; }
             .avoid-break { page-break-inside: avoid; }
         }
@@ -530,7 +566,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     <div class="document-container">
         <!-- Page 1 Header -->
         <div class="header">
-            <img src="data:image/png;base64,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" alt="Brüggen Logo" class="logo">
+            <img src="https://i.imgur.com/9QZQ5pF.png" alt="Brüggen Logo" class="logo" onerror="this.style.display='none'">
             <div class="header-content">
                 <h1>Product Information</h1>
                 <div class="product-number">${formData.productNumber || "Recipe Number"}</div>
@@ -539,20 +575,20 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
 
         <!-- Product Name Section -->
-        <div class="product-name-section">
+        <div class="product-name-section avoid-break">
             <span class="product-name-label">Product Name</span>
             <h2 class="product-name">${formData.productName || "Product name will appear here..."}</h2>
         </div>
 
         <!-- Product Image -->
         ${formData.productImage ? `
-        <div class="product-image">
+        <div class="product-image avoid-break">
             <img src="${formData.productImage}" alt="Product" />
         </div>
         ` : ''}
 
         <!-- Ingredients Section -->
-        <div class="section">
+        <div class="section avoid-break">
             <div class="section-header">
                 <h3 class="section-title">Ingredients</h3>
             </div>
@@ -567,7 +603,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
 
         <!-- Warning Box -->
-        <div class="warning-box">
+        <div class="warning-box avoid-break">
             <div class="warning-content">
                 <svg class="warning-icon" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -598,10 +634,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                     <tbody>
                         ${generateIngredientsTable().map(ingredient => `
                         <tr>
-                            <td>
+                            <td class="${ingredient.isFinalProduct ? '' : 'base-ingredient'}">
                                 ${ingredient.isFinalProduct ? 
                                   `<strong>${ingredient.name}</strong>` : 
-                                  `<span style="color: #6b7280;">${ingredient.name}</span>`
+                                  ingredient.name
                                 }
                             </td>
                             <td>${ingredient.percentage}%</td>
@@ -614,13 +650,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
         ` : ''}
 
-        <!-- Page Break -->
+        <!-- Page Break für Nutrition -->
         ${formData.nutrition ? '<div class="page-break"></div>' : ''}
 
         <!-- Page 2 Header (if nutrition exists) -->
         ${formData.nutrition ? `
         <div class="header">
-            <img src="data:image/png;base64,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" alt="Brüggen Logo" class="logo">
+            <img src="https://i.imgur.com/9QZQ5pF.png" alt="Brüggen Logo" class="logo" onerror="this.style.display='none'">
             <div class="header-content">
                 <h1>Product Information</h1>
                 <div class="product-number">${formData.productNumber || "Recipe Number"}</div>
@@ -693,7 +729,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         <!-- Nutri-Score and Claims -->
         ${formData.nutrition ? `
-        <div class="grid-two-cols">
+        <div class="grid-two-cols avoid-break">
             ${nutriScoreHtml}
             <div class="claims-section">
                 <div class="claims-header">
@@ -707,16 +743,16 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         ` : ''}
 
         <!-- Storage Conditions -->
-        <div class="section">
+        <div class="section avoid-break">
             <div class="section-header">
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
                 <div style="display: flex; align-items: flex-start;">
-                    <svg style="width: 20px; height: 20px; color: #3b82f6; margin-right: 12px; margin-top: 2px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 18px; height: 18px; color: #3b82f6; margin-right: 10px; margin-top: 2px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <div style="font-size: 14px; color: #374151; line-height: 1.5; white-space: pre-line;">
+                    <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
                         ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
                     </div>
                 </div>
@@ -724,7 +760,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
 
         <!-- Allergy Advice -->
-        <div class="allergy-advice">
+        <div class="allergy-advice avoid-break">
             <div class="allergy-content">
                 <svg class="allergy-icon" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -740,16 +776,16 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         <!-- Preparation Instructions -->
         ${formData.preparation ? `
-        <div class="section">
+        <div class="section avoid-break">
             <div class="section-header">
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
                 <div style="display: flex; align-items: flex-start;">
-                    <svg style="width: 20px; height: 20px; color: #8b5cf6; margin-right: 12px; margin-top: 2px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 18px; height: 18px; color: #8b5cf6; margin-right: 10px; margin-top: 2px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    <div style="font-size: 14px; color: #374151; line-height: 1.5; white-space: pre-line;">
+                    <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
                         ${formData.preparation}
                     </div>
                 </div>
@@ -758,7 +794,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         ` : ''}
 
         <!-- Footer -->
-        <div class="footer-section">
+        <div class="footer-section avoid-break">
             <div class="footer-grid">
                 <div class="footer-item">
                     <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
