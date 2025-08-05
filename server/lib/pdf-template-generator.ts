@@ -2,6 +2,8 @@
 import { ProductInfo } from '@shared/schema';
 import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
 import { calculateClaims } from './claims-calculator-server';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * HTML-Template-Generator für PDF-Erstellung
@@ -13,11 +15,7 @@ import { calculateClaims } from './claims-calculator-server';
 export function generatePDFTemplate(formData: ProductInfo): string {
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
   
-  // Brüggen Logo as base64 - the actual logo provided by user
   // Function to get base64 image from file system
-  const fs = require('fs');
-  const path = require('path');
-  
   const getImageBase64 = (filename: string): string => {
     try {
       const imagePath = path.join(process.cwd(), 'attached_assets', filename);

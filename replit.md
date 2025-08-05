@@ -27,6 +27,10 @@ The application is built as a full-stack JavaScript application following a clea
 - **Environment Management**: Robust environment variable management for sensitive data like API keys.
 
 ### Recent Changes (2025-08-05)
+- **PDF Header Optimization**: Updated with new Brüggen logo from user assets and reduced header height to 40px while maintaining full width
+- **Logo Integration**: Implemented dynamic logo loading from attached_assets folder using proper ES6 imports and base64 conversion
+- **Nutri-Score Images**: Fixed Nutri-Score image paths by loading actual images from attached_assets folder matching live preview source paths
+- **Import Fix**: Resolved TypeScript module import error by replacing CommonJS require() with ES6 imports for file system operations
 - **Complete PDF Generation System**: Implemented and thoroughly tested professional server-side PDF generation with Puppeteer, producing native PDF documents with selectable text, functional links, and perfect layout reproduction.
 - **Enhanced PDF Quality & Page Breaks**: 
   - Native PDF format with selectable text and clickable links
