@@ -129,16 +129,17 @@ export async function generatePDFWithPuppeteer(
     await page.setDefaultNavigationTimeout(60000);
     await page.setDefaultTimeout(30000);
     
-    // Blockiere unnötige Ressourcen für bessere Performance
+    // Erlaube ALLE Ressourcen für vollständigen Inhalt
     await page.setRequestInterception(true);
     page.on('request', (req) => {
       const resourceType = req.resourceType();
-      if (['stylesheet', 'font', 'image'].includes(resourceType)) {
-        req.continue(); // CSS, Fonts und Bilder sind wichtig für PDF
-      } else if (['media', 'websocket', 'other'].includes(resourceType)) {
-        req.abort(); // Blockiere unnötige Ressourcen
+      // Erlaube alle wichtigen Ressourcen für vollständige PDF-Darstellung
+      if (['document', 'stylesheet', 'font', 'image', 'script', 'xhr', 'fetch'].includes(resourceType)) {
+        req.continue(); // Alle wichtigen Ressourcen erlauben
+      } else if (['media', 'websocket'].includes(resourceType)) {
+        req.abort(); // Nur unwichtige Ressourcen blockieren
       } else {
-        req.continue();
+        req.continue(); // Standardverhalten für andere Ressourcen
       }
     });
 
@@ -155,46 +156,55 @@ export async function generatePDFWithPuppeteer(
 
     console.log('⏳ Warte auf vollständiges Laden der Seite...');
 
-    // Warten auf spezifische Elemente und Bilder
+    // Warte auf vollständigen Content-Load
     await page.evaluate(() => {
       return new Promise<void>((resolve) => {
-        // Warte auf alle Bilder
-        const images = Array.from(document.querySelectorAll('img'));
-        let loadedImages = 0;
+        console.log('🔍 Prüfe Seiteninhalt...');
         
-        if (images.length === 0) {
+        // Warte auf alle wichtigen Elemente
+        const checkContent = () => {
+          const tables = document.querySelectorAll('table');
+          const images = document.querySelectorAll('img');
+          const mainContent = document.querySelector('#document-preview-content');
+          
+          console.log(`Gefunden: ${tables.length} Tabellen, ${images.length} Bilder`);
+          
+          // Prüfe Bilder
+          const imagesLoaded = Array.from(images).every(img => img.complete);
+          
+          // Prüfe ob Hauptinhalt vorhanden ist
+          const hasMainContent = !!mainContent;
+          
+          return hasMainContent && imagesLoaded;
+        };
+        
+        // Sofort prüfen
+        if (checkContent()) {
+          console.log('✅ Alle Inhalte bereits geladen');
           resolve();
           return;
         }
-
-        images.forEach(img => {
-          if (img.complete) {
-            loadedImages++;
-          } else {
-            img.onload = () => {
-              loadedImages++;
-              if (loadedImages === images.length) {
-                resolve();
-              }
-            };
-            img.onerror = () => {
-              loadedImages++;
-              if (loadedImages === images.length) {
-                resolve();
-              }
-            };
+        
+        // Interval für kontinuierliche Prüfung
+        const checkInterval = setInterval(() => {
+          if (checkContent()) {
+            console.log('✅ Inhalte vollständig geladen');
+            clearInterval(checkInterval);
+            resolve();
           }
-        });
-
-        // Optimierter Fallback nach 5 Sekunden für bessere Performance
+        }, 500);
+        
+        // Fallback nach 10 Sekunden
         setTimeout(() => {
+          console.log('⚠️ Content-Load-Timeout erreicht');
+          clearInterval(checkInterval);
           resolve();
-        }, 5000);
+        }, 10000);
       });
     });
 
-    // Reduzierte Wartezeit für bessere Performance 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Zusätzliche Wartezeit für finales Rendering
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     console.log('📋 Generiere PDF...');
 
