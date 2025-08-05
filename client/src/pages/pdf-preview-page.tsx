@@ -61,89 +61,92 @@ export default function PDFPreviewPage() {
   // PDF-optimierte Styles für bessere Darstellung
   return (
     <div className="min-h-screen bg-white">
-      <style>{`
-        @media print {
-          body { margin: 0; }
-          .no-print { display: none !important; }
-          .page-break-before { page-break-before: always; }
-          .page-break-after { page-break-after: always; }
-          .avoid-break { page-break-inside: avoid; }
-        }
+      {/* Container mit expliziter ID für Puppeteer */}
+      <div id="document-preview-content">
+        <style>{`
+          @media print {
+            body { margin: 0; }
+            .no-print { display: none !important; }
+            .page-break-before { page-break-before: always; }
+            .page-break-after { page-break-after: always; }
+            .avoid-break { page-break-inside: avoid; }
+          }
+          
+          /* CSS für Puppeteer PDF-Generierung */
+          .page-break-before {
+            page-break-before: always;
+            break-before: page;
+          }
+          
+          .page-break-after {
+            page-break-after: always;
+            break-after: page;
+          }
+          
+          .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          /* PDF-optimierte Schriftarten */
+          body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            padding: 0;
+          }
+          
+          /* Container für PDF-Seiten */
+          .pdf-page {
+            min-height: 100vh;
+            padding: 20mm;
+            box-sizing: border-box;
+          }
+          
+          /* Bessere Darstellung für PDF */
+          img {
+            max-width: 100%;
+            height: auto;
+            image-rendering: -webkit-optimize-contrast;
+          }
+          
+          /* Tabellen-Optimierungen */
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            page-break-inside: auto;
+          }
+          
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          
+          th, td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+          }
+          
+          /* Gradient-Fallbacks für PDF */
+          .gradient-fallback {
+            background: #f59e0b !important;
+          }
+          
+          /* Verstecke visuelle Page-Break-Indikatoren im PDF */
+          .page-break-indicator {
+            display: none;
+          }
+        `}</style>
         
-        /* CSS für Puppeteer PDF-Generierung */
-        .page-break-before {
-          page-break-before: always;
-          break-before: page;
-        }
-        
-        .page-break-after {
-          page-break-after: always;
-          break-after: page;
-        }
-        
-        .avoid-break {
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-        
-        /* PDF-optimierte Schriftarten */
-        body {
-          font-family: 'Helvetica', 'Arial', sans-serif;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          margin: 0;
-          padding: 0;
-        }
-        
-        /* Container für PDF-Seiten */
-        .pdf-page {
-          min-height: 100vh;
-          padding: 20mm;
-          box-sizing: border-box;
-        }
-        
-        /* Bessere Darstellung für PDF */
-        img {
-          max-width: 100%;
-          height: auto;
-          image-rendering: -webkit-optimize-contrast;
-        }
-        
-        /* Tabellen-Optimierungen */
-        table {
-          border-collapse: collapse;
-          width: 100%;
-          page-break-inside: auto;
-        }
-        
-        tr {
-          page-break-inside: avoid;
-          page-break-after: auto;
-        }
-        
-        th, td {
-          border: 1px solid #e5e7eb;
-          padding: 8px;
-          text-align: left;
-        }
-        
-        /* Gradient-Fallbacks für PDF */
-        .gradient-fallback {
-          background: #f59e0b !important;
-        }
-        
-        /* Verstecke visuelle Page-Break-Indikatoren im PDF */
-        .page-break-indicator {
-          display: none;
-        }
-      `}</style>
-      
-      {/* Document Preview ohne Download-Button */}
-      <DocumentPreview 
-        formData={sessionData as ProductInfo} 
-        sessionId={sessionId}
-        isPDFMode={true}
-      />
+        {/* Document Preview ohne Download-Button */}
+        <DocumentPreview 
+          formData={sessionData as ProductInfo} 
+          sessionId={sessionId}
+          isPDFMode={true}
+        />
+      </div>
     </div>
   );
 }
