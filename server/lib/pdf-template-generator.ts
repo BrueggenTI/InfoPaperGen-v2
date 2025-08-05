@@ -1,7 +1,7 @@
 
 import { ProductInfo } from '@shared/schema';
-import { calculateNutriScore, getNutriScoreColor } from '../../client/src/lib/nutri-score';
-import { calculateClaims } from '../../client/src/lib/claims-calculator';
+import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
+import { calculateClaims } from './claims-calculator-server';
 
 /**
  * HTML-Template-Generator für PDF-Erstellung
