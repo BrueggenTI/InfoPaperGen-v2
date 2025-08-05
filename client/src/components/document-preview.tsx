@@ -1,10 +1,11 @@
 import { ProductInfo } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import { generateEnhancedVisualPDF } from "@/lib/visual-pdf-generator";
+import { Download, Loader2 } from "lucide-react";
+import { downloadPDFFromServer } from "@/lib/server-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
+import { useState } from "react";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -13,6 +14,7 @@ interface DocumentPreviewProps {
 }
 
 export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
   const calculatePerServing = (per100g: number) => {
@@ -116,20 +118,26 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
   };
 
   const handleExportPDF = async () => {
+    if (!sessionId) {
+      alert('Session-ID fehlt. Bitte laden Sie die Seite neu.');
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    
     try {
-      // Verwende die neue visuelle PDF-Generierung
-      // Diese erfasst die komplette Live-Preview inklusive aller Styles und Bilder
-      await generateEnhancedVisualPDF('document-preview-content', {
-        filename: `product-information-${formData.productName || 'document'}.pdf`,
-        quality: 0.95,
-        scale: 2,
-        useCORS: true,
-        allowTaint: false
+      // Verwende die neue serverseitige PDF-Generierung mit Puppeteer
+      // Diese erstellt ein echtes PDF mit auswählbarem Text und funktionalen Links
+      await downloadPDFFromServer({
+        sessionId: sessionId,
+        baseUrl: window.location.origin
       });
     } catch (error) {
-      console.error('Fehler beim Generieren des visuellen PDFs:', error);
+      console.error('Fehler beim Generieren des Server-PDFs:', error);
       // Zeige benutzerfreundliche Fehlermeldung
-      alert('Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
+      alert(error instanceof Error ? error.message : 'Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -183,11 +191,21 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
         <div className="flex justify-end mb-6">
           <Button
             onClick={handleExportPDF}
-            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
+            disabled={isGeneratingPDF}
+            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
             data-testid="button-download-pdf"
           >
-            <Download className="w-4 h-4" />
-            <span>Download PDF</span>
+            {isGeneratingPDF ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>PDF wird erstellt...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Download PDF</span>
+              </>
+            )}
           </Button>
         </div>
       )}

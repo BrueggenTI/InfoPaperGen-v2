@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { productInfoSchema } from "@shared/schema";
 import { extractIngredientsFromImage, extractNutritionFromImage, translateIngredients } from "./services/openai";
-// Browser-based PDF generation removed due to environment constraints
+import { handlePDFDownload } from "./lib/puppeteer-pdf-generator";
 import multer from "multer";
 
 const upload = multer({
@@ -153,66 +153,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Browser-based PDF generation endpoint
-  app.post("/api/generate-pdf", async (req, res) => {
-    try {
-      const { url, sessionId } = req.body;
-      
-      if (!url || !sessionId) {
-        res.status(400).json({ message: "URL and sessionId are required" });
-        return;
-      }
-
-      const puppeteer = require('puppeteer');
-      
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
-      });
-
-      const page = await browser.newPage();
-      
-      // Set viewport for consistent rendering
-      await page.setViewport({ width: 1200, height: 800 });
-      
-      // Navigate to the PDF preview page
-      await page.goto(url, { 
-        waitUntil: 'networkidle0',
-        timeout: 30000 
-      });
-
-      // Generate PDF
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '0.5in',
-          right: '0.5in',
-          bottom: '0.5in',
-          left: '0.5in'
-        }
-      });
-
-      await browser.close();
-
-      // Set response headers for PDF download
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="product-info-${sessionId}.pdf"`);
-      res.send(pdfBuffer);
-
-    } catch (error) {
-      console.error('Error in PDF generation endpoint:', error);
-      res.status(500).json({ message: "Error generating PDF", error: (error as Error).message });
-    }
-  });
+  // Enhanced Puppeteer-based PDF generation endpoint
+  app.post("/api/download-pdf", handlePDFDownload);
 
   const httpServer = createServer(app);
   return httpServer;

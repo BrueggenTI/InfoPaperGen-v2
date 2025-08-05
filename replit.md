@@ -27,15 +27,19 @@ The application is built as a full-stack JavaScript application following a clea
 - **Environment Management**: Robust environment variable management for sensitive data like API keys.
 
 ### Recent Changes (2025-01-05)
-- **Visual PDF Generator Implementation**: Completely replaced existing PDF generation with new visual capture technology using html2canvas + jsPDF combination. This creates pixel-perfect PDF exports that capture the exact visual appearance of the Live Preview, including all CSS styling, images, layouts, and dynamic content.
-- **Enhanced User Experience**: New PDF generation provides:
-  - Exact visual reproduction of Live Preview
-  - High-quality image capture with 2x scaling
-  - Proper handling of CORS and external images
-  - Multi-page support for large content
-  - Professional PDF metadata
-  - Automatic image loading detection
-- **Technical Implementation**: Created comprehensive visual-pdf-generator.ts with multiple export modes (single page, multi-page, enhanced with pre-loading) and robust error handling with German user interface.
+- **Server-based PDF Generator Implementation**: Completely replaced client-side PDF generation with professional server-side solution using Puppeteer. This creates native PDF documents with selectable text, functional links, and perfect layout reproduction.
+- **Enhanced PDF Quality**: New server-side PDF generation provides:
+  - Native PDF format with selectable text and clickable links
+  - Server-side rendering with Puppeteer for consistent output
+  - Optimized PDF settings (A4 format, proper margins, print backgrounds)
+  - Automatic image loading and CSS animation handling
+  - Professional PDF metadata and proper filename generation
+- **Technical Implementation**: 
+  - Created puppeteer-pdf-generator.ts with robust error handling and Replit-optimized browser settings
+  - Added /api/download-pdf API endpoint for server-side PDF generation
+  - Implemented server-pdf-generator.ts for frontend integration with progress feedback
+  - Created dedicated /document-preview route for clean PDF rendering without UI elements
+- **User Experience**: Added loading states, progress indicators, and comprehensive error handling with German user interface.
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.
