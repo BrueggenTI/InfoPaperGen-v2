@@ -41,8 +41,8 @@ export async function generatePDFWithPuppeteer(
   try {
     console.log('🚀 Starte Puppeteer Browser...');
     
-    // Browser starten mit optimierten Einstellungen für Replit
-    browser = await puppeteer.launch({
+    // Browser starten mit automatischer Erkennung des verfügbaren Browsers
+    const launchOptions: any = {
       headless: true,
       args: [
         '--no-sandbox',
@@ -52,10 +52,51 @@ export async function generatePDFWithPuppeteer(
         '--no-first-run',
         '--no-zygote',
         '--single-process',
-        '--disable-gpu'
-      ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH
-    });
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-default-apps',
+        '--disable-features=TranslateUI,VizDisplayCompositor',
+        '--disable-ipc-flooding-protection',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--run-all-compositor-stages-before-draw',
+        '--memory-pressure-off'
+      ]
+    };
+
+    // Versuche verschiedene Browser-Pfade
+    const possiblePaths = [
+      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
+      process.env.PUPPETEER_EXECUTABLE_PATH,
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome'
+    ].filter(Boolean);
+
+    let browserPath = null;
+    for (const path of possiblePaths) {
+      try {
+        if (path && require('fs').existsSync(path)) {
+          browserPath = path;
+          break;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+
+    if (browserPath) {
+      console.log(`🔍 Verwende Browser: ${browserPath}`);
+      launchOptions.executablePath = browserPath;
+    } else {
+      console.log('⚠️ Kein spezifischer Browser-Pfad gefunden, verwende Puppeteer Standard');
+    }
+
+    browser = await puppeteer.launch(launchOptions);
 
     console.log('📄 Erstelle neue Seite...');
     const page = await browser.newPage();
