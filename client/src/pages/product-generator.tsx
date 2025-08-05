@@ -160,7 +160,7 @@ export default function ProductGenerator() {
           <div className="section-divider"></div>
 
           {/* Live Preview Section - Full Width Below */}
-          <div className="w-full">
+          <div className="w-full" id="document-preview-content">
             <div className="card-bruggen">
               <div className="p-6 border-b border-border">
                 <h3 className="text-xl font-semibold text-primary flex items-center gap-2">

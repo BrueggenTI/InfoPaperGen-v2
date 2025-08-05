@@ -70,6 +70,8 @@ The application is built as a full-stack JavaScript application following a clea
   - **Stability improvements**: Replaced complex page.evaluate() with stable waitForSelector() approach
   - **Live Preview Integration**: Enhanced PDF-Preview-Page to correctly capture all form data from Live Preview at end of form
   - **Content Container**: Added explicit document-preview-content ID for reliable Puppeteer content detection
+  - **URL Correction**: Fixed PDF generation to use main page with complete Live Preview instead of separate document-preview route
+  - **Complete Data Capture**: PDF now captures all form data from the Live Preview section below all form steps
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.

@@ -219,7 +219,7 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
 
     // Base URL bestimmen (für lokale Entwicklung und Produktion)
     const baseUrl = url || `${req.protocol}://${req.get('host')}`;
-    const previewUrl = `${baseUrl}/document-preview?session=${sessionId}`;
+    const previewUrl = `${baseUrl}/?session=${sessionId}`;
 
     console.log(`📄 Starte PDF-Generierung für Session: ${sessionId}`);
     console.log(`🔗 Preview URL: ${previewUrl}`);
