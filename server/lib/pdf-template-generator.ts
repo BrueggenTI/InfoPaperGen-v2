@@ -164,13 +164,17 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     const nutriScoreImage = nutriScoreImages[nutriScore.nutriGrade as keyof typeof nutriScoreImages] || nutriScoreImages['C'];
 
     nutriScoreHtml = `
-      <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
-        <h3 style="font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 6px;">Nutri-Score Rating</h3>
-        <div style="text-align: center;">
-          <img src="${nutriScoreImage}" alt="Nutri-Score ${nutriScore.nutriGrade}" style="height: 48px; width: auto; margin-bottom: 4px;" />
-          <p style="font-size: 12px; color: #374151; margin: 0; font-weight: 500;">
-            Grade: ${nutriScore.nutriGrade} • Score: ${nutriScore.finalScore}
-          </p>
+      <div class="claims-section">
+        <div class="claims-header">
+          <h3 class="section-title">Nutri-Score Rating</h3>
+        </div>
+        <div class="claims-content">
+          <div style="text-align: center;">
+            <img src="${nutriScoreImage}" alt="Nutri-Score ${nutriScore.nutriGrade}" style="height: 48px; width: auto; margin-bottom: 4px;" />
+            <p style="font-size: 12px; color: #374151; margin: 0; font-weight: 500;">
+              Grade: ${nutriScore.nutriGrade} • Score: ${nutriScore.finalScore}
+            </p>
+          </div>
         </div>
       </div>
     `;
@@ -458,7 +462,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .grid-two-cols {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr; /* 33:66 Verhältnis */
             gap: 8px;
             margin-bottom: 8px;
         }
