@@ -267,12 +267,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 8px 12px;
+            padding: 6px 12px; /* Reduziert von 8px auf 6px */
             border-bottom: 2px solid #cbd5e1;
             border-radius: 6px 6px 0 0;
-            margin-bottom: 12px;
+            margin-bottom: 6px; /* Reduziert von 12px auf 6px */
             margin-top: 0; /* Kein Rand über Header */
-            height: 40px;
+            height: 36px; /* Reduziert von 40px auf 36px */
             display: flex;
             align-items: center;
             justify-content: center; /* Header-Inhalt mittig */
@@ -320,11 +320,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .product-name-section {
             background: linear-gradient(to right, white, #f8fafc);
             border-radius: 8px;
-            padding: 12px;
+            padding: 8px; /* Reduziert von 12px auf 8px */
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 6px; /* Reduziert von 12px auf 6px */
         }
         
         .product-name-label {
@@ -347,7 +347,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .product-image {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 6px; /* Reduziert von 12px auf 6px */
         }
         
         .product-image img {
@@ -359,13 +359,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .section {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* Reduziert von 8px auf 4px */
             overflow: hidden;
             page-break-inside: avoid;
         }
         
         .section-header {
-            padding: 4px 8px;
+            padding: 2px 8px; /* Reduziert von 4px auf 2px */
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
@@ -378,7 +378,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .section-content {
-            padding: 2px 8px; /* Noch kleinerer Abstand zum Titel */
+            padding: 1px 8px; /* Reduziert von 2px auf 1px */
         }
         
         .ingredients-content {
@@ -398,31 +398,33 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .warning-box {
             border-left: 4px solid #3b82f6;
-            padding: 4px 6px;
+            padding: 2px 6px; /* Reduziert von 4px auf 2px */
             border-radius: 0 6px 6px 0;
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* Reduziert von 8px auf 4px */
             page-break-inside: avoid;
         }
         
         .warning-content {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            line-height: 1.5;
+            align-items: flex-start; /* Geändert von center auf flex-start */
+            gap: 4px; /* Reduziert von 6px auf 4px */
+            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
         }
         
         .warning-icon {
-            width: 16px;
-            height: 16px;
+            width: 14px; /* Reduziert von 16px auf 14px */
+            height: 14px; /* Reduziert von 16px auf 14px */
             color: #3b82f6;
             flex-shrink: 0;
+            margin-top: 1px; /* Inline-Ausrichtung mit erster Textzeile */
         }
         
         .warning-text {
             font-size: 12px;
             color: #1e40af;
-            line-height: 1.5;
+            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
             font-weight: 500;
+            margin: 0; /* Entfernt Standard-Margins */
         }
         
         .table-container {
@@ -490,37 +492,39 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .allergy-advice {
             border-left: 4px solid #ef4444;
             border-radius: 0 6px 6px 0;
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* Reduziert von 8px auf 4px */
             page-break-inside: avoid;
         }
         
         .allergy-content {
             display: flex;
-            align-items: center;
-            padding: 2px 8px;
-            gap: 6px;
-            line-height: 1.5;
+            align-items: flex-start; /* Geändert von center auf flex-start */
+            padding: 1px 8px; /* Reduziert von 2px auf 1px */
+            gap: 4px; /* Reduziert von 6px auf 4px */
+            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
         }
         
         .allergy-icon {
-            width: 16px;
-            height: 16px;
+            width: 14px; /* Reduziert von 16px auf 14px */
+            height: 14px; /* Reduziert von 16px auf 14px */
             color: #ef4444;
             flex-shrink: 0;
+            margin-top: 1px; /* Inline-Ausrichtung mit Text */
         }
         
         .allergy-text-container h3 {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            margin-bottom: 4px;
+            margin-bottom: 2px; /* Reduziert von 4px auf 2px */
         }
         
         .allergy-text {
             font-size: 13px;
             color: #991b1b;
-            line-height: 1.5;
+            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
             white-space: pre-line;
+            margin: 0; /* Entfernt Standard-Margins */
         }
         
         .footer-section {
@@ -772,11 +776,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: center; gap: 6px; line-height: 1.5;">
-                    <svg style="width: 16px; height: 16px; color: #3b82f6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="display: flex; align-items: flex-start; gap: 4px; line-height: 1.4;">
+                    <svg style="width: 14px; height: 14px; color: #3b82f6; flex-shrink: 0; margin-top: 1px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
+                    <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
                         ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
                     </div>
                 </div>
@@ -805,11 +809,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: center; gap: 6px; line-height: 1.5;">
-                    <svg style="width: 16px; height: 16px; color: #8b5cf6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="display: flex; align-items: flex-start; gap: 4px; line-height: 1.4;">
+                    <svg style="width: 14px; height: 14px; color: #8b5cf6; flex-shrink: 0; margin-top: 1px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
+                    <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
                         ${formData.preparation}
                     </div>
                 </div>

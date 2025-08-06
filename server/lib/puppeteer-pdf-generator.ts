@@ -209,11 +209,11 @@ export async function generatePDFWithPuppeteer(
       printBackground: true,
       displayHeaderFooter: false,
       margin: {
-        top: '20mm',
-        bottom: '20mm',
-        left: '15mm',
-        right: '15mm'
-      },
+          top: '3mm',
+          bottom: '3mm',
+          left: '3mm',
+          right: '3mm'
+        },
       preferCSSPageSize: false,
       landscape: false,
       ...options
@@ -275,10 +275,10 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
         </div>
       `,
       margin: {
-        top: '10mm',
-        bottom: '10mm', 
-        left: '10mm',
-        right: '10mm'
+        top: '3mm',
+        bottom: '3mm', 
+        left: '3mm',
+        right: '3mm'
       },
       // Performance-Optimierungen für PDF-Generierung
       preferCSSPageSize: true
@@ -373,10 +373,10 @@ export async function handleDirectPDFGeneration(req: Request, res: Response): Pr
       printBackground: true,
       displayHeaderFooter: false,
       margin: {
-        top: '10mm',
-        bottom: '10mm',
-        left: '10mm',
-        right: '10mm'
+        top: '3mm',
+        bottom: '3mm',
+        left: '3mm',
+        right: '3mm'
       },
       preferCSSPageSize: true,
       landscape: false
@@ -537,10 +537,10 @@ export async function generatePDFFromHTML(
       printBackground: true,
       displayHeaderFooter: false,
       margin: {
-        top: '10mm',
-        bottom: '10mm',
-        left: '10mm',
-        right: '10mm'
+        top: '3mm',
+        bottom: '3mm',
+        left: '3mm',
+        right: '3mm'
       },
       preferCSSPageSize: true,
       landscape: false,
