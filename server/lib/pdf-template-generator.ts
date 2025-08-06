@@ -370,10 +370,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 14px;
             color: #1e293b;
+            margin-bottom: 0;
         }
         
         .section-content {
-            padding: 8px;
+            padding: 4px 8px; /* Kleinerer Abstand zum Titel */
         }
         
         .ingredients-content {
@@ -474,8 +475,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             background: #f8fafc;
         }
         
+        .claims-header h3 {
+            margin-bottom: 0;
+        }
+        
         .claims-content {
-            padding: 8px;
+            padding: 4px 8px;
         }
         
         .allergy-advice {
@@ -487,17 +492,17 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .allergy-content {
             display: flex;
-            align-items: center;
-            padding: 6px;
+            align-items: flex-start;
+            padding: 4px 8px;
             gap: 8px;
         }
         
         .allergy-icon {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             color: #ef4444;
             flex-shrink: 0;
-            margin-top: 0;
+            margin-top: 2px; /* Icon mit erstem Textzeile ausrichten */
         }
         
         .allergy-text-container h3 {
@@ -763,8 +768,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <svg style="width: 18px; height: 18px; color: #3b82f6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <svg style="width: 16px; height: 16px; color: #3b82f6; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                     <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
@@ -796,9 +801,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <svg style="width: 18px; height: 18px; color: #8b5cf6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.246 0-3.332.477-4.5 1.253" />
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <svg style="width: 16px; height: 16px; color: #8b5cf6; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                     <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
                         ${formData.preparation}
