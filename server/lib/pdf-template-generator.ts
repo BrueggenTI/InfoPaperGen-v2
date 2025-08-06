@@ -250,13 +250,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.3;
-            color: #1a202c;
+            font-family: Arial, sans-serif;
+            line-height: 1.2;
+            color: #333;
             background: white;
             margin: 0;
-            padding: 5mm; /* Reduced margins for more content space */
-            font-size: 10px; /* Smaller base font for more compact layout */
+            padding: 8mm;
+            font-size: 10px;
         }
 
         /* =================================================================== */
@@ -284,17 +284,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .header {
             position: relative;
-            background: linear-gradient(135deg, #ff4143 0%, #661c31 100%);
+            background: #ff4143;
             padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            height: 35px;
+            margin-bottom: 15px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             page-break-inside: avoid;
-            break-inside: avoid;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             color: white;
         }
 
@@ -318,19 +315,16 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .header h1 {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 14px;
+            font-weight: bold;
             color: white;
-            margin-bottom: 1px;
-            letter-spacing: 0.3px;
-            text-rendering: optimizeLegibility;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            margin: 0;
         }
 
         .product-number {
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-            font-size: 11px;
+            color: white;
+            font-weight: normal;
+            font-size: 10px;
         }
 
         .page-number {
@@ -339,42 +333,28 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             top: 50%;
             transform: translateY(-50%);
             font-size: 10px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.1);
-            padding: 3px 6px;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
+            color: white;
         }
 
         .product-name-section {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            border-radius: 8px;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
+            padding: 8px;
         }
 
         .product-name-label {
             font-size: 10px;
-            font-weight: 500;
-            color: #6b7280;
-            letter-spacing: 0.03em;
-            margin-bottom: 3px;
+            font-weight: normal;
+            color: #666;
+            margin-bottom: 2px;
             display: block;
         }
 
         .product-name {
-            font-size: 18px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff4143 0%, #661c31 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff4143;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .product-image {
@@ -389,86 +369,63 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .section {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            overflow: hidden;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
             page-break-inside: avoid;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-            background: #ffffff;
         }
 
         .section-header {
-            padding: 6px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            margin-bottom: 0px;
+            padding: 5px 8px;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
         }
 
         .section-title {
-            font-weight: 700;
-            font-size: 12px;
-            color: #2d3748;
-            margin-bottom: 0;
-            margin-top: 0;
-            line-height: 1.2;
+            font-weight: bold;
+            font-size: 11px;
+            color: #333;
+            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
         .section-content {
-            padding: 8px 10px;
-            margin-top: 0;
-            background: #ffffff;
+            padding: 8px;
         }
 
         .ingredients-content {
             font-size: 10px;
-            line-height: 1.4;
-            color: #4a5568;
-            text-align: justify;
+            line-height: 1.3;
+            color: #333;
         }
 
         .ingredients-note {
             font-size: 8px;
-            color: #6b7280;
+            color: #666;
             font-style: italic;
-            margin-top: 3px;
+            margin-top: 5px;
             padding-top: 3px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #ddd;
         }
 
         .warning-box {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border: 1px solid #93c5fd;
-            border-left: 3px solid #3b82f6;
+            border: 1px solid #ddd;
             padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             page-break-inside: avoid;
-            box-shadow: 0 1px 4px rgba(59, 130, 246, 0.08);
         }
 
         .warning-content {
-            display: flex;
-            align-items: flex-start;
-            gap: 3px;
             line-height: 1.3;
         }
 
         .warning-icon {
-            width: 12px;
-            height: 12px;
-            color: #3b82f6;
-            flex-shrink: 0;
-            margin-top: 1px;
+            display: none;
         }
 
         .warning-text {
             font-size: 9px;
-            color: #1e40af;
+            color: #333;
             line-height: 1.3;
-            font-weight: 500;
             margin: 0;
         }
 
@@ -480,29 +437,24 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             width: 100%;
             font-size: 9px;
             border-collapse: collapse;
-            background: white;
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
 
         th {
-            padding: 6px 6px;
+            padding: 5px;
             text-align: left;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ff4143 0%, #661c31 100%);
+            font-weight: bold;
+            background: #ff4143;
             color: white;
             font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
         td {
-            padding: 4px 6px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #4a5568;
+            padding: 4px 5px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
             vertical-align: top;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .base-ingredient {
@@ -545,41 +497,32 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Storage Conditions */
         .storage-conditions {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
             page-break-inside: avoid;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-            background: #ffffff;
         }
 
         .storage-conditions .section-header {
-            padding: 6px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            margin-bottom: 0px;
+            padding: 5px 8px;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
         }
 
         .storage-conditions .section-header h3 {
-            font-weight: 700;
-            font-size: 12px;
-            color: #2d3748;
-            margin-bottom: 0;
-            margin-top: 0;
-            line-height: 1.2;
+            font-weight: bold;
+            font-size: 11px;
+            color: #333;
+            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
         .storage-conditions .section-content {
-            padding: 8px 10px;
-            margin-top: 0;
-            background: #ffffff;
+            padding: 8px;
         }
 
         .storage-conditions .section-text {
             font-size: 9px;
-            color: #4a5568;
+            color: #333;
             line-height: 1.3;
             white-space: pre-line;
             margin: 0;
@@ -587,41 +530,32 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Allergy Advice */
         .allergy-advice {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
             page-break-inside: avoid;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-            background: #ffffff;
         }
 
         .allergy-advice .section-header {
-            padding: 6px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            margin-bottom: 0px;
+            padding: 5px 8px;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
         }
 
         .allergy-advice .section-header h3 {
-            font-weight: 700;
-            font-size: 12px;
-            color: #2d3748;
-            margin-bottom: 0;
-            margin-top: 0;
-            line-height: 1.2;
+            font-weight: bold;
+            font-size: 11px;
+            color: #333;
+            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
         .allergy-advice .section-content {
-            padding: 8px 10px;
-            margin-top: 0;
-            background: #ffffff;
+            padding: 8px;
         }
 
         .allergy-advice .section-text {
             font-size: 9px;
-            color: #4a5568;
+            color: #333;
             line-height: 1.3;
             white-space: pre-line;
             margin: 0;
@@ -629,53 +563,41 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Preparation Instructions */
         .preparation-instructions {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
             page-break-inside: avoid;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-            background: #ffffff;
         }
 
         .preparation-instructions .section-header {
-            padding: 6px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            margin-bottom: 0px;
+            padding: 5px 8px;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
         }
 
         .preparation-instructions .section-header h3 {
-            font-weight: 700;
-            font-size: 12px;
-            color: #2d3748;
-            margin-bottom: 0;
-            margin-top: 0;
-            line-height: 1.2;
+            font-weight: bold;
+            font-size: 11px;
+            color: #333;
+            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
 
         .preparation-instructions .section-content {
-            padding: 8px 10px;
-            margin-top: 0;
-            background: #ffffff;
+            padding: 8px;
         }
 
         .preparation-instructions .section-text {
             font-size: 9px;
-            color: #4a5568;
+            color: #333;
             line-height: 1.3;
             white-space: pre-line;
             margin: 0;
         }
 
         .footer-section {
-            margin-top: 12px;
-            background: linear-gradient(135deg, #ff4143 0%, #661c31 100%);
-            border-radius: 6px;
-            padding: 10px;
-            border: none;
-            box-shadow: 0 2px 6px rgba(255, 65, 67, 0.2);
+            margin-top: 15px;
+            background: #ff4143;
+            padding: 8px;
             page-break-inside: avoid;
             color: white;
         }
@@ -693,33 +615,25 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .footer-icon {
-            width: 18px;
-            height: 18px;
-            color: rgba(255, 255, 255, 0.9);
-            margin-right: 12px;
-            flex-shrink: 0;
+            display: none;
         }
 
         .footer-label {
-            font-weight: 600;
+            font-weight: bold;
             color: white;
         }
 
         .footer-value {
-            margin-left: 8px;
-            color: rgba(255, 255, 255, 0.9);
+            margin-left: 5px;
+            color: white;
         }
 
         .disclaimer {
-            font-size: 10px;
-            color: #64748b;
+            font-size: 9px;
+            color: #666;
             font-style: italic;
-            line-height: 1.6;
-            margin-top: 20px;
-            padding: 16px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            line-height: 1.3;
+            margin-top: 15px;
             text-align: center;
         }
 
@@ -744,10 +658,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: white; letter-spacing: 0.3px; text-rendering: optimizeLegibility; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Product Information</h1>
-                <div class="product-number" style="font-size: 11px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 14px; font-weight: bold; color: white;">Product Information</h1>
+                <div class="product-number" style="font-size: 10px; color: white; font-weight: normal;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 10px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.1); padding: 3px 6px; border-radius: 8px; backdrop-filter: blur(10px);">Page 1</div>
+            <div class="page-number" style="font-size: 10px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: white;">Page 1</div>
         </div>
 
         <!-- Product name Section -->
@@ -831,10 +745,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: white; letter-spacing: 0.3px; text-rendering: optimizeLegibility; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Product Information</h1>
-                <div class="product-number" style="font-size: 11px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 14px; font-weight: bold; color: white;">Product Information</h1>
+                <div class="product-number" style="font-size: 10px; color: white; font-weight: normal;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 10px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.1); padding: 3px 6px; border-radius: 8px; backdrop-filter: blur(10px);">Page 2</div>
+            <div class="page-number" style="font-size: 10px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: white;">Page 2</div>
         </div>
         ` : ''}
 
