@@ -372,7 +372,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 2px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            margin-bottom: 2px; /* Reduziert den Abstand nach der Überschrift */
+            margin-bottom: 0px; /* Komplett entfernt für engere Gruppierung */
         }
 
         .section-title {
@@ -380,12 +380,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 14px;
             color: #1e293b;
             margin-bottom: 0;
-            margin-top: 0; /* Entfernt oberen Abstand */
+            margin-top: 0;
+            line-height: 1.2; /* Engere Zeilenhöhe */
         }
 
         .section-content {
-            padding: 2px 8px 6px 8px; /* Reduziert oberen Padding, behält unteren Padding */
-            margin-top: 0; /* Entfernt oberen Abstand */
+            padding: 1px 8px 6px 8px; /* Noch weniger oberer Padding */
+            margin-top: 0;
         }
 
         .ingredients-content {
@@ -509,7 +510,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 1px 8px;
             gap: 4px;
             line-height: 1.4;
-            margin-top: 0; /* Entfernt oberen Abstand */
+            margin-top: 0;
         }
 
         .allergy-icon {
@@ -524,8 +525,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            margin-bottom: 1px; /* Weiter reduziert für engere Gruppierung */
-            margin-top: 0; /* Entfernt oberen Abstand */
+            margin-bottom: 0px; /* Komplett entfernt für engste Gruppierung */
+            margin-top: 0;
+            line-height: 1.1; /* Sehr enge Zeilenhöhe */
         }
 
         .allergy-text {
@@ -606,11 +608,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px; font-family: 'Helvetica', 'Arial', sans-serif;">Product Information</h1>
-                <div class="product-number" style="font-size: 12px; font-family: 'Helvetica', 'Arial', sans-serif;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em;">Product Information</h1>
+                <div class="product-number" style="font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 1</div>
-        </div></div>
+            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500; color: #374151;">Page 1</div>
+        </div>
 
         <!-- Product name Section -->
         <div class="product-name-section avoid-break">
@@ -696,10 +698,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px; font-family: 'Helvetica', 'Arial', sans-serif;">Product Information</h1>
-                <div class="product-number" style="font-size: 12px; font-family: 'Helvetica', 'Arial', sans-serif;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em;">Product Information</h1>
+                <div class="product-number" style="font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'Helvetica', 'Arial', sans-serif;">Page 2</div>
+            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500; color: #374151;">Page 2</div>
         </div>
         ` : ''}
 
