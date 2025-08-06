@@ -96,6 +96,23 @@ export default function PDFPreviewPage() {
             margin: 0;
             padding: 0;
           }
+
+          /* =================================================================== */
+          /* CSS-Lösung zur Behebung des PDF-Abstandproblems (General Solution) */
+          /* =================================================================== */
+
+          h2, h3 {
+            /* Setzt den Abstand UNTER der Überschrift auf einen kleinen, sauberen Wert. */
+            margin-bottom: 4px !important; 
+          }
+
+          p {
+            /* Entfernt den Abstand ÜBER dem Absatz vollständig. */
+            margin-top: 0 !important;
+            
+            /* Verbessert die Lesbarkeit des Textes. */
+            line-height: 1.5;
+          }
           
           /* Container für PDF-Seiten */
           .pdf-page {
