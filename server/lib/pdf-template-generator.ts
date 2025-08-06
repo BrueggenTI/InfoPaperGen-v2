@@ -893,23 +893,26 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div class="section-text">
-                    ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: linear-gradient(to right, #f8fafc, #f1f5f9); border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px;">
+                    <span style="font-size: 12px; font-weight: 500; color: #374151;">${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}</span>
+                    <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; background: #e2e8f0; color: #1e293b;">
+                        ℃
+                    </span>
                 </div>
             </div>
         </div>
 
         <!-- Allergy Advice mit optimiertem Abstand -->
         <div class="allergy-advice avoid-break">
-            <div class="allergy-content">
-                <svg class="allergy-icon" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                <div class="allergy-text-container">
-                    <h3>Allergy Advice</h3>
-                    <div class="allergy-text">
-                        ${formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
-                    </div>
+            <div class="section-header">
+                <h3 class="section-title">Allergy Advice</h3>
+            </div>
+            <div class="section-content">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: linear-gradient(to right, #fef2f2, #fef7f7); border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 8px;">
+                    <span style="font-size: 12px; font-weight: 500; color: #374151;">${formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}</span>
+                    <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; background: #dc2626; color: #ffffff;">
+                        ⚠
+                    </span>
                 </div>
             </div>
         </div>
@@ -920,8 +923,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div class="section-text">
-                    ${formData.preparation || "Preparation instructions will be provided based on product type..."}
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: linear-gradient(to right, #f0f9ff, #ecfeff); border-radius: 8px; border: 1px solid #bae6fd; margin-bottom: 8px;">
+                    <span style="font-size: 12px; font-weight: 500; color: #374151;">${formData.preparation || "Preparation instructions will be provided based on product type..."}</span>
+                    <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; background: #0369a1; color: #ffffff;">
+                        🍳
+                    </span>
                 </div>
             </div>
         </div>
