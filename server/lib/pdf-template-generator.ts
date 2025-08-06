@@ -187,25 +187,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
     const claimsToShow = [];
 
-    // Alle Claims anzeigen, aber nur der Claim selbst (wie in den kleinen Buttons)
+    // Nur positive/grüne Claims anzeigen (Fiber und Protein)
     if (claimsResult.fiber.bestClaim) {
-      claimsToShow.push({ claim: claimsResult.fiber.bestClaim, type: 'positive' });
+      claimsToShow.push({ label: "Source of fibre / High fibre", claim: claimsResult.fiber.bestClaim });
     }
     if (claimsResult.protein.bestClaim) {
-      claimsToShow.push({ claim: claimsResult.protein.bestClaim, type: 'positive' });
+      claimsToShow.push({ label: "Source of protein / High protein", claim: claimsResult.protein.bestClaim });
     }
-    if (claimsResult.salt.bestClaim) {
-      claimsToShow.push({ claim: claimsResult.salt.bestClaim, type: 'negative' });
-    }
-    if (claimsResult.sugar.bestClaim) {
-      claimsToShow.push({ claim: claimsResult.sugar.bestClaim, type: 'negative' });
-    }
-    if (claimsResult.fat.bestClaim) {
-      claimsToShow.push({ claim: claimsResult.fat.bestClaim, type: 'negative' });
-    }
-    if (claimsResult.saturatedFat.bestClaim) {
-      claimsToShow.push({ claim: claimsResult.saturatedFat.bestClaim, type: 'negative' });
-    }
+    // Negative Claims (Salt, Sugar, Fat, Saturated Fat) werden nicht mehr angezeigt
 
     // Nur ausgewählte Declarations hinzufügen
     if (formData.declarations?.wholegrain) {
