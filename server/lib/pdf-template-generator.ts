@@ -262,7 +262,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             color: #333;
             background: white;
             margin: 0;
-            padding: 5mm; /* Kleinere Ränder */
+            padding: 3mm; /* 3mm Ränder wie gewünscht */
         }
         
         .document-container {
@@ -278,9 +278,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             border-bottom: 2px solid #cbd5e1;
             border-radius: 6px 6px 0 0;
             margin-bottom: 12px;
+            margin-top: 0; /* Kein Rand über Header */
             height: 40px;
             display: flex;
             align-items: center;
+            justify-content: center; /* Header-Inhalt mittig */
         }
         
         .logo {
@@ -291,6 +293,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .header-content {
             text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         .header h1 {
@@ -331,7 +338,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 12px;
             font-weight: 500;
             color: #6b7280;
-            text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 4px;
             display: block;
@@ -397,7 +403,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .warning-box {
-            background: #dbeafe;
             border-left: 4px solid #3b82f6;
             padding: 6px;
             border-radius: 0 6px 6px 0;
@@ -485,26 +490,25 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .allergy-advice {
-            background: #fef2f2;
             border-left: 4px solid #ef4444;
             border-radius: 0 6px 6px 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 8px;
             page-break-inside: avoid;
         }
         
         .allergy-content {
             display: flex;
-            align-items: flex-start;
-            padding: 10px;
+            align-items: center;
+            padding: 6px;
+            gap: 8px;
         }
         
         .allergy-icon {
             width: 20px;
             height: 20px;
             color: #ef4444;
-            margin-right: 8px;
             flex-shrink: 0;
+            margin-top: 0;
         }
         
         .allergy-text-container h3 {
@@ -770,8 +774,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: flex-start;">
-                    <svg style="width: 18px; height: 18px; color: #3b82f6; margin-right: 10px; margin-top: 2px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg style="width: 18px; height: 18px; color: #3b82f6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                     <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
@@ -803,9 +807,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: flex-start;">
-                    <svg style="width: 18px; height: 18px; color: #8b5cf6; margin-right: 10px; margin-top: 2px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg style="width: 18px; height: 18px; color: #8b5cf6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.246 0-3.332.477-4.5 1.253" />
                     </svg>
                     <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
                         ${formData.preparation}
