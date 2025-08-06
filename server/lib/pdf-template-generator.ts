@@ -520,19 +520,19 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 2px 8px 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            margin-bottom: 0px;
+            margin-bottom: -1px; /* Reduzierter Abstand nach unten */
         }
 
         .storage-conditions .section-header h3 {
             margin-bottom: 0;
             margin-top: 0;
-            padding-bottom: 2px;
+            padding-bottom: 1px; /* Reduziert von 2px auf 1px */
         }
 
         .storage-conditions .section-content {
-            /* KEIN OBERER ABSTAND - DIREKTER ANSCHLUSS */
+            /* DIREKTER ANSCHLUSS MIT NEGATIVEM MARGIN */
             padding: 0px 8px 6px 8px;
-            margin-top: 0;
+            margin-top: -2px; /* Negativer Margin für engeren Anschluss */
         }
 
         .storage-conditions .section-text {
@@ -574,8 +574,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            /* KEIN ABSTAND - DIREKTER ANSCHLUSS */
-            margin-bottom: 0;
+            /* ENGERER ANSCHLUSS */
+            margin-bottom: -2px; /* Negativer Margin für engeren Anschluss */
             margin-top: 0;
             padding-bottom: 0;
             line-height: 1.1;
@@ -587,8 +587,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
-            margin-top: 0;
-            /* KEIN ABSTAND - DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
+            margin-top: -1px; /* Negativer Margin für direkten Anschluss */
+            /* DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
             padding-top: 0;
         }
 
@@ -604,19 +604,19 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 2px 8px 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            margin-bottom: 0px;
+            margin-bottom: -1px; /* Reduzierter Abstand nach unten */
         }
 
         .preparation-instructions .section-header h3 {
             margin-bottom: 0;
             margin-top: 0;
-            padding-bottom: 2px;
+            padding-bottom: 1px; /* Reduziert von 2px auf 1px */
         }
 
         .preparation-instructions .section-content {
-            /* KEIN OBERER ABSTAND - DIREKTER ANSCHLUSS */
+            /* DIREKTER ANSCHLUSS MIT NEGATIVEM MARGIN */
             padding: 0px 8px 6px 8px;
-            margin-top: 0;
+            margin-top: -2px; /* Negativer Margin für engeren Anschluss */
         }
 
         .preparation-instructions .section-text {
