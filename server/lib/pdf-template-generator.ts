@@ -267,15 +267,15 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 6px 12px; /* Reduziert von 8px auf 6px */
+            padding: 6px 12px;
             border-bottom: 2px solid #cbd5e1;
             border-radius: 6px 6px 0 0;
-            margin-bottom: 6px; /* Reduziert von 12px auf 6px */
-            margin-top: 0; /* Kein Rand über Header */
-            height: 36px; /* Reduziert von 40px auf 36px */
+            margin-bottom: 6px;
+            margin-top: 0;
+            height: 36px;
             display: flex;
             align-items: center;
-            justify-content: center; /* Header-Inhalt mittig */
+            justify-content: center;
         }
         
         .logo {
@@ -286,11 +286,15 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .header-content {
             text-align: center;
-            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
         }
         
         .header h1 {
@@ -594,13 +598,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     <div class="document-container">
         <!-- Page 1 Header -->
         <div class="header">
-            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; margin-right: 10px;" />
-            <div class="header-content" style="flex: 1; text-align: center;">
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
+            <div class="header-content" style="width: 100%; text-align: center; position: relative;">
                 <h1 style="margin: 0; font-size: 16px;">Product Information</h1>
                 <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe Number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px;">Page 1</div>
-        </div>
+            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 1</div>
+        </div></div>
 
         <!-- Product Name Section -->
         <div class="product-name-section avoid-break">
@@ -684,13 +688,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Page 2 Header (if nutrition exists) -->
         ${formData.nutrition ? `
         <div class="header">
-            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; margin-right: 10px;" />
-            <div class="header-content" style="flex: 1; text-align: center;">
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
+            <div class="header-content" style="width: 100%; text-align: center; position: relative;">
                 <h1 style="margin: 0; font-size: 16px;">Product Information</h1>
                 <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe Number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px;">Page 2</div>
-        </div>
+            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 2</div>
+        </div></div>
         ` : ''}
 
         <!-- Nutritional Table -->
