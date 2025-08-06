@@ -355,7 +355,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 12px;
         }
 
         .product-name-label {
@@ -378,7 +378,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .product-image {
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 12px;
         }
 
         .product-image img {
@@ -390,7 +390,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .section {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
             overflow: hidden;
             page-break-inside: avoid;
         }
@@ -436,7 +436,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             border-left: 4px solid #3b82f6;
             padding: 2px 6px;
             border-radius: 0 6px 6px 0;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
 
@@ -502,12 +502,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .claims-section {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
 
@@ -529,7 +530,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .storage-conditions {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
 
@@ -566,7 +567,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .allergy-advice {
             border-left: 4px solid #ef4444;
             border-radius: 0 6px 6px 0;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
 
@@ -613,7 +614,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .preparation-instructions {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
             page-break-inside: avoid;
         }
 
