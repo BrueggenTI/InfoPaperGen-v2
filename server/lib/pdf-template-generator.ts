@@ -1,4 +1,3 @@
-
 import { ProductInfo } from '@shared/schema';
 import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
 import { calculateClaims } from './claims-calculator-server';
@@ -14,7 +13,7 @@ import path from 'path';
 
 export function generatePDFTemplate(formData: ProductInfo): string {
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
-  
+
   // Function to get base64 image from file system
   const getImageBase64 = (filename: string): string => {
     try {
@@ -26,10 +25,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       return '';
     }
   };
-  
+
   // Brüggen Logo as base64 - the actual logo provided by user
   const brueggenLogoBase64 = `data:image/png;base64,${getImageBase64('Brueggen LOGO NEW-RGB_1754403378420.png')}`;
-  
+
   // Nutri-Score images as base64 from actual files
   const nutriScoreImages = {
     'A': `data:image/jpeg;base64,${getImageBase64('Nutri_Score_1_1753880672878.jpg')}`,
@@ -136,7 +135,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
   // Nutri-Score berechnung
   let nutriScoreHtml = '';
   let claimsHtml = '';
-  
+
   if (formData.nutrition) {
     const nutriScore = calculateNutriScore({
       energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
@@ -248,7 +247,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
@@ -257,13 +256,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin: 0;
             padding: 3mm; /* Exakt 3mm Ränder */
         }
-        
+
         .document-container {
             width: 100%;
             margin: 0;
             background: white;
         }
-        
+
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
@@ -277,13 +276,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             align-items: center;
             justify-content: center;
         }
-        
+
         .logo {
             height: 30px;
             width: auto;
             margin-right: 10px;
         }
-        
+
         .header-content {
             text-align: center;
             display: flex;
@@ -296,7 +295,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             transform: translate(-50%, -50%);
             width: auto;
         }
-        
+
         .header h1 {
             font-size: 18px;
             font-weight: bold;
@@ -304,13 +303,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin-bottom: 4px;
             letter-spacing: 0.025em;
         }
-        
+
         .product-number {
             color: #1e293b;
             font-weight: 600;
             font-size: 14px;
         }
-        
+
         .page-number {
             position: absolute;
             right: 12px;
@@ -320,7 +319,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 500;
             color: #374151;
         }
-        
+
         .product-name-section {
             background: linear-gradient(to right, white, #f8fafc);
             border-radius: 8px;
@@ -330,7 +329,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             text-align: center;
             margin-bottom: 6px; /* Reduziert von 12px auf 6px */
         }
-        
+
         .product-name-label {
             font-size: 12px;
             font-weight: 500;
@@ -339,7 +338,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin-bottom: 4px;
             display: block;
         }
-        
+
         .product-name {
             font-size: 18px;
             font-weight: bold;
@@ -348,18 +347,18 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             background-clip: text;
             color: transparent;
         }
-        
+
         .product-image {
             text-align: center;
             margin-bottom: 6px; /* Reduziert von 12px auf 6px */
         }
-        
+
         .product-image img {
             max-width: 300px;
             max-height: 128px;
             object-fit: contain;
         }
-        
+
         .section {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
@@ -367,30 +366,30 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             overflow: hidden;
             page-break-inside: avoid;
         }
-        
+
         .section-header {
             padding: 2px 8px; /* Reduziert von 4px auf 2px */
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
-        
+
         .section-title {
             font-weight: 600;
             font-size: 14px;
             color: #1e293b;
             margin-bottom: 0;
         }
-        
+
         .section-content {
             padding: 0.5px 8px; /* Weiter reduziert für weniger Abstand */
         }
-        
+
         .ingredients-content {
             font-size: 12px; /* Reduziert von 14px auf 12px */
             line-height: 1.6;
             color: #374151;
         }
-        
+
         .ingredients-note {
             font-size: 12px;
             color: #6b7280;
@@ -399,7 +398,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding-top: 4px;
             border-top: 1px solid #e2e8f0;
         }
-        
+
         .warning-box {
             border-left: 4px solid #3b82f6;
             padding: 2px 6px; /* Reduziert von 4px auf 2px */
@@ -407,14 +406,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin-bottom: 4px; /* Reduziert von 8px auf 4px */
             page-break-inside: avoid;
         }
-        
+
         .warning-content {
             display: flex;
             align-items: flex-start; /* Geändert von center auf flex-start */
             gap: 4px; /* Reduziert von 6px auf 4px */
             line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
         }
-        
+
         .warning-icon {
             width: 14px; /* Reduziert von 16px auf 14px */
             height: 14px; /* Reduziert von 16px auf 14px */
@@ -422,7 +421,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             flex-shrink: 0;
             margin-top: 1px; /* Inline-Ausrichtung mit erster Textzeile */
         }
-        
+
         .warning-text {
             font-size: 12px;
             color: #1e40af;
@@ -430,17 +429,17 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 500;
             margin: 0; /* Entfernt Standard-Margins */
         }
-        
+
         .table-container {
             overflow-x: auto;
         }
-        
+
         table {
             width: 100%;
             font-size: 11px;
             border-collapse: collapse;
         }
-        
+
         th {
             padding: 3px 4px;
             text-align: left;
@@ -449,57 +448,57 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             background: #f8fafc;
             border-bottom: 1px solid #e2e8f0;
         }
-        
+
         td {
             padding: 3px 4px;
             border-bottom: 1px solid #f1f5f9;
             color: #374151;
         }
-        
+
         .base-ingredient {
             color: #6b7280;
             font-style: italic;
             padding-left: 20px;
         }
-        
+
         tr:hover {
             background: #f8fafc;
         }
-        
+
         .grid-two-cols {
             display: grid;
             grid-template-columns: 1fr 2fr; /* 33:66 Verhältnis */
             gap: 8px;
             margin-bottom: 8px;
         }
-        
+
         .claims-section {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
             page-break-inside: avoid;
         }
-        
+
         .claims-header {
             padding: 4px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
-        
+
         .claims-header h3 {
             margin-bottom: 0;
         }
-        
+
         .claims-content {
             padding: 2px 8px;
         }
-        
+
         .allergy-advice {
             border-left: 4px solid #ef4444;
             border-radius: 0 6px 6px 0;
             margin-bottom: 4px; /* Reduziert von 8px auf 4px */
             page-break-inside: avoid;
         }
-        
+
         .allergy-content {
             display: flex;
             align-items: flex-start; /* Geändert von center auf flex-start */
@@ -507,7 +506,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             gap: 4px; /* Reduziert von 6px auf 4px */
             line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
         }
-        
+
         .allergy-icon {
             width: 14px; /* Reduziert von 16px auf 14px */
             height: 14px; /* Reduziert von 16px auf 14px */
@@ -515,14 +514,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             flex-shrink: 0;
             margin-top: 1px; /* Inline-Ausrichtung mit Text */
         }
-        
+
         .allergy-text-container h3 {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
             margin-bottom: 2px; /* Reduziert von 4px auf 2px */
         }
-        
+
         .allergy-text {
             font-size: 13px;
             color: #991b1b;
@@ -530,7 +529,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             white-space: pre-line;
             margin: 0; /* Entfernt Standard-Margins */
         }
-        
+
         .footer-section {
             margin-top: 12px;
             background: linear-gradient(to right, #f1f5f9, #f8fafc);
@@ -540,19 +539,19 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             page-break-inside: avoid;
         }
-        
+
         .footer-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             font-size: 13px;
         }
-        
+
         .footer-item {
             display: flex;
             align-items: center;
         }
-        
+
         .footer-icon {
             width: 18px;
             height: 18px;
@@ -560,17 +559,17 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin-right: 10px;
             flex-shrink: 0;
         }
-        
+
         .footer-label {
             font-weight: 600;
             color: #374151;
         }
-        
+
         .footer-value {
             margin-left: 8px;
             color: #6b7280;
         }
-        
+
         .disclaimer {
             font-size: 11px;
             color: #6b7280;
@@ -578,15 +577,15 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.5;
             margin-top: 12px;
         }
-        
+
         .page-break {
             page-break-before: always;
         }
-        
+
         .avoid-break {
             page-break-inside: avoid;
         }
-        
+
         @media print {
             body { margin: 0; padding: 5mm; }
             .page-break { page-break-before: always; }
@@ -600,8 +599,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px;">Product Information</h1>
-                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe Number"}</div>
+                <h1 style="margin: 0; font-size: 16px;">Product information</h1>
+                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe number"}</div>
             </div>
             <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 1</div>
         </div></div>
@@ -690,8 +689,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px;">Product Information</h1>
-                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe Number"}</div>
+                <h1 style="margin: 0; font-size: 16px;">Product information</h1>
+                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe number"}</div>
             </div>
             <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 2</div>
         </div></div>
