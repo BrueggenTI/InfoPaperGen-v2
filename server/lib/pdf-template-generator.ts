@@ -517,7 +517,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .storage-conditions .section-header {
-            padding: 0px 8px;
+            padding: 2px 8px 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
             margin-bottom: 0px;
@@ -526,10 +526,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .storage-conditions .section-header h3 {
             margin-bottom: 0;
             margin-top: 0;
+            padding-bottom: 2px;
         }
 
         .storage-conditions .section-content {
-            /* MINIMALER ABSTAND FÜR DIREKTE VERBINDUNG */
+            /* KEIN OBERER ABSTAND - DIREKTER ANSCHLUSS */
             padding: 0px 8px 6px 8px;
             margin-top: 0;
         }
@@ -540,7 +541,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
-            margin-top: 2px;
+            margin-top: 0;
             padding-top: 0;
         }
 
@@ -573,9 +574,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            /* ENTSCHEIDENDE ÄNDERUNG: Minimaler margin für direkte Verbindung */
+            /* KEIN ABSTAND - DIREKTER ANSCHLUSS */
             margin-bottom: 0;
             margin-top: 0;
+            padding-bottom: 0;
             line-height: 1.1;
         }
 
@@ -585,8 +587,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
-            margin-top: 2px;
-            /* DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
+            margin-top: 0;
+            /* KEIN ABSTAND - DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
             padding-top: 0;
         }
 
@@ -599,7 +601,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .preparation-instructions .section-header {
-            padding: 0px 8px;
+            padding: 2px 8px 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
             margin-bottom: 0px;
@@ -608,10 +610,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .preparation-instructions .section-header h3 {
             margin-bottom: 0;
             margin-top: 0;
+            padding-bottom: 2px;
         }
 
         .preparation-instructions .section-content {
-            /* MINIMALER ABSTAND FÜR DIREKTE VERBINDUNG */
+            /* KEIN OBERER ABSTAND - DIREKTER ANSCHLUSS */
             padding: 0px 8px 6px 8px;
             margin-top: 0;
         }
@@ -622,7 +625,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
-            margin-top: 2px;
+            margin-top: 0;
             padding-top: 0;
         }
 
