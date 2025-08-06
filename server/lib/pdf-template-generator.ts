@@ -250,12 +250,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.4;
+            color: #1a202c;
             background: white;
             margin: 0;
-            padding: 3mm; /* Exakt 3mm Ränder */
+            padding: 8mm; /* Increased margins for better visual balance */
+            font-size: 11px; /* Optimized base font size for readability */
         }
 
         /* =================================================================== */
@@ -283,22 +284,18 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .header {
             position: relative;
-            background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 8px 12px;
-            border-bottom: 2px solid #cbd5e1;
-            border-radius: 6px 6px 0 0;
-            margin-bottom: 8px;
-            margin-top: 2px;
-            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Verhindert Seitenumbrüche innerhalb des Headers */
             page-break-inside: avoid;
             break-inside: avoid;
-            /* Stellt sicher, dass der Header als Block behandelt wird */
-            display: block;
-            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
         }
 
         .logo {
@@ -321,41 +318,43 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .header h1 {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1e293b;
-            margin-bottom: 4px;
-            letter-spacing: 0.025em;
-            /* Explizite UTF-8 Encoding-Unterstützung */
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
             text-rendering: optimizeLegibility;
-            -webkit-font-feature-settings: "kern" 1;
-            font-feature-settings: "kern" 1;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .product-number {
-            color: #1e293b;
-            font-weight: 600;
-            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            font-size: 13px;
         }
 
         .page-number {
             position: absolute;
-            right: 12px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 12px;
             font-weight: 500;
-            color: #374151;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .product-name-section {
-            background: linear-gradient(to right, white, #f8fafc);
-            border-radius: 8px;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .product-name-label {
@@ -368,12 +367,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .product-name {
-            font-size: 18px;
-            font-weight: bold;
-            background: linear-gradient(to right, #d97706, #eab308);
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .product-image {
@@ -389,38 +390,43 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .section {
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
             overflow: hidden;
             page-break-inside: avoid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: #ffffff;
         }
 
         .section-header {
-            padding: 0px 8px;
+            padding: 12px 16px;
             border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             margin-bottom: 0px;
         }
 
         .section-title {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1e293b;
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3748;
             margin-bottom: 0;
             margin-top: 0;
-            line-height: 1.2;
+            line-height: 1.3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .section-content {
-            /* KRITISCHE ÄNDERUNG: Reduzierter oberer Padding für engere Gruppierung */
-            padding: 0px 8px 6px 8px;
+            padding: 16px;
             margin-top: 0;
+            background: #ffffff;
         }
 
         .ingredients-content {
             font-size: 12px;
             line-height: 1.6;
-            color: #374151;
+            color: #4a5568;
+            text-align: justify;
         }
 
         .ingredients-note {
@@ -433,11 +439,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .warning-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #93c5fd;
             border-left: 4px solid #3b82f6;
-            padding: 2px 6px;
-            border-radius: 0 6px 6px 0;
-            margin-bottom: 12px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
             page-break-inside: avoid;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
         }
 
         .warning-content {
@@ -456,9 +465,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .warning-text {
-            font-size: 12px;
+            font-size: 11px;
             color: #1e40af;
-            line-height: 1.4;
+            line-height: 1.5;
             font-weight: 500;
             margin: 0;
         }
@@ -469,23 +478,31 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         table {
             width: 100%;
-            font-size: 11px;
+            font-size: 10px;
             border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         th {
-            padding: 3px 4px;
+            padding: 12px 8px;
             text-align: left;
-            font-weight: 600;
-            color: #374151;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
+            font-weight: 700;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         td {
-            padding: 3px 4px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #374151;
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+            vertical-align: top;
         }
 
         .base-ingredient {
@@ -529,122 +546,138 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Storage Conditions */
         .storage-conditions {
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
             page-break-inside: avoid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: #ffffff;
         }
 
         .storage-conditions .section-header {
-            padding: 1px 8px 0px 8px; /* Reduziert von 2px auf 1px */
+            padding: 12px 16px;
             border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
-            margin-bottom: -2px; /* Stärkerer negativer Abstand */
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin-bottom: 0px;
         }
 
         .storage-conditions .section-header h3 {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3748;
             margin-bottom: 0;
             margin-top: 0;
-            padding-bottom: 0; /* Komplett entfernt */
+            line-height: 1.3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .storage-conditions .section-content {
-            /* MAXIMALE KOMPRIMIERUNG */
-            padding: 0px 8px 4px 8px; /* Bottom-Padding reduziert von 6px auf 4px */
-            margin-top: -3px; /* Stärkerer negativer Margin */
+            padding: 16px;
+            margin-top: 0;
+            background: #ffffff;
         }
 
         .storage-conditions .section-text {
-            font-size: 13px;
-            color: #374151;
-            line-height: 1.3; /* Reduziert von 1.4 auf 1.3 */
+            font-size: 11px;
+            color: #4a5568;
+            line-height: 1.5;
             white-space: pre-line;
             margin: 0;
-            margin-top: -1px; /* Zusätzlicher negativer Margin */
-            padding-top: 0;
         }
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Allergy Advice */
         .allergy-advice {
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
             page-break-inside: avoid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: #ffffff;
         }
 
         .allergy-advice .section-header {
-            padding: 1px 8px 0px 8px; /* Reduziert von 2px auf 1px */
+            padding: 12px 16px;
             border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
-            margin-bottom: -2px; /* Stärkerer negativer Abstand */
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin-bottom: 0px;
         }
 
         .allergy-advice .section-header h3 {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3748;
             margin-bottom: 0;
             margin-top: 0;
-            padding-bottom: 0; /* Komplett entfernt */
+            line-height: 1.3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .allergy-advice .section-content {
-            /* MAXIMALE KOMPRIMIERUNG */
-            padding: 0px 8px 4px 8px; /* Bottom-Padding reduziert von 6px auf 4px */
-            margin-top: -3px; /* Stärkerer negativer Margin */
+            padding: 16px;
+            margin-top: 0;
+            background: #ffffff;
         }
 
         .allergy-advice .section-text {
-            font-size: 13px;
-            color: #374151;
-            line-height: 1.3; /* Reduziert von 1.4 auf 1.3 */
+            font-size: 11px;
+            color: #4a5568;
+            line-height: 1.5;
             white-space: pre-line;
             margin: 0;
-            margin-top: -1px; /* Zusätzlicher negativer Margin */
-            padding-top: 0;
         }
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Preparation Instructions */
         .preparation-instructions {
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
             page-break-inside: avoid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: #ffffff;
         }
 
         .preparation-instructions .section-header {
-            padding: 1px 8px 0px 8px; /* Reduziert von 2px auf 1px */
+            padding: 12px 16px;
             border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
-            margin-bottom: -2px; /* Stärkerer negativer Abstand */
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin-bottom: 0px;
         }
 
         .preparation-instructions .section-header h3 {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3748;
             margin-bottom: 0;
             margin-top: 0;
-            padding-bottom: 0; /* Komplett entfernt */
+            line-height: 1.3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .preparation-instructions .section-content {
-            /* MAXIMALE KOMPRIMIERUNG */
-            padding: 0px 8px 4px 8px; /* Bottom-Padding reduziert von 6px auf 4px */
-            margin-top: -3px; /* Stärkerer negativer Margin */
+            padding: 16px;
+            margin-top: 0;
+            background: #ffffff;
         }
 
         .preparation-instructions .section-text {
-            font-size: 13px;
-            color: #374151;
-            line-height: 1.3; /* Reduziert von 1.4 auf 1.3 */
+            font-size: 11px;
+            color: #4a5568;
+            line-height: 1.5;
             white-space: pre-line;
             margin: 0;
-            margin-top: -1px; /* Zusätzlicher negativer Margin */
-            padding-top: 0;
         }
 
         .footer-section {
-            margin-top: 12px;
-            background: linear-gradient(to right, #f1f5f9, #f8fafc);
-            border-radius: 8px;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
             page-break-inside: avoid;
+            color: white;
         }
 
         .footer-grid {
@@ -662,27 +695,32 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .footer-icon {
             width: 18px;
             height: 18px;
-            color: #6b7280;
-            margin-right: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-right: 12px;
             flex-shrink: 0;
         }
 
         .footer-label {
             font-weight: 600;
-            color: #374151;
+            color: white;
         }
 
         .footer-value {
             margin-left: 8px;
-            color: #6b7280;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .disclaimer {
-            font-size: 11px;
-            color: #6b7280;
+            font-size: 10px;
+            color: #64748b;
             font-style: italic;
-            line-height: 1.5;
-            margin-top: 12px;
+            line-height: 1.6;
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
         }
 
         .page-break {
@@ -706,10 +744,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
-                <div class="product-number" style="font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: white; letter-spacing: 0.5px; text-rendering: optimizeLegibility; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Product Information</h1>
+                <div class="product-number" style="font-size: 13px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500; color: #374151;">Page 1</div>
+            <div class="page-number" style="font-size: 12px; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: 12px; backdrop-filter: blur(10px);">Page 1</div>
         </div>
 
         <!-- Product name Section -->
@@ -793,10 +831,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
-                <div class="product-number" style="font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: white; letter-spacing: 0.5px; text-rendering: optimizeLegibility; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">Product Information</h1>
+                <div class="product-number" style="font-size: 13px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500; color: #374151;">Page 2</div>
+            <div class="page-number" style="font-size: 12px; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: 12px; backdrop-filter: blur(10px);">Page 2</div>
         </div>
         ` : ''}
 
