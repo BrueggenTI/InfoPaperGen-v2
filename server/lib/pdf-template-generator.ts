@@ -523,9 +523,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin-bottom: 0px;
         }
 
+        .storage-conditions .section-header h3 {
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+
         .storage-conditions .section-content {
-            /* DIREKTE ANBINDUNG DES TEXTES AN DIE ÜBERSCHRIFT */
-            padding: 2px 8px 6px 8px;
+            /* MINIMALER ABSTAND FÜR DIREKTE VERBINDUNG */
+            padding: 0px 8px 6px 8px;
             margin-top: 0;
         }
 
@@ -535,6 +540,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
+            margin-top: 2px;
             padding-top: 0;
         }
 
@@ -567,8 +573,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            /* ENTSCHEIDENDE ÄNDERUNG: Negativer margin-bottom für sofortige Verbindung */
-            margin-bottom: -2px;
+            /* ENTSCHEIDENDE ÄNDERUNG: Minimaler margin für direkte Verbindung */
+            margin-bottom: 0;
             margin-top: 0;
             line-height: 1.1;
         }
@@ -579,8 +585,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
+            margin-top: 2px;
             /* DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
-            padding-top: 2px;
+            padding-top: 0;
         }
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Preparation Instructions */
@@ -598,9 +605,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             margin-bottom: 0px;
         }
 
+        .preparation-instructions .section-header h3 {
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+
         .preparation-instructions .section-content {
-            /* MINIMALER ABSTAND FÜR SOFORTIGE GRUPPIERUNG */
-            padding: 1px 8px 6px 8px;
+            /* MINIMALER ABSTAND FÜR DIREKTE VERBINDUNG */
+            padding: 0px 8px 6px 8px;
             margin-top: 0;
         }
 
@@ -610,6 +622,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
+            margin-top: 2px;
             padding-top: 0;
         }
 
@@ -880,19 +893,17 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             </div>
         </div>
 
-        <!-- Preparation Instructions mit optimiertem Abstand -->
-        ${formData.preparation ? `
+        <!-- Preparation Instructions mit optimiertem Abstand - immer anzeigen -->
         <div class="preparation-instructions avoid-break">
             <div class="section-header">
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
                 <div class="section-text">
-                    ${formData.preparation}
+                    ${formData.preparation || "Preparation instructions will be provided based on product type..."}
                 </div>
             </div>
         </div>
-        ` : ''}
 
         <!-- Footer -->
         <div class="footer-section avoid-break">
