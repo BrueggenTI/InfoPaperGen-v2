@@ -379,7 +379,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .section-header {
-            padding: 2px 8px;
+            padding: 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
             margin-bottom: 0px;
@@ -517,7 +517,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .storage-conditions .section-header {
-            padding: 2px 8px;
+            padding: 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
             margin-bottom: 0px;
@@ -599,7 +599,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .preparation-instructions .section-header {
-            padding: 2px 8px;
+            padding: 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
             margin-bottom: 0px;
