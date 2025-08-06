@@ -1,3 +1,4 @@
+
 import { ProductInfo } from '@shared/schema';
 import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
 import { calculateClaims } from './claims-calculator-server';
@@ -267,12 +268,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 8px 12px; /* Erhöht von 6px auf 8px */
+            padding: 8px 12px;
             border-bottom: 2px solid #cbd5e1;
             border-radius: 6px 6px 0 0;
-            margin-bottom: 8px; /* Erhöht von 6px auf 8px */
-            margin-top: 2px; /* Hinzugefügt für Abstand vom oberen Rand */
-            height: 40px; /* Erhöht von 36px auf 40px */
+            margin-bottom: 8px;
+            margin-top: 2px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -303,6 +304,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             color: #1e293b;
             margin-bottom: 4px;
             letter-spacing: 0.025em;
+            /* Explizite UTF-8 Encoding-Unterstützung */
+            text-rendering: optimizeLegibility;
+            -webkit-font-feature-settings: "kern" 1;
+            font-feature-settings: "kern" 1;
         }
 
         .product-number {
@@ -324,11 +329,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .product-name-section {
             background: linear-gradient(to right, white, #f8fafc);
             border-radius: 8px;
-            padding: 8px; /* Reduziert von 12px auf 8px */
+            padding: 8px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 6px; /* Reduziert von 12px auf 6px */
+            margin-bottom: 6px;
         }
 
         .product-name-label {
@@ -351,7 +356,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .product-image {
             text-align: center;
-            margin-bottom: 6px; /* Reduziert von 12px auf 6px */
+            margin-bottom: 6px;
         }
 
         .product-image img {
@@ -363,7 +368,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .section {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
-            margin-bottom: 4px; /* Reduziert von 8px auf 4px */
+            margin-bottom: 4px;
             overflow: hidden;
             page-break-inside: avoid;
         }
@@ -372,7 +377,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 2px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            margin-bottom: 0px; /* Komplett entfernt für engere Gruppierung */
+            margin-bottom: 0px;
         }
 
         .section-title {
@@ -381,16 +386,17 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             color: #1e293b;
             margin-bottom: 0;
             margin-top: 0;
-            line-height: 1.2; /* Engere Zeilenhöhe */
+            line-height: 1.2;
         }
 
         .section-content {
-            padding: 1px 8px 6px 8px; /* Noch weniger oberer Padding */
+            /* KRITISCHE ÄNDERUNG: Reduzierter oberer Padding für engere Gruppierung */
+            padding: 0px 8px 6px 8px;
             margin-top: 0;
         }
 
         .ingredients-content {
-            font-size: 12px; /* Reduziert von 14px auf 12px */
+            font-size: 12px;
             line-height: 1.6;
             color: #374151;
         }
@@ -406,33 +412,33 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .warning-box {
             border-left: 4px solid #3b82f6;
-            padding: 2px 6px; /* Reduziert von 4px auf 2px */
+            padding: 2px 6px;
             border-radius: 0 6px 6px 0;
-            margin-bottom: 4px; /* Reduziert von 8px auf 4px */
+            margin-bottom: 4px;
             page-break-inside: avoid;
         }
 
         .warning-content {
             display: flex;
-            align-items: flex-start; /* Geändert von center auf flex-start */
-            gap: 4px; /* Reduziert von 6px auf 4px */
-            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
+            align-items: flex-start;
+            gap: 4px;
+            line-height: 1.4;
         }
 
         .warning-icon {
-            width: 14px; /* Reduziert von 16px auf 14px */
-            height: 14px; /* Reduziert von 16px auf 14px */
+            width: 14px;
+            height: 14px;
             color: #3b82f6;
             flex-shrink: 0;
-            margin-top: 1px; /* Inline-Ausrichtung mit erster Textzeile */
+            margin-top: 1px;
         }
 
         .warning-text {
             font-size: 12px;
             color: #1e40af;
-            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
+            line-height: 1.4;
             font-weight: 500;
-            margin: 0; /* Entfernt Standard-Margins */
+            margin: 0;
         }
 
         .table-container {
@@ -472,7 +478,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .grid-two-cols {
             display: grid;
-            grid-template-columns: 1fr 2fr; /* 33:66 Verhältnis */
+            grid-template-columns: 1fr 2fr;
             gap: 8px;
             margin-bottom: 8px;
         }
@@ -497,10 +503,41 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 2px 8px;
         }
 
+        /* KRITISCHE ÄNDERUNG: Spezielle Styling für Storage Conditions */
+        .storage-conditions {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            page-break-inside: avoid;
+        }
+
+        .storage-conditions .section-header {
+            padding: 2px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            margin-bottom: 0px;
+        }
+
+        .storage-conditions .section-content {
+            /* DIREKTE ANBINDUNG DES TEXTES AN DIE ÜBERSCHRIFT */
+            padding: 2px 8px 6px 8px;
+            margin-top: 0;
+        }
+
+        .storage-conditions .section-text {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.4;
+            white-space: pre-line;
+            margin: 0;
+            padding-top: 0;
+        }
+
+        /* KRITISCHE ÄNDERUNG: Spezielle Styling für Allergy Advice */
         .allergy-advice {
             border-left: 4px solid #ef4444;
             border-radius: 0 6px 6px 0;
-            margin-bottom: 4px; /* Reduziert von 8px auf 4px */
+            margin-bottom: 4px;
             page-break-inside: avoid;
         }
 
@@ -525,9 +562,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            margin-bottom: 0px; /* Komplett entfernt für engste Gruppierung */
+            /* ENTSCHEIDENDE ÄNDERUNG: Negativer margin-bottom für sofortige Verbindung */
+            margin-bottom: -2px;
             margin-top: 0;
-            line-height: 1.1; /* Sehr enge Zeilenhöhe */
+            line-height: 1.1;
         }
 
         .allergy-text {
@@ -536,7 +574,38 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             line-height: 1.4;
             white-space: pre-line;
             margin: 0;
-            padding-top: 0; /* Entfernt oberen Padding */
+            /* DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
+            padding-top: 2px;
+        }
+
+        /* KRITISCHE ÄNDERUNG: Spezielle Styling für Preparation Instructions */
+        .preparation-instructions {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            page-break-inside: avoid;
+        }
+
+        .preparation-instructions .section-header {
+            padding: 2px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            margin-bottom: 0px;
+        }
+
+        .preparation-instructions .section-content {
+            /* MINIMALER ABSTAND FÜR SOFORTIGE GRUPPIERUNG */
+            padding: 1px 8px 6px 8px;
+            margin-top: 0;
+        }
+
+        .preparation-instructions .section-text {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.4;
+            white-space: pre-line;
+            margin: 0;
+            padding-top: 0;
         }
 
         .footer-section {
@@ -604,7 +673,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 </head>
 <body>
     <div class="document-container">
-        <!-- Page 1 Header -->
+        <!-- Page 1 Header mit korrektem UTF-8 Encoding -->
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
@@ -693,7 +762,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Page Break für Nutrition -->
         ${formData.nutrition ? '<div class="page-break"></div>' : ''}
 
-        <!-- Page 2 Header (if nutrition exists) -->
+        <!-- Page 2 Header mit korrektem UTF-8 Encoding -->
         ${formData.nutrition ? `
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
@@ -782,19 +851,19 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
         ` : ''}
 
-        <!-- Storage Conditions -->
-        <div class="section avoid-break">
+        <!-- Storage Conditions mit optimiertem Abstand -->
+        <div class="storage-conditions avoid-break">
             <div class="section-header">
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0; padding-top: 0;">
+                <div class="section-text">
                     ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
                 </div>
             </div>
         </div>
 
-        <!-- Allergy Advice -->
+        <!-- Allergy Advice mit optimiertem Abstand -->
         <div class="allergy-advice avoid-break">
             <div class="allergy-content">
                 <svg class="allergy-icon" fill="currentColor" viewBox="0 0 20 20">
@@ -809,14 +878,14 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             </div>
         </div>
 
-        <!-- Preparation Instructions -->
+        <!-- Preparation Instructions mit optimiertem Abstand -->
         ${formData.preparation ? `
-        <div class="section avoid-break">
+        <div class="preparation-instructions avoid-break">
             <div class="section-header">
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0; padding-top: 0;">
+                <div class="section-text">
                     ${formData.preparation}
                 </div>
             </div>
