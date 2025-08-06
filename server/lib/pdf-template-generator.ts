@@ -238,6 +238,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Product Information - ${formData.productName || 'Product'}</title>
     <style>
         * {
@@ -368,9 +369,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .section-header {
-            padding: 2px 8px; /* Reduziert von 4px auf 2px */
+            padding: 2px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
+            margin-bottom: 2px; /* Reduziert den Abstand nach der Überschrift */
         }
 
         .section-title {
@@ -378,10 +380,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 14px;
             color: #1e293b;
             margin-bottom: 0;
+            margin-top: 0; /* Entfernt oberen Abstand */
         }
 
         .section-content {
-            padding: 0.5px 8px; /* Weiter reduziert für weniger Abstand */
+            padding: 2px 8px 6px 8px; /* Reduziert oberen Padding, behält unteren Padding */
+            margin-top: 0; /* Entfernt oberen Abstand */
         }
 
         .ingredients-content {
@@ -501,33 +505,36 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .allergy-content {
             display: flex;
-            align-items: flex-start; /* Geändert von center auf flex-start */
-            padding: 1px 8px; /* Reduziert von 2px auf 1px */
-            gap: 4px; /* Reduziert von 6px auf 4px */
-            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
+            align-items: flex-start;
+            padding: 1px 8px;
+            gap: 4px;
+            line-height: 1.4;
+            margin-top: 0; /* Entfernt oberen Abstand */
         }
 
         .allergy-icon {
-            width: 14px; /* Reduziert von 16px auf 14px */
-            height: 14px; /* Reduziert von 16px auf 14px */
+            width: 14px;
+            height: 14px;
             color: #ef4444;
             flex-shrink: 0;
-            margin-top: 1px; /* Inline-Ausrichtung mit Text */
+            margin-top: 1px;
         }
 
         .allergy-text-container h3 {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            margin-bottom: 2px; /* Reduziert von 4px auf 2px */
+            margin-bottom: 1px; /* Weiter reduziert für engere Gruppierung */
+            margin-top: 0; /* Entfernt oberen Abstand */
         }
 
         .allergy-text {
             font-size: 13px;
             color: #991b1b;
-            line-height: 1.4; /* Reduziert von 1.5 auf 1.4 */
+            line-height: 1.4;
             white-space: pre-line;
-            margin: 0; /* Entfernt Standard-Margins */
+            margin: 0;
+            padding-top: 0; /* Entfernt oberen Padding */
         }
 
         .footer-section {
@@ -599,8 +606,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px;">Product information</h1>
-                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 16px; font-family: 'Helvetica', 'Arial', sans-serif;">Product Information</h1>
+                <div class="product-number" style="font-size: 12px; font-family: 'Helvetica', 'Arial', sans-serif;">${formData.productNumber || "Recipe number"}</div>
             </div>
             <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 1</div>
         </div></div>
@@ -689,11 +696,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px;">Product information</h1>
-                <div class="product-number" style="font-size: 12px;">${formData.productNumber || "Recipe number"}</div>
+                <h1 style="margin: 0; font-size: 16px; font-family: 'Helvetica', 'Arial', sans-serif;">Product Information</h1>
+                <div class="product-number" style="font-size: 12px; font-family: 'Helvetica', 'Arial', sans-serif;">${formData.productNumber || "Recipe number"}</div>
             </div>
-            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 2</div>
-        </div></div>
+            <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'Helvetica', 'Arial', sans-serif;">Page 2</div>
+        </div>
         ` : ''}
 
         <!-- Nutritional Table -->
@@ -779,7 +786,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
+                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0; padding-top: 0;">
                     ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
                 </div>
             </div>
@@ -807,7 +814,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
+                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0; padding-top: 0;">
                     ${formData.preparation}
                 </div>
             </div>
