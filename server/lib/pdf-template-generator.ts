@@ -169,7 +169,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
           <h3 class="section-title">Nutri-Score Rating</h3>
         </div>
         <div class="claims-content">
-          <div style="text-align: center;">
+          <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
             <img src="${nutriScoreImage}" alt="Nutri-Score ${nutriScore.nutriGrade}" style="height: 48px; width: auto; margin-bottom: 4px;" />
             <p style="font-size: 12px; color: #374151; margin: 0; font-weight: 500;">
               Grade: ${nutriScore.nutriGrade} • Score: ${nutriScore.finalScore}
@@ -606,9 +606,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">Page 1</div>
         </div></div>
 
-        <!-- Product Name Section -->
+        <!-- Product name Section -->
         <div class="product-name-section avoid-break">
-            <span class="product-name-label">Product Name</span>
+            <span class="product-name-label">Product name</span>
             <h2 class="product-name">${formData.productName || "Product name will appear here..."}</h2>
         </div>
 
