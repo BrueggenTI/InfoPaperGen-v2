@@ -382,7 +382,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .section-content {
-            padding: 1px 8px; /* Reduziert von 2px auf 1px */
+            padding: 0.5px 8px; /* Weiter reduziert für weniger Abstand */
         }
         
         .ingredients-content {
@@ -780,13 +780,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: flex-start; gap: 4px; line-height: 1.4;">
-                    <svg style="width: 14px; height: 14px; color: #3b82f6; flex-shrink: 0; margin-top: 1px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
-                        ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
-                    </div>
+                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
+                    ${formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
                 </div>
             </div>
         </div>
@@ -813,13 +808,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: flex-start; gap: 4px; line-height: 1.4;">
-                    <svg style="width: 14px; height: 14px; color: #8b5cf6; flex-shrink: 0; margin-top: 1px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
-                        ${formData.preparation}
-                    </div>
+                <div style="font-size: 13px; color: #374151; line-height: 1.4; white-space: pre-line; margin: 0;">
+                    ${formData.preparation}
                 </div>
             </div>
         </div>
