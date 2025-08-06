@@ -213,8 +213,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <div style="grid-column: 1 / -1;">
           ${claimsToShow.map(item => `
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: linear-gradient(to right, #f0fdf4, #ecfdf5); border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 8px;">
-              <span style="font-size: 14px; font-weight: 500; color: #374151;">${item.label}</span>
-              <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 12px; font-weight: 600; background: #dcfce7; color: #166534;">
+              <span style="font-size: 12px; font-weight: 500; color: #374151;">${item.label}</span>
+              <span style="display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; background: #dcfce7; color: #166534;">
                 ${item.claim}
               </span>
             </div>
@@ -267,12 +267,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 6px 12px;
+            padding: 8px 12px; /* Erhöht von 6px auf 8px */
             border-bottom: 2px solid #cbd5e1;
             border-radius: 6px 6px 0 0;
-            margin-bottom: 6px;
-            margin-top: 0;
-            height: 36px;
+            margin-bottom: 8px; /* Erhöht von 6px auf 8px */
+            margin-top: 2px; /* Hinzugefügt für Abstand vom oberen Rand */
+            height: 40px; /* Erhöht von 36px auf 40px */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -386,7 +386,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .ingredients-content {
-            font-size: 14px;
+            font-size: 12px; /* Reduziert von 14px auf 12px */
             line-height: 1.6;
             color: #374151;
         }
