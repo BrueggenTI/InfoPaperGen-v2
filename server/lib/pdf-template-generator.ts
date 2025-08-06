@@ -681,7 +681,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Page 1 Header mit korrektem UTF-8 Encoding -->
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
-            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: relative; margin: 0 auto;">
+            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                 <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
                 <div class="product-number" style="font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
             </div>
@@ -764,14 +764,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
         ` : ''}
 
-        <!-- Page Break für Nutrition mit verstärktem Seitenumbruch -->
-        ${formData.nutrition ? '<div class="page-break" style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>' : ''}
-
-        <!-- Page 2 Header mit korrektem UTF-8 Encoding und verstärktem Seitenumbruch -->
+        <!-- Page 2 Header mit korrektem UTF-8 Encoding und nur einem Seitenumbruch -->
         ${formData.nutrition ? `
         <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
-            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: relative; margin: 0 auto;">
+            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                 <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
                 <div class="product-number" style="font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
             </div>
