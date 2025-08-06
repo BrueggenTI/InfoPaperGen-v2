@@ -1,4 +1,3 @@
-
 import { ProductInfo } from '@shared/schema';
 import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
 import { calculateClaims } from './claims-calculator-server';
@@ -759,12 +758,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
         ` : ''}
 
-        <!-- Page Break für Nutrition -->
-        ${formData.nutrition ? '<div class="page-break"></div>' : ''}
+        <!-- Page Break für Nutrition mit verstärktem Seitenumbruch -->
+        ${formData.nutrition ? '<div class="page-break" style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>' : ''}
 
-        <!-- Page 2 Header mit korrektem UTF-8 Encoding -->
+        <!-- Page 2 Header mit korrektem UTF-8 Encoding und verstärktem Seitenumbruch -->
         ${formData.nutrition ? `
-        <div class="header">
+        <div class="header" style="page-break-before: always; break-before: page; margin-top: 0;">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: 100%; text-align: center; position: relative;">
                 <h1 style="margin: 0; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em;">Product Information</h1>
