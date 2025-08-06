@@ -276,6 +276,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Verhindert Seitenumbrüche innerhalb des Headers */
+            page-break-inside: avoid;
+            break-inside: avoid;
+            /* Stellt sicher, dass der Header als Block behandelt wird */
+            display: block;
+            overflow: hidden;
         }
 
         .logo {
@@ -763,7 +769,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         <!-- Page 2 Header mit korrektem UTF-8 Encoding und verstärktem Seitenumbruch -->
         ${formData.nutrition ? `
-        <div class="header" style="page-break-before: always; break-before: page; margin-top: 0;">
+        <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: relative; margin: 0 auto;">
                 <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
