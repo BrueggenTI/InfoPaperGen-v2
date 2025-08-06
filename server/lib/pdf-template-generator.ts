@@ -284,7 +284,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .header {
             position: relative;
-            background: #ff4143;
+            background: #661c31;
             padding: 8px 12px;
             margin-bottom: 15px;
             height: 30px;
@@ -353,8 +353,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .product-name {
             font-size: 16px;
             font-weight: bold;
-            color: #ff4143;
-            text-transform: uppercase;
+            color: #661c31;
         }
 
         .product-image {
@@ -385,7 +384,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 11px;
             color: #333;
             margin: 0;
-            text-transform: uppercase;
         }
 
         .section-content {
@@ -443,10 +441,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 5px;
             text-align: left;
             font-weight: bold;
-            background: #ff4143;
+            background: #661c31;
             color: white;
             font-size: 9px;
-            text-transform: uppercase;
         }
 
         td {
@@ -513,7 +510,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 11px;
             color: #333;
             margin: 0;
-            text-transform: uppercase;
         }
 
         .storage-conditions .section-content {
@@ -546,7 +542,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 11px;
             color: #333;
             margin: 0;
-            text-transform: uppercase;
         }
 
         .allergy-advice .section-content {
@@ -579,7 +574,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-size: 11px;
             color: #333;
             margin: 0;
-            text-transform: uppercase;
         }
 
         .preparation-instructions .section-content {
@@ -596,7 +590,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         .footer-section {
             margin-top: 15px;
-            background: #ff4143;
+            background: #661c31;
             padding: 8px;
             page-break-inside: avoid;
             color: white;
@@ -710,7 +704,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         ${(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) ? `
         <div class="section avoid-break">
             <div class="section-header">
-                <h3 class="section-title">Detailed Ingredients Breakdown</h3>
+                <h3 class="section-title">Detailed ingredients breakdown</h3>
             </div>
             <div class="table-container">
                 <table>
@@ -740,23 +734,11 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
         ` : ''}
 
-        <!-- Page 2 Header mit korrektem UTF-8 Encoding und nur einem Seitenumbruch -->
-        ${formData.nutrition ? `
-        <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
-            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
-            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
-                <h1 style="margin: 0; font-size: 14px; font-weight: bold; color: white;">Product Information</h1>
-                <div class="product-number" style="font-size: 10px; color: white; font-weight: normal;">${formData.productNumber || "Recipe number"}</div>
-            </div>
-            <div class="page-number" style="font-size: 10px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: white;">Page 2</div>
-        </div>
-        ` : ''}
-
-        <!-- Nutritional Table -->
+        <!-- Nutritional Table on Page 1 -->
         ${formData.nutrition ? `
         <div class="section avoid-break">
             <div class="section-header">
-                <h3 class="section-title">Average Nutritional Value</h3>
+                <h3 class="section-title">Average nutritional value</h3>
             </div>
             <div class="table-container">
                 <table>
@@ -814,13 +796,25 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         </div>
         ` : ''}
 
+        <!-- Page 2 Header mit korrektem UTF-8 Encoding und nur einem Seitenumbruch -->
+        ${formData.nutrition ? `
+        <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
+            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                <h1 style="margin: 0; font-size: 14px; font-weight: bold; color: white;">Product Information</h1>
+                <div class="product-number" style="font-size: 10px; color: white; font-weight: normal;">${formData.productNumber || "Recipe number"}</div>
+            </div>
+            <div class="page-number" style="font-size: 10px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: white;">Page 2</div>
+        </div>
+        ` : ''}
+
         <!-- Nutri-Score and Claims -->
         ${formData.nutrition ? `
         <div class="grid-two-cols avoid-break">
             ${nutriScoreHtml}
             <div class="claims-section">
                 <div class="claims-header">
-                    <h3 class="section-title">Possible Declarations</h3>
+                    <h3 class="section-title">Possible declarations</h3>
                 </div>
                 <div class="claims-content">
                     ${claimsHtml}
@@ -832,7 +826,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Storage Conditions mit optimiertem Abstand -->
         <div class="storage-conditions avoid-break">
             <div class="section-header">
-                <h3 class="section-title">Storage Conditions</h3>
+                <h3 class="section-title">Storage conditions</h3>
             </div>
             <div class="section-content">
                 <div class="section-text">
@@ -844,7 +838,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Allergy Advice mit optimiertem Abstand -->
         <div class="allergy-advice avoid-break">
             <div class="section-header">
-                <h3 class="section-title">Allergy Advice</h3>
+                <h3 class="section-title">Allergy advice</h3>
             </div>
             <div class="section-content">
                 <div class="section-text">
@@ -856,7 +850,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Preparation Instructions mit optimiertem Abstand - immer anzeigen -->
         <div class="preparation-instructions avoid-break">
             <div class="section-header">
-                <h3 class="section-title">Preparation Instructions</h3>
+                <h3 class="section-title">Preparation instructions</h3>
             </div>
             <div class="section-content">
                 <div class="section-text">
