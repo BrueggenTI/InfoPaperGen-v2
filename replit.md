@@ -61,7 +61,7 @@ The application is built as a full-stack JavaScript application following a clea
   - **Resource blocking**: Implemented request interception to block unnecessary resources
   - **Reduced wait times**: Optimized fallback timers (10s→5s, 2s→1s)
   - **Browser flags**: Added 16 additional performance-focused Chrome flags
-- **PDF Layout & Content Optimizations (2025-08-05)**: Fixed PDF generation issues:
+- **PDF Layout & Content Optimizations (2025-08-06)**: Fixed PDF generation issues:
   - **Reduced margins**: Decreased from 25mm to 10mm (60% reduction) for better content utilization
   - **Removed visual elements**: Eliminated box shadows, borders, and rounded corners in PDF mode
   - **Header optimization**: Brüggen logo section redesigned as clean document header with border
@@ -76,6 +76,13 @@ The application is built as a full-stack JavaScript application following a clea
   - **Content Container**: Added explicit document-preview-content ID for reliable Puppeteer content detection
   - **URL Correction**: Fixed PDF generation to use main page with complete Live Preview instead of separate document-preview route
   - **Complete Data Capture**: PDF now captures all form data from the Live Preview section below all form steps
+- **Clean Design Implementation (2025-08-06)**: Minimalistic, professional PDF design overhaul:
+  - **3mm Margins**: Exact 3mm margins for maximum content utilization (body padding and full-width container)
+  - **Centered Header**: Product Information header perfectly centered with reference number
+  - **Product Name Capitalization**: Only first letter capitalized, not all uppercase
+  - **Icon-Text Alignment**: Storage Conditions and Preparation Instructions - icons and text on same height with flex center alignment
+  - **Removed Colored Backgrounds**: Allergy Advice and Ingredients warnings show only colored left borders without background colors
+  - **Positive Claims Only**: Possible Declarations section displays only green highlighted claims (Fiber and Protein sources)
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.

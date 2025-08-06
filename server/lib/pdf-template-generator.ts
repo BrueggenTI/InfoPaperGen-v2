@@ -251,12 +251,12 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             color: #333;
             background: white;
             margin: 0;
-            padding: 3mm; /* 3mm Ränder wie gewünscht */
+            padding: 3mm; /* Exakt 3mm Ränder */
         }
         
         .document-container {
-            max-width: 100%;
-            margin: 0 auto;
+            width: 100%;
+            margin: 0;
             background: white;
         }
         
