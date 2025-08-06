@@ -565,48 +565,38 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         /* KRITISCHE ÄNDERUNG: Spezielle Styling für Allergy Advice */
         .allergy-advice {
-            border-left: 4px solid #ef4444;
-            border-radius: 0 6px 6px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
             margin-bottom: 12px;
             page-break-inside: avoid;
         }
 
-        .allergy-content {
-            display: flex;
-            align-items: flex-start;
-            padding: 0px 8px 2px 8px; /* Top-Padding auf 0, Bottom reduziert */
-            gap: 3px; /* Gap reduziert von 4px auf 3px */
-            line-height: 1.3; /* Reduziert von 1.4 auf 1.3 */
-            margin-top: -1px; /* Negativer Margin hinzugefügt */
+        .allergy-advice .section-header {
+            padding: 1px 8px 0px 8px; /* Reduziert von 2px auf 1px */
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            margin-bottom: -2px; /* Stärkerer negativer Abstand */
         }
 
-        .allergy-icon {
-            width: 14px;
-            height: 14px;
-            color: #ef4444;
-            flex-shrink: 0;
-            margin-top: 0px; /* Reduziert von 1px auf 0px */
+        .allergy-advice .section-header h3 {
+            margin-bottom: 0;
+            margin-top: 0;
+            padding-bottom: 0; /* Komplett entfernt */
         }
 
-        .allergy-text-container h3 {
-            font-weight: 600;
-            font-size: 15px;
-            color: #991b1b;
+        .allergy-advice .section-content {
             /* MAXIMALE KOMPRIMIERUNG */
-            margin-bottom: -3px; /* Stärkerer negativer Margin */
-            margin-top: -1px; /* Negativer Top-Margin hinzugefügt */
-            padding-bottom: 0;
-            line-height: 1.0; /* Reduziert von 1.1 auf 1.0 */
+            padding: 0px 8px 4px 8px; /* Bottom-Padding reduziert von 6px auf 4px */
+            margin-top: -3px; /* Stärkerer negativer Margin */
         }
 
-        .allergy-text {
+        .allergy-advice .section-text {
             font-size: 13px;
-            color: #991b1b;
+            color: #374151;
             line-height: 1.3; /* Reduziert von 1.4 auf 1.3 */
             white-space: pre-line;
             margin: 0;
-            margin-top: -2px; /* Stärkerer negativer Margin */
-            /* ENGSTE VERBINDUNG ZUR ÜBERSCHRIFT */
+            margin-top: -1px; /* Zusätzlicher negativer Margin */
             padding-top: 0;
         }
 
@@ -905,13 +895,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Allergy Advice</h3>
             </div>
             <div class="section-content">
-                <div class="allergy-content">
-                    <svg class="allergy-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                    <div class="allergy-text">
-                        ${formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
-                    </div>
+                <div class="section-text">
+                    ${formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
                 </div>
             </div>
         </div>
