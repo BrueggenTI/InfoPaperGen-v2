@@ -168,8 +168,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
           <h3 class="section-title">Nutri-Score Rating</h3>
         </div>
         <div class="claims-content">
-          <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-            <img src="${nutriScoreImage}" alt="Nutri-Score ${nutriScore.nutriGrade}" style="height: 48px; width: auto; margin-bottom: 4px;" />
+          <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 120px;">
+            <img src="${nutriScoreImage}" alt="Nutri-Score ${nutriScore.nutriGrade}" style="height: 48px; width: auto; margin-bottom: 4px; display: block; margin-left: auto; margin-right: auto;" />
             <p style="font-size: 12px; color: #374151; margin: 0; font-weight: 500;">
               Grade: ${nutriScore.nutriGrade} • Score: ${nutriScore.finalScore}
             </p>
@@ -285,9 +285,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .header {
             position: relative;
             background: #661c31;
-            padding: 8px 12px;
+            padding: 15px 12px;
             margin-bottom: 15px;
-            height: 30px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -650,7 +650,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     <div class="document-container">
         <!-- Page 1 Header mit korrektem UTF-8 Encoding -->
         <div class="header">
-            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 35px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                 <h1 style="margin: 0; font-size: 14px; font-weight: bold; color: white;">Product Information</h1>
                 <div class="product-number" style="font-size: 10px; color: white; font-weight: normal;">${formData.productNumber || "Recipe number"}</div>
@@ -799,7 +799,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Page 2 Header mit korrektem UTF-8 Encoding und nur einem Seitenumbruch -->
         ${formData.nutrition ? `
         <div class="header" style="page-break-before: always; break-before: page; page-break-inside: avoid; break-inside: avoid; margin-top: 0;">
-            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
+            <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 35px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
             <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
                 <h1 style="margin: 0; font-size: 14px; font-weight: bold; color: white;">Product Information</h1>
                 <div class="product-number" style="font-size: 10px; color: white; font-weight: normal;">${formData.productNumber || "Recipe number"}</div>
