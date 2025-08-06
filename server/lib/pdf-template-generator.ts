@@ -675,9 +675,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         <!-- Page 1 Header mit korrektem UTF-8 Encoding -->
         <div class="header">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
-            <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em;">Product Information</h1>
-                <div class="product-number" style="font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
+            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: relative; margin: 0 auto;">
+                <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
+                <div class="product-number" style="font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
             </div>
             <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500; color: #374151;">Page 1</div>
         </div>
@@ -765,9 +765,9 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         ${formData.nutrition ? `
         <div class="header" style="page-break-before: always; break-before: page; margin-top: 0;">
             <img src="${brueggenLogoBase64}" alt="Brüggen Logo" style="height: 30px; width: auto; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);" />
-            <div class="header-content" style="width: 100%; text-align: center; position: relative;">
-                <h1 style="margin: 0; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em;">Product Information</h1>
-                <div class="product-number" style="font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
+            <div class="header-content" style="width: calc(100% - 160px); text-align: center; position: relative; margin: 0 auto;">
+                <h1 style="margin: 0; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: bold; color: #1e293b; letter-spacing: 0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Product Information</h1>
+                <div class="product-number" style="font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-weight: 600;">${formData.productNumber || "Recipe number"}</div>
             </div>
             <div class="page-number" style="font-size: 11px; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-weight: 500; color: #374151;">Page 2</div>
         </div>
