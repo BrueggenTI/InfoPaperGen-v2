@@ -508,39 +508,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             padding: 2px 8px;
         }
 
-        /* GLOBALE ABSTANDS-RESET für alle Überschriften und Texte */
-        h1, h2, h3, h4, h5, h6 {
-            margin: 0 !important;
-            padding: 0 !important;
-            margin-bottom: 0 !important;
-            margin-top: 0 !important;
-        }
-
-        p, div, span {
-            margin: 0 !important;
-            padding: 0 !important;
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-        }
-
-        /* SEKTIONS-SPEZIFISCHE MINIMAL-ABSTÄNDE */
-        .section-content {
-            padding: 2px 8px 6px 8px !important;
-            margin: 0 !important;
-        }
-
-        .section-text {
-            font-size: 13px;
-            color: #374151;
-            line-height: 1.4;
-            white-space: pre-line;
-            margin: 0 !important;
-            padding: 0 !important;
-            /* NUR 2px Abstand zwischen Überschrift und Text */
-            margin-top: 2px !important;
-        }
-
-        /* Storage Conditions mit MINIMALEN Abständen */
+        /* KRITISCHE ÄNDERUNG: Spezielle Styling für Storage Conditions */
         .storage-conditions {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
@@ -549,28 +517,34 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .storage-conditions .section-header {
-            padding: 4px 8px !important;
+            padding: 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            margin: 0 !important;
+            margin-bottom: 0px;
         }
 
         .storage-conditions .section-header h3 {
-            margin: 0 !important;
-            padding: 0 !important;
-            line-height: 1.2;
+            margin-bottom: 0;
+            margin-top: 0;
         }
 
         .storage-conditions .section-content {
-            padding: 2px 8px 6px 8px !important;
-            margin: 0 !important;
+            /* MINIMALER ABSTAND FÜR DIREKTE VERBINDUNG */
+            padding: 0px 8px 6px 8px;
+            margin-top: 0;
         }
 
         .storage-conditions .section-text {
-            margin-top: 2px !important;
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.4;
+            white-space: pre-line;
+            margin: 0;
+            margin-top: 2px;
+            padding-top: 0;
         }
 
-        /* Allergy Advice mit MINIMALEN Abständen */
+        /* KRITISCHE ÄNDERUNG: Spezielle Styling für Allergy Advice */
         .allergy-advice {
             border-left: 4px solid #ef4444;
             border-radius: 0 6px 6px 0;
@@ -581,10 +555,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .allergy-content {
             display: flex;
             align-items: flex-start;
-            padding: 4px 8px !important;
+            padding: 1px 8px;
             gap: 4px;
             line-height: 1.4;
-            margin: 0 !important;
+            margin-top: 0;
         }
 
         .allergy-icon {
@@ -599,9 +573,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             font-weight: 600;
             font-size: 15px;
             color: #991b1b;
-            margin: 0 !important;
-            padding: 0 !important;
-            line-height: 1.2;
+            /* ENTSCHEIDENDE ÄNDERUNG: Minimaler margin für direkte Verbindung */
+            margin-bottom: 0;
+            margin-top: 0;
+            line-height: 1.1;
         }
 
         .allergy-text {
@@ -609,13 +584,13 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             color: #991b1b;
             line-height: 1.4;
             white-space: pre-line;
-            margin: 0 !important;
-            padding: 0 !important;
-            /* NUR 2px Abstand zwischen Überschrift und Text */
-            margin-top: 2px !important;
+            margin: 0;
+            margin-top: 2px;
+            /* DIREKTER ANSCHLUSS AN ÜBERSCHRIFT */
+            padding-top: 0;
         }
 
-        /* Preparation Instructions mit MINIMALEN Abständen */
+        /* KRITISCHE ÄNDERUNG: Spezielle Styling für Preparation Instructions */
         .preparation-instructions {
             border: 1px solid #e2e8f0;
             border-radius: 6px;
@@ -624,25 +599,31 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
 
         .preparation-instructions .section-header {
-            padding: 4px 8px !important;
+            padding: 0px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            margin: 0 !important;
+            margin-bottom: 0px;
         }
 
         .preparation-instructions .section-header h3 {
-            margin: 0 !important;
-            padding: 0 !important;
-            line-height: 1.2;
+            margin-bottom: 0;
+            margin-top: 0;
         }
 
         .preparation-instructions .section-content {
-            padding: 2px 8px 6px 8px !important;
-            margin: 0 !important;
+            /* MINIMALER ABSTAND FÜR DIREKTE VERBINDUNG */
+            padding: 0px 8px 6px 8px;
+            margin-top: 0;
         }
 
         .preparation-instructions .section-text {
-            margin-top: 2px !important;
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.4;
+            white-space: pre-line;
+            margin: 0;
+            margin-top: 2px;
+            padding-top: 0;
         }
 
         .footer-section {
