@@ -365,7 +365,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .section-header {
-            padding: 6px 8px;
+            padding: 4px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
@@ -378,7 +378,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .section-content {
-            padding: 4px 8px; /* Kleinerer Abstand zum Titel */
+            padding: 2px 8px; /* Noch kleinerer Abstand zum Titel */
         }
         
         .ingredients-content {
@@ -398,7 +398,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .warning-box {
             border-left: 4px solid #3b82f6;
-            padding: 6px;
+            padding: 4px 6px;
             border-radius: 0 6px 6px 0;
             margin-bottom: 8px;
             page-break-inside: avoid;
@@ -406,15 +406,15 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .warning-content {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.5;
         }
         
         .warning-icon {
             width: 16px;
             height: 16px;
             color: #3b82f6;
-            margin-right: 8px;
-            margin-top: 2px;
             flex-shrink: 0;
         }
         
@@ -474,7 +474,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .claims-header {
-            padding: 6px 8px;
+            padding: 4px 8px;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
         }
@@ -484,7 +484,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         }
         
         .claims-content {
-            padding: 4px 8px;
+            padding: 2px 8px;
         }
         
         .allergy-advice {
@@ -496,9 +496,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         
         .allergy-content {
             display: flex;
-            align-items: flex-start;
-            padding: 4px 8px;
-            gap: 8px;
+            align-items: center;
+            padding: 2px 8px;
+            gap: 6px;
+            line-height: 1.5;
         }
         
         .allergy-icon {
@@ -506,7 +507,6 @@ export function generatePDFTemplate(formData: ProductInfo): string {
             height: 16px;
             color: #ef4444;
             flex-shrink: 0;
-            margin-top: 2px; /* Icon mit erstem Textzeile ausrichten */
         }
         
         .allergy-text-container h3 {
@@ -772,8 +772,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Storage Conditions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: flex-start; gap: 8px;">
-                    <svg style="width: 16px; height: 16px; color: #3b82f6; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="display: flex; align-items: center; gap: 6px; line-height: 1.5;">
+                    <svg style="width: 16px; height: 16px; color: #3b82f6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                     <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
@@ -805,8 +805,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                 <h3 class="section-title">Preparation Instructions</h3>
             </div>
             <div class="section-content">
-                <div style="display: flex; align-items: flex-start; gap: 8px;">
-                    <svg style="width: 16px; height: 16px; color: #8b5cf6; flex-shrink: 0; margin-top: 2px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="display: flex; align-items: center; gap: 6px; line-height: 1.5;">
+                    <svg style="width: 16px; height: 16px; color: #8b5cf6; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                     <div style="font-size: 13px; color: #374151; line-height: 1.5; white-space: pre-line;">
