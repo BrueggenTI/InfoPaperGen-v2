@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Extract ingredients from image
   app.post("/api/extract/ingredients", upload.single("image"), async (req, res) => {
     const operationId = `ingredient-extraction-${Date.now()}`;
-    
+
     try {
       DebugLogger.info("INGREDIENT_EXTRACTION", "Started", { 
         operationId,
@@ -112,14 +112,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const base64Image = req.file.buffer.toString("base64");
-      
+
       DebugLogger.info("INGREDIENT_EXTRACTION", "Calling OpenAI API", { 
         operationId, 
         base64Length: base64Image.length 
       });
 
       const extractedIngredients = await extractIngredientsFromImage(base64Image);
-      
+
       DebugLogger.success("INGREDIENT_EXTRACTION", "OpenAI Response Received", { 
         operationId, 
         ingredientCount: extractedIngredients.ingredients?.length || 0 
@@ -135,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             : ingredient.percentage
         }))
       };
-      
+
       DebugLogger.success("INGREDIENT_EXTRACTION", "Processing Complete", { 
         operationId, 
         finalIngredientCount: roundedIngredients.ingredients?.length || 0 
@@ -149,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errorMessage, 
         errorStack: error instanceof Error ? error.stack : undefined 
       }, error as Error);
-      
+
       // Check if this is an API key related error
       if (errorMessage.includes("OpenAI API key")) {
         res.status(503).json({ 
@@ -173,14 +173,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/extract-ingredients", async (req, res) => {
     try {
       const { image, isBaseProduct } = req.body;
-      
+
       if (!image) {
         res.status(400).json({ message: "No image data provided" });
         return;
       }
 
       const extractedIngredients = await extractIngredientsFromImage(image, isBaseProduct);
-      
+
       // Round all percentages to one decimal place
       const roundedIngredients = {
         ...extractedIngredients,
@@ -191,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             : ingredient.percentage
         }))
       };
-      
+
       res.json(roundedIngredients);
     } catch (error) {
       res.status(500).json({ message: "Error extracting ingredients", error: (error as Error).message });
@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Extract nutrition from image
   app.post("/api/extract/nutrition", upload.single("image"), async (req, res) => {
     const operationId = `nutrition-extraction-${Date.now()}`;
-    
+
     try {
       DebugLogger.info("NUTRITION_EXTRACTION", "Started", { 
         operationId,
@@ -239,17 +239,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const base64Image = req.file.buffer.toString("base64");
-      
-      DebugLogger.info("NUTRITION_EXTRACTION", "Calling OpenAI API", { 
-        operationId, 
-        base64Length: base64Image.length 
-      });
 
+      console.log(`[${operationId}] About to call extractNutritionFromImage...`);
       const extractedNutrition = await extractNutritionFromImage(base64Image);
-      
+      console.log(`[${operationId}] extractNutritionFromImage completed:`, extractedNutrition);
+
       DebugLogger.success("NUTRITION_EXTRACTION", "Processing Complete", { 
         operationId, 
-        hasNutritionData: !!extractedNutrition 
+        hasNutrition: !!extractedNutrition,
+        nutritionKeys: Object.keys(extractedNutrition || {}),
+        nutritionData: extractedNutrition
       });
 
       res.json(extractedNutrition);
@@ -260,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errorMessage, 
         errorStack: error instanceof Error ? error.stack : undefined 
       }, error as Error);
-      
+
       // Check if this is an API key related error
       if (errorMessage.includes("OpenAI API key")) {
         res.status(503).json({ 
@@ -283,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Extract nutrition from base64 image
   app.post("/api/extract-nutrition", async (req, res) => {
     const operationId = `nutrition-extraction-base64-${Date.now()}`;
-    
+
     try {
       DebugLogger.info("NUTRITION_EXTRACTION_BASE64", "Started", { 
         operationId,
@@ -303,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { image } = req.body;
-      
+
       if (!image) {
         DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "No Image Data", { operationId });
         return res.status(400).json({ 
@@ -354,23 +353,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       DebugLogger.info("NUTRITION_EXTRACTION_BASE64", "Calling OpenAI", { operationId });
       const extractedNutrition = await extractNutritionFromImage(cleanBase64);
-      
-      DebugLogger.success("NUTRITION_EXTRACTION_BASE64", "Success", { 
-        operationId, 
-        hasNutrition: !!extractedNutrition 
-      });
-      
+
+      console.log(`[${operationId}] Sending response with nutrition data:`, { nutrition: extractedNutrition });
+
       res.json({ nutrition: extractedNutrition });
+
+      console.log(`[${operationId}] Response sent successfully`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
       const errorType = error instanceof Error ? error.constructor.name : typeof error;
-      
-      DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "Processing Failed", { 
+
+      console.error(`[${operationId}] Error in nutrition extraction:`, error);
+
+      DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "Failed", { 
         operationId, 
         errorMessage, 
-        errorType,
-        errorStack: errorStack?.split('\n')[0] // Only first line to avoid too much data
+        errorStack: errorStack?.split('\n')[0], // Only first line to avoid too much data
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        timestamp: new Date().toISOString()
       }, error as Error);
 
       // Check if this is an API key related error
@@ -418,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { ingredients, targetLanguage, sourceLanguage } = req.body;
-      
+
       if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
         res.status(400).json({ 
           message: "No ingredients provided",
@@ -440,12 +441,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         targetLanguage,
         sourceLanguage
       });
-      
+
       res.json(translationResult);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("[INGREDIENT TRANSLATION] Error:", error);
-      
+
       // Check if this is an API key related error
       if (errorMessage.includes("OpenAI API key")) {
         res.status(503).json({ 

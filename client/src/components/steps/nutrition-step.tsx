@@ -13,6 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage, formatNutriScoreDetails } from "@/lib/nutri-score";
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
+import { v4 as uuidv4 } from 'uuid';
 
 const nutritionSchema = z.object({
   energy: z.object({
@@ -37,6 +38,40 @@ interface NutritionStepProps {
   isLoading?: boolean;
 }
 
+// Debugging component to display API errors
+const DebugPanel: React.FC<{ lastApiError: any }> = ({ lastApiError }) => {
+  if (!lastApiError) return null;
+
+  const errorDetails = lastApiError ? {
+    message: lastApiError.message || 'No message',
+    name: lastApiError.name || 'Unknown Error',
+    stack: lastApiError.stack || 'No stack trace',
+    type: typeof lastApiError,
+    constructor: lastApiError.constructor?.name || 'Unknown Constructor'
+  } : {};
+
+  return (
+    <Card className="mb-6 border-destructive">
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2 text-destructive">
+          <Loader2 className="w-5 h-5" />
+          <span>API Debugging Information</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground mb-2">Last API Error:</p>
+        <div className="bg-secondary/20 p-3 rounded-lg text-xs overflow-auto max-h-48">
+          <p><strong>Type:</strong> {errorDetails.type}</p>
+          <p><strong>Name:</strong> {errorDetails.name}</p>
+          <p><strong>Constructor:</strong> {errorDetails.constructor}</p>
+          <p><strong>Message:</strong> {errorDetails.message}</p>
+          <pre className="mt-2 whitespace-pre-wrap"><code>{errorDetails.stack}</code></pre>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function NutritionStep({
   formData,
   onUpdate,
@@ -47,6 +82,7 @@ export default function NutritionStep({
   const { toast } = useToast();
   const nutritionImageInputRef = useRef<HTMLInputElement>(null);
   const [nutritionImage, setNutritionImage] = useState<string | null>(null);
+  const [lastApiError, setLastApiError] = useState<any>(null); // State to store the last API error
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
   const form = useForm<z.infer<typeof nutritionSchema>>({
@@ -69,6 +105,8 @@ export default function NutritionStep({
   // AI nutrition extraction mutation
   const extractNutritionMutation = useMutation({
     mutationFn: async (imageData: string) => {
+      const debugId = uuidv4();
+      console.log(`[${debugId}] Starting nutrition extraction with image data...`);
       try {
         // Ensure we have valid base64 data
         let cleanImageData = imageData;
@@ -77,42 +115,52 @@ export default function NutritionStep({
         }
 
         if (!cleanImageData || cleanImageData.length === 0) {
+          console.error(`[${debugId}] Invalid image data format received.`);
           throw new Error("Invalid image data format");
         }
 
-        console.log("Sending nutrition extraction request with image data length:", cleanImageData.length);
+        console.log(`[${debugId}] Sending nutrition extraction request with image data length:`, cleanImageData.length);
 
-        const res = await apiRequest("POST", "/api/extract-nutrition", { 
+        const res = await apiRequest("POST", "/api/extract-nutrition", {
           image: cleanImageData
         });
 
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ 
+          console.warn(`[${debugId}] API request failed with status: ${res.status}`);
+          const errorData = await res.json().catch(() => ({
             message: "Network error occurred",
             userFriendlyMessage: "Netzwerkfehler aufgetreten. Bitte versuchen Sie es erneut."
           }));
+          console.error(`[${debugId}] API error response:`, errorData);
           throw new Error(errorData.userFriendlyMessage || errorData.message || "API request failed");
         }
 
         const result = await res.json();
-        console.log("Nutrition extraction response:", result);
-        
+        console.log(`[${debugId}] Nutrition extraction response:`, result);
+
         // Handle both response formats - direct nutrition object or wrapped in nutrition property
         if (result.nutrition) {
+          console.log(`[${debugId}] Nutrition data found within 'nutrition' property.`);
           return { nutrition: result.nutrition };
         } else if (result.energy || result.fat || result.protein) {
+          console.log(`[${debugId}] Nutrition data found directly in response.`);
           return { nutrition: result };
         }
-        
+
+        console.log(`[${debugId}] No specific nutrition data structure detected in response.`);
         return result;
-      } catch (fetchError) {
-        console.error("Nutrition extraction fetch error:", fetchError);
+      } catch (fetchError: any) {
+        console.log(`[${debugId}] Error stack:`, fetchError.stack);
+        console.error(`[${debugId}] Error type:`, typeof fetchError);
+        console.error(`[${debugId}] Error constructor:`, fetchError.constructor.name);
+        setLastApiError(fetchError);
         throw fetchError;
       }
     },
     onSuccess: (data) => {
-      console.log("Nutrition extraction success:", data);
-      
+      const debugId = uuidv4();
+      console.log(`[${debugId}] Nutrition extraction success. Data:`, data);
+
       // Extract nutrition data from response - handle multiple response formats
       let nutritionData = null;
       if (data && data.nutrition) {
@@ -120,7 +168,7 @@ export default function NutritionStep({
       } else if (data && (data.energy || data.fat || data.protein)) {
         nutritionData = data;
       }
-      
+
       if (nutritionData) {
         // Ensure all required fields exist with proper defaults
         const nutritionWithDefaults = {
@@ -134,17 +182,18 @@ export default function NutritionStep({
           salt: Number(nutritionData.salt) || 0,
           fruitVegLegumeContent: Number(nutritionData.fruitVegLegumeContent) || 0
         };
-        
-        console.log("Setting nutrition data:", nutritionWithDefaults);
+
+        console.log(`[${debugId}] Setting nutrition data with defaults:`, nutritionWithDefaults);
         form.reset(nutritionWithDefaults);
         onUpdate({ nutrition: nutritionWithDefaults });
-        
+
         toast({
           title: "Nährwerte extrahiert",
           description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
         });
+        setLastApiError(null); // Clear error on success
       } else {
-        console.warn("No nutrition data found in response:", data);
+        console.warn(`[${debugId}] No nutrition data found in response:`, data);
         toast({
           title: "Keine Daten extrahiert",
           description: "Keine Nährwerte im Bild erkannt. Bitte geben Sie die Werte manuell ein.",
@@ -153,22 +202,23 @@ export default function NutritionStep({
       }
     },
     onError: (error: any) => {
-      console.error("Nutrition extraction failed:", error);
+      const debugId = uuidv4();
+      console.error(`[${debugId}] Nutrition extraction failed. Error:`, error);
 
       // Safely extract error message with multiple fallbacks
       let errorMessage = "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
 
       try {
         // Try to get the message from various possible error structures
-        const message = error?.message || 
-                       error?.message || 
+        const message = error?.message ||
+                       error?.message ||
                        error?.userFriendlyMessage ||
-                       error?.error?.message || 
+                       error?.error?.message ||
                        error?.response?.data?.message ||
                        error?.response?.data?.userFriendlyMessage ||
                        String(error);
 
-        console.log("Error message extracted:", message);
+        console.log(`[${debugId}] Attempting to parse error message:`, message);
 
         // Check for specific error patterns and provide appropriate messages
         if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured") || message.includes("503")) {
@@ -189,7 +239,7 @@ export default function NutritionStep({
           errorMessage = message;
         }
       } catch (parseError) {
-        console.error("Error parsing error message:", parseError);
+        console.error(`[${debugId}] Error parsing error message:`, parseError);
         // Use default message if parsing fails
       }
 
@@ -203,14 +253,21 @@ export default function NutritionStep({
 
   // Calculate per serving values
   const calculatePerServing = (per100g: number) => {
+    if (isNaN(per100g) || typeof per100g !== 'number') return '';
     return (per100g * servingSize / 100).toFixed(1);
   };
 
   const handleNutritionImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const debugId = uuidv4();
+    console.log(`[${debugId}] Handling nutrition image upload...`);
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log(`[${debugId}] No file selected.`);
+      return;
+    }
 
     if (file.size > 10 * 1024 * 1024) {
+      console.warn(`[${debugId}] File size exceeds limit (10MB). File size: ${file.size}`);
       toast({
         title: "File too large",
         description: "Please select a file under 10MB.",
@@ -222,65 +279,77 @@ export default function NutritionStep({
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
+      console.log(`[${debugId}] File read successfully. Setting image and triggering mutation.`);
       setNutritionImage(base64);
       extractNutritionMutation.mutate(base64);
+    };
+    reader.onerror = (e) => {
+      console.error(`[${debugId}] Error reading file:`, e);
+      toast({
+        title: "File read error",
+        description: "Could not read the uploaded file.",
+        variant: "destructive",
+      });
     };
     reader.readAsDataURL(file);
   };
 
   const removeNutritionImage = () => {
+    const debugId = uuidv4();
+    console.log(`[${debugId}] Removing nutrition image.`);
     setNutritionImage(null);
     if (nutritionImageInputRef.current) {
       nutritionImageInputRef.current.value = '';
     }
+    // Optionally, reset the form if the image removal should also clear extracted data
+    // form.reset({...nutritionSchema.getDefault()});
+    // onUpdate({ nutrition: nutritionSchema.getDefault() });
   };
 
   const onSubmit = (values: z.infer<typeof nutritionSchema>) => {
+    const debugId = uuidv4();
+    console.log(`[${debugId}] Form submitted with values:`, values);
     onUpdate({ nutrition: values });
     onNext();
   };
 
-  // Performance: Memoize field change handler  
-  const handleFieldChange = useCallback((field: string, value: number, nestedField?: string) => {
+  // Performance: Memoize field change handler
+  const handleFieldChange = useCallback((field: keyof typeof formData.nutrition, value: any, nestedField?: string) => {
+    const debugId = uuidv4();
+    console.log(`[${debugId}] Handling field change: ${field}, Value: ${value}, Nested: ${nestedField}`);
     let updateData;
-    if (nestedField) {
+    const currentNutrition = formData.nutrition || {};
+
+    if (nestedField && typeof value === 'number' && !isNaN(value)) {
+      const nestedValue = value;
       updateData = {
         nutrition: {
-          ...formData.nutrition,
-          energy: formData.nutrition?.energy || { kj: 0, kcal: 0 },
-          fat: formData.nutrition?.fat || 0,
-          saturatedFat: formData.nutrition?.saturatedFat || 0,
-          carbohydrates: formData.nutrition?.carbohydrates || 0,
-          sugars: formData.nutrition?.sugars || 0,
-          fiber: formData.nutrition?.fiber || 0,
-          protein: formData.nutrition?.protein || 0,
-          salt: formData.nutrition?.salt || 0,
-          fruitVegLegumeContent: formData.nutrition?.fruitVegLegumeContent || 0,
+          ...currentNutrition,
           [field]: {
-            ...(formData.nutrition?.[field as keyof typeof formData.nutrition] as any),
-            [nestedField]: value,
+            ...(currentNutrition[field] as any),
+            [nestedField]: nestedValue,
           },
         },
       };
-    } else {
+    } else if (typeof value === 'number' && !isNaN(value)) {
       updateData = {
         nutrition: {
-          energy: formData.nutrition?.energy || { kj: 0, kcal: 0 },
-          fat: formData.nutrition?.fat || 0,
-          saturatedFat: formData.nutrition?.saturatedFat || 0,
-          carbohydrates: formData.nutrition?.carbohydrates || 0,
-          sugars: formData.nutrition?.sugars || 0,
-          fiber: formData.nutrition?.fiber || 0,
-          protein: formData.nutrition?.protein || 0,
-          salt: formData.nutrition?.salt || 0,
-          fruitVegLegumeContent: formData.nutrition?.fruitVegLegumeContent || 0,
-          ...formData.nutrition,
+          ...currentNutrition,
           [field]: value,
         },
       };
+    } else {
+      console.warn(`[${debugId}] Invalid value for field ${field}: ${value}`);
+      return; // Do not update if value is invalid
     }
     onUpdate(updateData);
   }, [formData.nutrition, onUpdate]);
+
+  // Effect to log form values when they change
+  useEffect(() => {
+    const debugId = uuidv4();
+    console.log(`[${debugId}] Form values updated:`, watchedValues);
+  }, [watchedValues]);
 
   return (
     <div className="p-6">
@@ -290,6 +359,9 @@ export default function NutritionStep({
           Review and edit the extracted nutritional values per 100g. Values per {servingSize}g serving will be calculated automatically.
         </p>
       </div>
+
+      {/* Debug Panel */}
+      <DebugPanel lastApiError={lastApiError} />
 
       {/* Nutrition Image Upload */}
       <Card className="mb-6">
@@ -335,7 +407,7 @@ export default function NutritionStep({
           </div>
 
           {nutritionImage && (
-            <div className="relative">
+            <div className="relative mt-4">
               <img
                 src={nutritionImage}
                 alt="Nutrition Label"
@@ -356,7 +428,7 @@ export default function NutritionStep({
       </Card>
 
       {/* Nutritional Table - Same format as Live Preview */}
-      <div className="bg-white border border-slate-300 rounded-lg p-4">
+      <div className="bg-white border border-slate-300 rounded-lg p-4 mb-6">
         <h3 className="text-lg font-semibold text-slate-900 mb-4">Average nutritional value:</h3>
         <table className="w-full border-collapse border border-slate-400 text-sm">
           <thead>
@@ -381,7 +453,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.energy?.kj || ''}
+                    value={watchedValues.energy?.kj ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('energy.kj', value);
@@ -394,7 +466,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.energy?.kcal || ''}
+                    value={watchedValues.energy?.kcal ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('energy.kcal', value);
@@ -446,7 +518,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.fat || ''}
+                    value={watchedValues.fat ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('fat', value);
@@ -484,7 +556,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.saturatedFat || ''}
+                    value={watchedValues.saturatedFat ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('saturatedFat', value);
@@ -522,7 +594,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.carbohydrates || ''}
+                    value={watchedValues.carbohydrates ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('carbohydrates', value);
@@ -560,7 +632,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.sugars || ''}
+                    value={watchedValues.sugars ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('sugars', value);
@@ -598,7 +670,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.fiber || ''}
+                    value={watchedValues.fiber ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('fiber', value);
@@ -636,7 +708,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.protein || ''}
+                    value={watchedValues.protein ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('protein', value);
@@ -674,7 +746,7 @@ export default function NutritionStep({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={watchedValues.salt || ''}
+                    value={watchedValues.salt ?? ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       form.setValue('salt', value);
@@ -710,7 +782,7 @@ export default function NutritionStep({
 
       {/* Fruit/Veg/Legume Content Input */}
       <Form {...form}>
-        <div className="bg-white border border-slate-300 rounded-lg p-4">
+        <div className="bg-white border border-slate-300 rounded-lg p-4 mb-6">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">Fruit/Vegetable/Legume Content</h3>
           <p className="text-sm text-slate-600 mb-3">
             Enter the percentage of fruits, vegetables, nuts and legumes for accurate Nutri-Score calculation.
@@ -843,8 +915,8 @@ export default function NutritionStep({
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <img 
-                      src={getNutriScoreImage(nutriScoreResult.nutriGrade)} 
+                    <img
+                      src={getNutriScoreImage(nutriScoreResult.nutriGrade)}
                       alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
                       className="h-8 w-auto"
                     />
@@ -937,9 +1009,9 @@ export default function NutritionStep({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
           <div className="flex justify-between mt-8">
-            <Button 
+            <Button
               type="button"
-              variant="outline" 
+              variant="outline"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -953,7 +1025,7 @@ export default function NutritionStep({
               <span>Back</span>
             </Button>
 
-            <Button 
+            <Button
               type="submit"
               disabled={isLoading}
               className="flex items-center space-x-2"
