@@ -124,15 +124,17 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     return markedIngredient?.percentage || 0;
   };
 
-  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
-    const finalIngredients = formData.ingredients || [];
-    const baseIngredients = formData.baseProductIngredients || [];
+  // Performance: Memoize generateIngredientsTable to prevent ReferenceErrors
+  const generateIngredientsTable = useMemo(() => {
+    // Ensure all variables are safely defined to prevent ReferenceError in production
+    const finalIngredients = formData?.ingredients || [];
+    const baseIngredients = formData?.baseProductIngredients || [];
     const markedIngredientPercentage = getMarkedIngredientPercentage();
     const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
 
     // Add final product ingredients in the same order as they appear
     finalIngredients
-      .filter(ing => ing.name.trim())
+      .filter(ing => ing?.name?.trim())
       .forEach(ing => {
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
           // First add the marked ingredient itself
@@ -145,7 +147,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
           // Then add base product ingredients with recalculated percentages
           baseIngredients
-            .filter(baseIng => baseIng.name.trim())
+            .filter(baseIng => baseIng?.name?.trim())
             .forEach(baseIng => {
               const wholeProductPercentage = baseIng.percentage 
                 ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
@@ -169,7 +171,10 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       });
 
     return tableIngredients;
-  };
+  }, [formData?.ingredients, formData?.baseProductIngredients]);
+
+  // Call the memoized function
+  const ingredientsTableData = generateIngredientsTable;
 
   const handleDownloadPDF = async () => {
     debugLog("PDF download initiated", { sessionId, hasFormData: !!formData });
@@ -398,7 +403,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                       </tr>
                     </thead>
                     <tbody>
-                      {generateIngredientsTable().map((ingredient, index) => (
+                      {ingredientsTableData.map((ingredient, index) => (
                         <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                           <td className="p-2">
                             {ingredient.isFinalProduct ? (

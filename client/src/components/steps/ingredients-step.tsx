@@ -377,8 +377,13 @@ export default function IngredientsStep({
     onUpdate({ baseProductIngredients: ingredients });
   };
 
-  const formatCombinedIngredients = () => {
-    const baseFormatted = baseProductIngredients
+  // Performance: Memoize formatCombinedIngredients function  
+  const formatCombinedIngredients = useCallback(() => {
+    // Ensure arrays are always defined to prevent ReferenceError
+    const safeBaseProductIngredients = baseProductIngredients || [];
+    const safeFinalProductIngredients = finalProductIngredients || [];
+    
+    const baseFormatted = safeBaseProductIngredients
       .filter(ing => ing.name.trim())
       .map(ing => {
         const percentage = ing.percentage ? ` ${ing.percentage.toFixed(1)}%*` : '';
@@ -386,7 +391,7 @@ export default function IngredientsStep({
       })
       .join(', ');
 
-    const finalFormatted = finalProductIngredients
+    const finalFormatted = safeFinalProductIngredients
       .filter(ing => ing.name.trim())
       .map(ing => {
         const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
@@ -402,14 +407,19 @@ export default function IngredientsStep({
       .join(', ');
 
     return finalFormatted;
-  };
+  }, [baseProductIngredients, finalProductIngredients]);
 
-  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
+  // Performance: Memoize generateIngredientsTable function
+  const generateIngredientsTable = useCallback((): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
     const markedIngredientPercentage = getMarkedIngredientPercentage();
     const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
+    
+    // Ensure baseProductIngredients is always defined
+    const safeBaseProductIngredients = baseProductIngredients || [];
+    const safeFinalProductIngredients = finalProductIngredients || [];
 
     // Add final product ingredients in the same order as they appear
-    finalProductIngredients
+    safeFinalProductIngredients
       .filter(ing => ing.name.trim())
       .forEach(ing => {
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
@@ -422,7 +432,7 @@ export default function IngredientsStep({
           });
           
           // Then add base product ingredients with recalculated percentages
-          baseProductIngredients
+          safeBaseProductIngredients
             .filter(baseIng => baseIng.name.trim())
             .forEach(baseIng => {
               const wholeProductPercentage = baseIng.percentage 
@@ -447,7 +457,7 @@ export default function IngredientsStep({
       });
 
     return tableIngredients;
-  };
+  }, [baseProductIngredients, finalProductIngredients]);
 
   // Function to mark/unmark an ingredient as base recipe
   const toggleIngredientAsBase = (ingredientName: string) => {
