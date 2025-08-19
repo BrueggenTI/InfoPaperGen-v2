@@ -36,15 +36,6 @@ app.use((req, res, next) => {
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  // Enhanced logging for debugging
-  if (path.startsWith("/api")) {
-    console.log(`[SERVER] ${req.method} ${path} - Request started`, {
-      headers: req.headers,
-      bodySize: req.headers['content-length'] || 'unknown',
-      userAgent: req.headers['user-agent']
-    });
-  }
-
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
@@ -55,16 +46,6 @@ app.use((req, res, next) => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      
-      // Enhanced error logging
-      if (res.statusCode >= 400) {
-        console.error(`[SERVER ERROR] ${logLine}`, {
-          response: capturedJsonResponse,
-          requestHeaders: req.headers,
-          timestamp: new Date().toISOString()
-        });
-      }
-      
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -83,29 +64,11 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    // Enhanced error logging
-    console.error(`[SERVER ERROR HANDLER]`, {
-      status,
-      message,
-      stack: err.stack,
-      url: req.url,
-      method: req.method,
-      headers: req.headers,
-      timestamp: new Date().toISOString()
-    });
-
-    res.status(status).json({ 
-      message,
-      debug: process.env.NODE_ENV === 'development' ? {
-        stack: err.stack,
-        timestamp: new Date().toISOString()
-      } : undefined
-    });
-    
+    res.status(status).json({ message });
     throw err;
   });
 

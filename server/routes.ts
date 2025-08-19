@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Extract nutrition from image - multipart/form-data
+  // Extract nutrition from image
   app.post("/api/extract/nutrition", upload.single("image"), async (req, res) => {
     try {
       if (!req.file) {
@@ -133,89 +133,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Extract nutrition from base64 image (for the nutrition step)
+  // Extract nutrition from base64 image
   app.post("/api/extract-nutrition", async (req, res) => {
-    const startTime = Date.now();
-    console.log("[NUTRITION EXTRACTION] Request received");
-    
     try {
       const { image } = req.body;
-      console.log("[NUTRITION EXTRACTION] Request body received", { 
-        hasImage: !!image,
-        imageLength: image ? image.length : 0
-      });
       
       if (!image) {
-        console.log("[NUTRITION EXTRACTION] Error: No image data provided");
-        res.status(400).json({ 
-          message: "No image data provided",
-          debug: { timestamp: new Date().toISOString() }
-        });
+        res.status(400).json({ message: "No image data provided" });
         return;
       }
 
-      // Validate base64 format
-      if (typeof image !== 'string') {
-        console.log("[NUTRITION EXTRACTION] Error: Image data is not a string");
-        res.status(400).json({ 
-          message: "Invalid image data format",
-          debug: { imageType: typeof image }
-        });
-        return;
-      }
-
-      console.log("[NUTRITION EXTRACTION] Starting OpenAI extraction...");
       const extractedNutrition = await extractNutritionFromImage(image);
-      
-      const processingTime = Date.now() - startTime;
-      console.log("[NUTRITION EXTRACTION] Success", { 
-        processingTimeMs: processingTime,
-        nutritionKeys: Object.keys(extractedNutrition || {})
-      });
-      
-      res.json({ 
-        nutrition: extractedNutrition,
-        debug: {
-          processingTimeMs: processingTime,
-          timestamp: new Date().toISOString()
-        }
-      });
+      res.json({ nutrition: extractedNutrition });
     } catch (error) {
-      const processingTime = Date.now() - startTime;
-      console.log("[NUTRITION EXTRACTION] Error:", error);
-      console.log("[NUTRITION EXTRACTION] Error details", {
-        errorMessage: (error as Error).message,
-        errorStack: (error as Error).stack,
-        processingTimeMs: processingTime
-      });
-      
-      console.log("[SERVER ERROR] POST /api/extract-nutrition 500 in " + processingTime + "ms", {
-        response: {
-          message: "Error extracting nutrition",
-          error: (error as Error).message,
-          debug: {
-            processingTimeMs: processingTime,
-            timestamp: new Date().toISOString(),
-            errorType: (error as Error).constructor.name
-          }
-        },
-        requestHeaders: req.headers,
-        timestamp: new Date().toISOString()
-      });
-      
-      res.status(500).json({ 
-        message: "Error extracting nutrition", 
-        error: (error as Error).message,
-        debug: {
-          processingTimeMs: processingTime,
-          timestamp: new Date().toISOString(),
-          errorType: (error as Error).constructor.name
-        }
-      });
+      res.status(500).json({ message: "Error extracting nutrition", error: (error as Error).message });
     }
   });
-
-
 
   // Translate ingredients
   app.post("/api/translate-ingredients", async (req, res) => {

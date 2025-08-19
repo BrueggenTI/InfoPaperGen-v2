@@ -7,11 +7,6 @@ import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/l
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 import { useState, useMemo, useCallback } from "react";
 
-// Debug logging function
-const debugLog = (message: string, data?: any) => {
-  console.log(`[DOCUMENT_PREVIEW DEBUG] ${message}`, data);
-};
-
 // Helper function to format ingredients list
 const formatIngredients = (ingredients: any[]) => {
   if (!ingredients || ingredients.length === 0) return "";
@@ -34,83 +29,55 @@ interface DocumentPreviewProps {
 
 export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [componentError, setComponentError] = useState<string | null>(null);
 
-  debugLog("DocumentPreview rendered", { 
-    formData: !!formData, 
-    sessionId, 
-    isPDFMode,
-    hasIngredients: !!formData?.ingredients,
-    hasBaseIngredients: !!formData?.baseProductIngredients,
-    hasNutrition: !!formData?.nutrition
-  });
-
-  // Performance: Memoize parsed serving size with error handling
-  const servingSize = useMemo(() => {
-    try {
-      const size = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
-      debugLog("Serving size calculated:", size);
-      return size;
-    } catch (error) {
-      debugLog("Error calculating serving size:", error);
-      setComponentError("Error calculating serving size");
-      return 40;
-    }
-  }, [formData.servingSize]);
+  // Performance: Memoize parsed serving size
+  const servingSize = useMemo(() => 
+    parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), 
+    [formData.servingSize]
+  );
 
   // Performance: Memoize calculation function 
   const calculatePerServing = useCallback((per100g: number) => {
     return (per100g * servingSize / 100).toFixed(1);
   }, [servingSize]);
 
-  // Performance: Memoize ingredients formatting with error handling
+  // Performance: Memoize ingredients formatting
   const formattedIngredients = useMemo(() => {
-    try {
-      debugLog("Formatting ingredients", {
-        finalIngredientsCount: formData.ingredients?.length || 0,
-        baseIngredientsCount: formData.baseProductIngredients?.length || 0
-      });
+    const finalIngredients = formData.ingredients || [];
+    const baseIngredients = formData.baseProductIngredients || [];
 
-      const finalIngredients = formData.ingredients || [];
-      const baseIngredients = formData.baseProductIngredients || [];
-
-      if (finalIngredients.length === 0 && baseIngredients.length === 0) {
-        return "Ingredients will appear here after extraction...";
-      }
-
-      // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
-      const baseFormatted = baseIngredients
-        .filter(ingredient => ingredient.name.trim() !== "")
-        .map(ingredient => {
-          const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
-          // Use current displayed name (which could be translated)
-          return `${ingredient.name}${percentage}`;
-        })
-        .join(', ');
-
-      // Format final ingredients with base ingredients in brackets (same as Kombinierte Vorschau)
-      const finalFormatted = finalIngredients
-        .filter(ingredient => ingredient.name.trim() !== "")
-        .map(ingredient => {
-          const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
-          // Use current displayed name (which could be translated)
-          const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
-
-          // Check if this ingredient is marked as base recipe
-          if (ingredient.isMarkedAsBase && baseFormatted) {
-            return `${ingredientText} [${baseFormatted}]`;
-          }
-
-          return ingredientText;
-        })
-        .join(', ');
-
-      return finalFormatted || "Ingredients will appear here after extraction...";
-    } catch (error) {
-      debugLog("Error formatting ingredients:", error);
-      setComponentError("Error formatting ingredients");
-      return "Error formatting ingredients";
+    if (finalIngredients.length === 0 && baseIngredients.length === 0) {
+      return "Ingredients will appear here after extraction...";
     }
+
+    // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
+    const baseFormatted = baseIngredients
+      .filter(ingredient => ingredient.name.trim() !== "")
+      .map(ingredient => {
+        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
+        // Use current displayed name (which could be translated)
+        return `${ingredient.name}${percentage}`;
+      })
+      .join(', ');
+
+    // Format final ingredients with base ingredients in brackets (same as Kombinierte Vorschau)
+    const finalFormatted = finalIngredients
+      .filter(ingredient => ingredient.name.trim() !== "")
+      .map(ingredient => {
+        const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
+        // Use current displayed name (which could be translated)
+        const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
+
+        // Check if this ingredient is marked as base recipe
+        if (ingredient.isMarkedAsBase && baseFormatted) {
+          return `${ingredientText} [${baseFormatted}]`;
+        }
+
+        return ingredientText;
+      })
+      .join(', ');
+
+    return finalFormatted || "Ingredients will appear here after extraction...";
   }, [formData.ingredients, formData.baseProductIngredients]);
 
   // Calculate percentage from base product to whole product using the same formula as ingredients-step
@@ -124,17 +91,15 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     return markedIngredient?.percentage || 0;
   };
 
-  // Performance: Memoize generateIngredientsTable to prevent ReferenceErrors
-  const generateIngredientsTable = useMemo(() => {
-    // Ensure all variables are safely defined to prevent ReferenceError in production
-    const finalIngredients = formData?.ingredients || [];
-    const baseIngredients = formData?.baseProductIngredients || [];
+  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
+    const finalIngredients = formData.ingredients || [];
+    const baseIngredients = formData.baseProductIngredients || [];
     const markedIngredientPercentage = getMarkedIngredientPercentage();
     const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
 
     // Add final product ingredients in the same order as they appear
     finalIngredients
-      .filter(ing => ing?.name?.trim())
+      .filter(ing => ing.name.trim())
       .forEach(ing => {
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
           // First add the marked ingredient itself
@@ -147,7 +112,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
           // Then add base product ingredients with recalculated percentages
           baseIngredients
-            .filter(baseIng => baseIng?.name?.trim())
+            .filter(baseIng => baseIng.name.trim())
             .forEach(baseIng => {
               const wholeProductPercentage = baseIng.percentage 
                 ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
@@ -171,22 +136,15 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       });
 
     return tableIngredients;
-  }, [formData?.ingredients, formData?.baseProductIngredients]);
-
-  // Call the memoized function
-  const ingredientsTableData = generateIngredientsTable;
+  };
 
   const handleDownloadPDF = async () => {
-    debugLog("PDF download initiated", { sessionId, hasFormData: !!formData });
-
     if (!sessionId) {
-      debugLog("PDF download failed: No session ID");
       alert('Keine Session-ID verfügbar. Bitte laden Sie die Seite neu.');
       return;
     }
 
     if (!formData) {
-      debugLog("PDF download failed: No form data");
       alert('Keine Formular-Daten verfügbar. Bitte füllen Sie das Formular aus.');
       return;
     }
@@ -194,15 +152,15 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     setIsGeneratingPDF(true);
 
     try {
-      debugLog("Starting PDF generation...");
+      // Verwende die neue direkte PDF-Generierung mit Formular-Daten
+      // Diese erstellt ein sauberes PDF nur mit den ausgefüllten Formular-Informationen
       await downloadPDFFromServer({
         formData: formData,
         sessionId: sessionId
       });
-      debugLog("PDF generation completed successfully");
     } catch (error) {
-      debugLog('PDF generation error:', error);
       console.error('Fehler beim Generieren des PDFs:', error);
+      // Zeige benutzerfreundliche Fehlermeldung
       alert(error instanceof Error ? error.message : 'Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
     } finally {
       setIsGeneratingPDF(false);
@@ -256,22 +214,6 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       </div>
     </div>
   );
-
-  // Show error if component has issues
-  if (componentError) {
-    return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-        <h2 className="text-red-800 font-bold">Component Error</h2>
-        <p className="text-red-700">{componentError}</p>
-        <button 
-          onClick={() => setComponentError(null)}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className={`${isPDFMode ? 'p-4 bg-white' : 'p-6 bg-gradient-to-br from-slate-50 to-slate-100'} min-h-screen`}>
@@ -403,7 +345,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                       </tr>
                     </thead>
                     <tbody>
-                      {ingredientsTableData.map((ingredient, index) => (
+                      {generateIngredientsTable().map((ingredient, index) => (
                         <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                           <td className="p-2">
                             {ingredient.isFinalProduct ? (

@@ -66,72 +66,33 @@ export default function NutritionStep({
 
   const watchedValues = form.watch();
 
-  // Debug logging function
-  const debugLog = (message: string, data?: any) => {
-    console.log(`[NUTRITION_STEP DEBUG] ${message}`, data);
-  };
-
-  // AI nutrition extraction mutation with enhanced debugging
+  // AI nutrition extraction mutation
   const extractNutritionMutation = useMutation({
     mutationFn: async (imageData: string) => {
-      debugLog("Starting nutrition extraction", { imageDataLength: imageData.length });
-      
-      try {
-        const imageBase64 = imageData.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-        debugLog("Sending request to extract nutrition", { base64Length: imageBase64.length });
-        
-        const res = await apiRequest("POST", "/api/extract-nutrition", { 
-          image: imageBase64
-        });
-        
-        debugLog("API response status:", res.status);
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          debugLog("API error response:", errorText);
-          throw new Error(`API request failed: ${res.status} - ${errorText}`);
-        }
-        
-        const data = await res.json();
-        debugLog("API response data:", data);
-        return data;
-      } catch (error) {
-        debugLog("Error in nutrition extraction:", error);
-        throw error;
-      }
+      const res = await apiRequest("POST", "/api/extract-nutrition", { 
+        image: imageData.split(',')[1] // Remove data:image/jpeg;base64, prefix
+      });
+      return await res.json();
     },
     onSuccess: (data) => {
-      debugLog("Nutrition extraction successful", data);
-      
       if (data && data.nutrition) {
         // Update form with extracted nutrition values
         const nutritionWithDefaults = {
           ...data.nutrition,
           fruitVegLegumeContent: data.nutrition.fruitVegLegumeContent || 0
         };
-        
-        debugLog("Updating form with nutrition data:", nutritionWithDefaults);
-        
         form.reset(nutritionWithDefaults);
         onUpdate({ nutrition: nutritionWithDefaults });
         toast({
           title: "Nutrition values extracted",
           description: "Nutrition values have been successfully extracted from the image.",
         });
-      } else {
-        debugLog("No nutrition data in response:", data);
-        toast({
-          title: "Extraction warning",
-          description: "No nutrition data found in the response.",
-          variant: "destructive",
-        });
       }
     },
     onError: (error) => {
-      debugLog("Nutrition extraction error:", error);
       toast({
         title: "Extraction error",
-        description: `Nutrition values could not be extracted: ${error.message || 'Unknown error'}`,
+        description: "Nutrition values could not be extracted from the image. Please enter them manually.",
         variant: "destructive",
       });
     },
@@ -143,41 +104,8 @@ export default function NutritionStep({
   };
 
   const handleNutritionImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    debugLog("Image upload event triggered");
-    
     const file = event.target.files?.[0];
-    if (!file) {
-      debugLog("No file selected");
-      return;
-    }
-    
-    debugLog("File selected", { 
-      name: file.name, 
-      size: file.size, 
-      type: file.type 
-    });
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      debugLog("Invalid file type:", file.type);
-      toast({
-        title: "Invalid file type",
-        description: "Please select an image file.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      debugLog("File too large:", file.size);
-      toast({
-        title: "File too large",
-        description: "Please select an image smaller than 10MB.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
