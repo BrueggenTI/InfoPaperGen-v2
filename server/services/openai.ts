@@ -31,10 +31,32 @@ export interface ExtractedNutrition {
 
 export async function extractIngredientsFromImage(base64Image: string, isBaseProduct: boolean = false): Promise<ExtractedIngredients> {
   try {
+    // Azure Environment Check - Verify OpenAI API Key availability
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("[OPENAI INGREDIENTS] OpenAI API key not available in environment");
+      throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
+    }
+
+    // Validate base64 image
+    if (!base64Image || typeof base64Image !== 'string') {
+      throw new Error("Invalid base64 image data provided");
+    }
+
+    // Strip data URL prefix if present (for Azure compatibility)
+    const cleanBase64 = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
+
     const productType = isBaseProduct ? "base product" : "final product";
     const contextDescription = isBaseProduct 
       ? "This is a base product SAP screenshot. The base product ingredients are components that will be included within a final product. Focus on extracting the ingredient composition of this base component."
       : "This is a final product SAP screenshot. Extract all ingredients from the complete final product, which may include base products as components.";
+
+    console.log("[OPENAI INGREDIENTS] Attempting to extract ingredients from image...", {
+      imageSize: `${Math.round(cleanBase64.length / 1024)}KB`,
+      productType,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      hasApiKey: !!process.env.OPENAI_API_KEY
+    });
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -73,7 +95,8 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
             {
               type: "image_url",
               image_url: {
-                url: `data:image/jpeg;base64,${base64Image}`
+                url: `data:image/png;base64,${cleanBase64}`,
+                detail: "high" // High detail for better ingredient reading
               }
             }
           ],
@@ -81,13 +104,44 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
       ],
       response_format: { type: "json_object" },
       max_tokens: 1000,
+      temperature: 0.1, // Low temperature for consistent extraction
+      // Azure-optimized settings
+      top_p: 0.95,
+      frequency_penalty: 0,
+      presence_penalty: 0,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
+    const responseContent = response.choices[0]?.message?.content || "{}";
+    
+    console.log("[OPENAI INGREDIENTS] Received response from OpenAI", {
+      hasContent: !!responseContent,
+      responseLength: responseContent.length,
+      timestamp: new Date().toISOString()
+    });
+
+    let result;
+    try {
+      result = JSON.parse(responseContent);
+    } catch (parseError) {
+      console.error("[OPENAI INGREDIENTS] JSON Parse Error:", parseError);
+      console.error("[OPENAI INGREDIENTS] Raw response content:", responseContent);
+      throw new Error("Invalid response format from OpenAI for ingredients extraction");
+    }
+
+    console.log("[OPENAI INGREDIENTS] Successfully extracted ingredients:", result);
     return result as ExtractedIngredients;
   } catch (error) {
-    console.error("Error extracting ingredients:", error);
-    throw new Error("Failed to extract ingredients from image");
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[OPENAI INGREDIENTS] Error extracting ingredients:", errorMessage);
+    
+    // Provide Azure-compatible error handling
+    if (errorMessage?.includes('API key')) {
+      throw new Error("OpenAI API key configuration issue. Please verify OPENAI_API_KEY environment variable is set.");
+    } else if (errorMessage?.includes('rate_limit')) {
+      throw new Error("OpenAI API rate limit exceeded. Please try again in a few moments.");
+    } else {
+      throw new Error(`Failed to extract ingredients from image: ${errorMessage}`);
+    }
   }
 }
 
@@ -151,6 +205,12 @@ Important guidelines:
 
 export async function extractNutritionFromImage(base64Image: string): Promise<ExtractedNutrition> {
   try {
+    // Azure Environment Check - Verify OpenAI API Key availability
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("[OPENAI NUTRITION] OpenAI API key not available in environment");
+      throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
+    }
+
     // Validate base64 image before sending to OpenAI
     if (!base64Image || typeof base64Image !== 'string') {
       throw new Error("Invalid base64 image data provided");
@@ -164,9 +224,14 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
       throw new Error("Image data too large (max 20MB)");
     }
 
+    // Strip data URL prefix if present (for Azure compatibility)
+    const cleanBase64 = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
+
     console.log("[OPENAI NUTRITION] Attempting to extract nutrition from image...", {
-      imageSize: `${Math.round(base64Image.length / 1024)}KB`,
-      timestamp: new Date().toISOString()
+      imageSize: `${Math.round(cleanBase64.length / 1024)}KB`,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      hasApiKey: !!process.env.OPENAI_API_KEY
     });
 
     const response = await openai.chat.completions.create({
@@ -207,7 +272,8 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
             {
               type: "image_url",
               image_url: {
-                url: `data:image/png;base64,${base64Image}`
+                url: `data:image/png;base64,${cleanBase64}`,
+                detail: "high" // High detail for better nutrition label reading
               }
             }
           ],
@@ -215,6 +281,11 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
       ],
       response_format: { type: "json_object" },
       max_tokens: 500,
+      temperature: 0.1, // Low temperature for consistent extraction
+      // Azure-optimized settings
+      top_p: 0.95,
+      frequency_penalty: 0,
+      presence_penalty: 0,
     });
 
     const responseContent = response.choices[0]?.message?.content || "{}";

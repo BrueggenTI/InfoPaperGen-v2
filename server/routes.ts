@@ -14,10 +14,16 @@ const upload = multer({
 });
 
 import { azureHealthCheck } from "./middleware/azure-monitoring";
+import { registerTestRoutes } from "./routes-test";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Azure Health Check Endpoint
   app.get("/api/health", azureHealthCheck);
+
+  // Register Azure test endpoints (for development and deployment verification)
+  if (process.env.NODE_ENV !== 'production') {
+    registerTestRoutes(app);
+  }
   // Create new product info session
   app.post("/api/product-info/sessions", async (req, res) => {
     try {
