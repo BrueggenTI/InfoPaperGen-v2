@@ -38,6 +38,9 @@ interface NutritionStepProps {
   isLoading?: boolean;
 }
 
+// Define the nutrition type from the schema
+type NutritionData = z.infer<typeof nutritionSchema>;
+
 // Debugging component to display API errors
 const DebugPanel: React.FC<{ lastApiError: any }> = ({ lastApiError }) => {
   if (!lastApiError) return null;
@@ -48,7 +51,13 @@ const DebugPanel: React.FC<{ lastApiError: any }> = ({ lastApiError }) => {
     stack: lastApiError.stack || 'No stack trace',
     type: typeof lastApiError,
     constructor: lastApiError.constructor?.name || 'Unknown Constructor'
-  } : {};
+  } : {
+    message: 'No message',
+    name: 'Unknown Error',
+    stack: 'No stack trace',
+    type: 'undefined',
+    constructor: 'Unknown Constructor'
+  };
 
   return (
     <Card className="mb-6 border-destructive">
@@ -314,20 +323,33 @@ export default function NutritionStep({
   };
 
   // Performance: Memoize field change handler
-  const handleFieldChange = useCallback((field: keyof typeof formData.nutrition, value: any, nestedField?: string) => {
+  const handleFieldChange = useCallback((field: keyof NutritionData, value: number, nestedField?: string) => {
     const debugId = uuidv4();
     console.log(`[${debugId}] Handling field change: ${field}, Value: ${value}, Nested: ${nestedField}`);
+    
+    // Initialize nutrition data with default values if not exists
+    const defaultNutrition: NutritionData = {
+      energy: { kj: 0, kcal: 0 },
+      fat: 0,
+      saturatedFat: 0,
+      carbohydrates: 0,
+      sugars: 0,
+      fiber: 0,
+      protein: 0,
+      salt: 0,
+      fruitVegLegumeContent: 0,
+    };
+    
+    const currentNutrition = { ...defaultNutrition, ...formData.nutrition };
     let updateData;
-    const currentNutrition = formData.nutrition || {};
 
     if (nestedField && typeof value === 'number' && !isNaN(value)) {
-      const nestedValue = value;
       updateData = {
         nutrition: {
           ...currentNutrition,
           [field]: {
             ...(currentNutrition[field] as any),
-            [nestedField]: nestedValue,
+            [nestedField]: value,
           },
         },
       };
