@@ -113,20 +113,27 @@ export default function NutritionStep({
 
   // AI nutrition extraction mutation - replicating ingredients pattern exactly
   const extractNutritionMutation = useMutation({
-    mutationFn: async (imageData: string) => {
+    mutationFn: async (file: File) => {
       const debugId = uuidv4();
-      console.log(`[${debugId}] Starting nutrition extraction with image data length:`, imageData.length);
+      console.log(`[${debugId}] Starting nutrition extraction with file:`, file.name, file.size);
       
-      // Validate base64 data (should already be clean from upload handler)
-      if (!imageData || imageData.length === 0) {
-        console.error(`[${debugId}] Invalid image data format received.`);
-        throw new Error("Invalid image data format");
+      // Validate file
+      if (!file) {
+        console.error(`[${debugId}] No file provided.`);
+        throw new Error("No file provided");
       }
 
-      console.log(`[${debugId}] Sending nutrition extraction request...`);
+      console.log(`[${debugId}] Sending nutrition extraction request as FormData...`);
 
-      const res = await apiRequest("POST", "/api/extract/nutrition", {
-        image: imageData
+      // Create FormData and append the file (matching server multer expectation)
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Send as FormData instead of JSON to match server multer configuration
+      const res = await fetch("/api/extract/nutrition", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
       });
 
       if (!res.ok) {
@@ -273,13 +280,14 @@ export default function NutritionStep({
       return;
     }
 
+    // Read file for preview display
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
-      const base64Data = base64.split(',')[1]; // Extract only base64 part, matching ingredients pattern
-      console.log(`[${debugId}] File read successfully. Setting image and triggering mutation. Base64 data length:`, base64Data.length);
+      console.log(`[${debugId}] File read successfully for preview. Setting image and triggering mutation.`);
       setNutritionImage(base64);
-      extractNutritionMutation.mutate(base64Data);
+      // Send the actual File object instead of base64 to match server multer expectation
+      extractNutritionMutation.mutate(file);
     };
     reader.onerror = (e) => {
       console.error(`[${debugId}] Error reading file:`, e);

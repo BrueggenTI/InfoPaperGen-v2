@@ -114,6 +114,14 @@ The application is built as a full-stack JavaScript application following a clea
   - **✅ API Validation**: Enhanced with explicit OpenAI API key checking and environment-specific debugging
   - **✅ Build Verification**: Production build successful (909KB main bundle, 279KB gzipped) with all fixes integrated
   - **✅ Comprehensive Testing**: Created deployment simulation test validating endpoint availability and error handling
+- **App Crash Fix (2025-08-19)**: Resolved nutrition table upload crashes with comprehensive debugging enhancements:
+  - **✅ API Endpoint Mismatch Fixed**: Corrected frontend URL from `/api/extract-nutrition` to `/api/extract/nutrition`
+  - **✅ Request Format Alignment**: Changed frontend from JSON to FormData to match server multer configuration
+  - **✅ Robust Error Handling**: Added extensive try-catch blocks for JSON parsing, KeyError, and ValueError scenarios
+  - **✅ German Error Logging**: Implemented detailed console logging with German error messages for deployment debugging
+  - **✅ React Hook Error Fixed**: Removed "use client" directive from TooltipProvider causing frontend crashes
+  - **✅ Graceful Error Handling**: App no longer crashes on nutrition extraction failures, returns proper error responses
+  - **✅ Individual Field Processing**: Each nutrition field processed independently to prevent total failure on single field errors
 - **Production Docker Containerization (2025-08-19)**:
   - **✅ Multi-stage Build**: Optimized Dockerfile with development dependencies for build, production-only for runtime
   - **✅ Puppeteer Compatibility**: 43 system libraries installed, 30+ Chrome flags for container environments
