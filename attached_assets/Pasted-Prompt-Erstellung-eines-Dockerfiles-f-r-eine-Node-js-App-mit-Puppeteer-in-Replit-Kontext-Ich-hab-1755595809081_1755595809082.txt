@@ -1,0 +1,20 @@
+Prompt: Erstellung eines Dockerfiles für eine Node.js-App mit Puppeteer in Replit
+Kontext:
+Ich habe eine Node.js-Anwendung in Replit entwickelt, die ich auf Azure App Service als Docker-Container bereitstellen möchte. Die Anwendung hat eine kritische Funktion, die Puppeteer verwendet, um PDFs zu generieren. Ich weiß, dass dafür eine spezielle Umgebung mit einem vorinstallierten Browser (Chromium) und diversen Systembibliotheken notwendig ist.
+Das Ziel:
+Erstelle ein vollständiges, produktionsreifes Dockerfile, das meine Node.js-Anwendung containerisiert. Das resultierende Docker-Image muss alle Abhängigkeiten enthalten, damit Puppeteer in einer Linux-Umgebung wie Azure App Service fehlerfrei läuft.
+Anforderungen an das Dockerfile:
+Basis-Image: Verwende ein offizielles, schlankes Node.js-Image als Basis. node:18-slim ist bevorzugt.
+Systemabhängigkeiten: Füge einen RUN-Befehl hinzu, der mittels apt-get alle notwendigen Systemabhängigkeiten für Puppeteer und headless Chromium installiert. Stelle sicher, dass diese Liste vollständig ist, um Laufzeitfehler zu vermeiden.
+Optimierung des Build-Prozesses:
+Setze ein Arbeitsverzeichnis (z.B. /usr/src/app).
+Kopiere zuerst nur die package.json und package-lock.json.
+Führe npm install --production aus, um nur die Produktionsabhängigkeiten zu installieren und den Docker-Layer-Cache optimal zu nutzen.
+Kopiere erst danach den restlichen Quellcode der Anwendung.
+Port-Freigabe: Gib den Port frei, auf dem meine Anwendung läuft. Standardmäßig ist das 8080.
+Startbefehl: Verwende CMD ["npm", "start"] als Befehl zum Starten der Anwendung, da mein Projekt ein entsprechendes Start-Skript in der package.json hat.
+Kommentare: Kommentiere jeden wichtigen Schritt im Dockerfile auf Deutsch, damit ich nachvollziehen kann, was die einzelnen Befehle bewirken.
+Was vermieden werden soll:
+Verwende keine übergroßen Basis-Images (wie node:18-bullseye in der vollen Version).
+Installiere keine unnötigen Entwicklungsabhängigkeiten im finalen Image.
+Hardcode keine Umgebungsvariablen oder Secrets im Dockerfile.
