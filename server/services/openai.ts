@@ -297,43 +297,110 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
       timestamp: new Date().toISOString()
     });
 
-    // Try to parse the JSON response
+    // Robust try-catch for JSON parsing with detailed logging (as requested)
     let result;
     try {
       result = JSON.parse(responseContent);
+      console.log("[OPENAI NUTRITION] Successfully parsed JSON response");
     } catch (parseError) {
       const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-      console.error("[OPENAI NUTRITION] JSON Parse Error:", parseError);
-      console.error("[OPENAI NUTRITION] Raw response content:", responseContent);
+      
+      // Detailed logging for debugging crashes (as requested in German description)
+      console.error("=== NUTRITION EXTRACTION JSON PARSING ERROR ===");
+      console.error("Fehler beim Parsen der KI-Antwort:", parseError);
+      console.error("Rohe KI-Antwort (ki_response):", responseContent);
+      console.error("JSON Parse Fehler Details:", {
+        errorMessage,
+        errorName: parseError instanceof Error ? parseError.name : "Unknown",
+        errorStack: parseError instanceof Error ? parseError.stack : "No stack trace",
+        responseLength: responseContent.length,
+        responsePreview: responseContent.substring(0, 200) + "...",
+        timestamp: new Date().toISOString()
+      });
+      console.error("=== END JSON PARSING ERROR DETAILS ===");
 
       // If the response indicates the model can't see the image, provide helpful error
       if (responseContent.includes("unable to see") || responseContent.includes("can't see") || responseContent.includes("cannot analyze")) {
-        throw new Error("The image could not be processed. Please ensure you're uploading a clear nutrition facts label image.");
+        throw new Error("Das Bild konnte nicht verarbeitet werden. Bitte stellen Sie sicher, dass Sie ein klares Nährwerttabellen-Bild hochladen.");
       }
 
-      // If it's a generic parsing error, return a default structure
-      throw new Error(`Invalid response format from OpenAI: ${errorMessage}`);
+      // If it's a generic parsing error, return a default structure with German message
+      throw new Error(`Ungültiges Antwortformat von OpenAI: ${errorMessage}. Rohe Antwort: ${responseContent.substring(0, 100)}...`);
     }
 
-    // Validate the result has the expected structure
+    // Robust validation and conversion with extensive error handling (as requested)
     if (!result || typeof result !== 'object') {
-      throw new Error("OpenAI returned invalid nutrition data format");
+      console.error("[OPENAI NUTRITION] Invalid result structure:", result);
+      throw new Error("OpenAI hat ein ungültiges Nährwerte-Datenformat zurückgegeben");
     }
 
-    // Ensure all required fields exist with defaults
-    const nutritionData: ExtractedNutrition = {
-      energy: result.energy || { kj: 0, kcal: 0 },
-      fat: Number(result.fat) || 0,
-      saturatedFat: Number(result.saturatedFat) || 0,
-      carbohydrates: Number(result.carbohydrates) || 0,
-      sugars: Number(result.sugars) || 0,
-      fiber: Number(result.fiber) || 0,
-      protein: Number(result.protein) || 0,
-      salt: Number(result.salt) || 0
+    // Robust conversion with try-catch for each field to handle ValueError scenarios
+    const nutritionData: Partial<ExtractedNutrition> = {};
+    
+    try {
+      // Energy handling with nested object validation
+      if (result.energy && typeof result.energy === 'object') {
+        nutritionData.energy = {
+          kj: Number(result.energy.kj) || 0,
+          kcal: Number(result.energy.kcal) || 0
+        };
+      } else {
+        nutritionData.energy = { kj: 0, kcal: 0 };
+        console.warn("[OPENAI NUTRITION] Energy field missing or invalid, using defaults");
+      }
+    } catch (energyError) {
+      console.error("Fehler beim Verarbeiten des Energy-Werts:", energyError);
+      nutritionData.energy = { kj: 0, kcal: 0 };
+    }
+
+    // Handle each nutrition field with individual try-catch to prevent total failure
+    const nutritionFields = [
+      { key: 'fat', german: 'Fett' },
+      { key: 'saturatedFat', german: 'Gesättigte Fettsäuren' },
+      { key: 'carbohydrates', german: 'Kohlenhydrate' },
+      { key: 'sugars', german: 'Zucker' },
+      { key: 'fiber', german: 'Ballaststoffe' },
+      { key: 'protein', german: 'Eiweiß' },
+      { key: 'salt', german: 'Salz' }
+    ];
+
+    for (const field of nutritionFields) {
+      try {
+        const rawValue = result[field.key];
+        if (rawValue === null || rawValue === undefined || rawValue === '' || rawValue === 'N/A' || rawValue === 'n/a') {
+          (nutritionData as any)[field.key] = 0;
+          console.warn(`[OPENAI NUTRITION] ${field.german} (${field.key}) was null/empty, using 0`);
+        } else {
+          const numericValue = Number(rawValue);
+          if (isNaN(numericValue)) {
+            console.error(`Fehler beim Konvertieren von ${field.german} (${field.key}): "${rawValue}" ist keine gültige Zahl`);
+            (nutritionData as any)[field.key] = 0;
+          } else {
+            (nutritionData as any)[field.key] = numericValue;
+          }
+        }
+      } catch (fieldError) {
+        console.error(`Fehler beim Verarbeiten von ${field.german} (${field.key}):`, fieldError);
+        console.error(`Roher Wert war:`, result[field.key]);
+        (nutritionData as any)[field.key] = 0; // Fallback to prevent crashes
+      }
+    }
+
+    // Ensure all required fields are present with defaults for complete ExtractedNutrition type
+    const completeNutritionData: ExtractedNutrition = {
+      energy: nutritionData.energy || { kj: 0, kcal: 0 },
+      fat: nutritionData.fat || 0,
+      saturatedFat: nutritionData.saturatedFat || 0,
+      carbohydrates: nutritionData.carbohydrates || 0,
+      sugars: nutritionData.sugars || 0,
+      fiber: nutritionData.fiber || 0,
+      protein: nutritionData.protein || 0,
+      salt: nutritionData.salt || 0
     };
 
-    console.log("[OPENAI NUTRITION] Successfully extracted nutrition data:", nutritionData);
-    return nutritionData;
+    console.log("[OPENAI NUTRITION] Successfully processed nutrition data:", completeNutritionData);
+    console.log("[OPENAI NUTRITION] Original OpenAI response keys:", Object.keys(result));
+    return completeNutritionData;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;

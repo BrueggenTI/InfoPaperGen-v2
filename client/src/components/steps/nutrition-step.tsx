@@ -125,7 +125,7 @@ export default function NutritionStep({
 
       console.log(`[${debugId}] Sending nutrition extraction request...`);
 
-      const res = await apiRequest("POST", "/api/extract-nutrition", {
+      const res = await apiRequest("POST", "/api/extract/nutrition", {
         image: imageData
       });
 

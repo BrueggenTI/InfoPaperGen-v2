@@ -241,8 +241,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const base64Image = req.file.buffer.toString("base64");
 
       console.log(`[${operationId}] About to call extractNutritionFromImage...`);
-      const extractedNutrition = await extractNutritionFromImage(base64Image);
-      console.log(`[${operationId}] extractNutritionFromImage completed:`, extractedNutrition);
+      
+      // Robust try-catch for nutrition extraction with detailed German error logging
+      let extractedNutrition;
+      try {
+        extractedNutrition = await extractNutritionFromImage(base64Image);
+        console.log(`[${operationId}] extractNutritionFromImage completed:`, extractedNutrition);
+      } catch (extractionError) {
+        const errorMessage = extractionError instanceof Error ? extractionError.message : String(extractionError);
+        
+        // Detailed logging as requested in German problem description
+        console.error("=== NÄHRWERTETABELLE VERARBEITUNG FEHLER ===");
+        console.error("Fehler beim Verarbeiten der Nährwertetabelle:", extractionError);
+        console.error("Fehlermeldung (Exception as e):", errorMessage);
+        console.error("Error Stack:", extractionError instanceof Error ? extractionError.stack : "Kein Stack Trace");
+        console.error("Operation ID:", operationId);
+        console.error("Image size:", Math.round(base64Image.length / 1024), "KB");
+        console.error("Timestamp:", new Date().toISOString());
+        console.error("=== ENDE NÄHRWERTETABELLE FEHLER ===");
+        
+        // Don't crash the app - return error response instead
+        DebugLogger.error("NUTRITION_EXTRACTION", "Processing Failed", { 
+          operationId,
+          error: errorMessage,
+          errorType: extractionError instanceof Error ? extractionError.constructor.name : typeof extractionError
+        });
+
+        res.status(500).json({ 
+          message: "Die Nährwertetabelle konnte nicht verarbeitet werden",
+          error: errorMessage,
+          userFriendlyMessage: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild.",
+          debugInfo: { 
+            operationId, 
+            step: "NUTRITION_EXTRACTION", 
+            error: errorMessage,
+            timestamp: new Date().toISOString()
+          }
+        });
+        return;
+      }
 
       DebugLogger.success("NUTRITION_EXTRACTION", "Processing Complete", { 
         operationId, 
