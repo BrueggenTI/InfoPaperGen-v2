@@ -96,6 +96,14 @@ export default function NutritionStep({
 
         const result = await res.json();
         console.log("Nutrition extraction response:", result);
+        
+        // Handle both response formats - direct nutrition object or wrapped in nutrition property
+        if (result.nutrition) {
+          return { nutrition: result.nutrition };
+        } else if (result.energy || result.fat || result.protein) {
+          return { nutrition: result };
+        }
+        
         return result;
       } catch (fetchError) {
         console.error("Nutrition extraction fetch error:", fetchError);
@@ -104,20 +112,39 @@ export default function NutritionStep({
     },
     onSuccess: (data) => {
       console.log("Nutrition extraction success:", data);
+      
+      // Extract nutrition data from response - handle multiple response formats
+      let nutritionData = null;
       if (data && data.nutrition) {
-        // Update form with extracted nutrition values
+        nutritionData = data.nutrition;
+      } else if (data && (data.energy || data.fat || data.protein)) {
+        nutritionData = data;
+      }
+      
+      if (nutritionData) {
+        // Ensure all required fields exist with proper defaults
         const nutritionWithDefaults = {
-          ...data.nutrition,
-          fruitVegLegumeContent: data.nutrition.fruitVegLegumeContent || 0
+          energy: nutritionData.energy || { kj: 0, kcal: 0 },
+          fat: Number(nutritionData.fat) || 0,
+          saturatedFat: Number(nutritionData.saturatedFat) || 0,
+          carbohydrates: Number(nutritionData.carbohydrates) || 0,
+          sugars: Number(nutritionData.sugars) || 0,
+          fiber: Number(nutritionData.fiber) || 0,
+          protein: Number(nutritionData.protein) || 0,
+          salt: Number(nutritionData.salt) || 0,
+          fruitVegLegumeContent: Number(nutritionData.fruitVegLegumeContent) || 0
         };
+        
+        console.log("Setting nutrition data:", nutritionWithDefaults);
         form.reset(nutritionWithDefaults);
         onUpdate({ nutrition: nutritionWithDefaults });
+        
         toast({
           title: "Nährwerte extrahiert",
           description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
         });
       } else {
-        console.warn("No nutrition data in response:", data);
+        console.warn("No nutrition data found in response:", data);
         toast({
           title: "Keine Daten extrahiert",
           description: "Keine Nährwerte im Bild erkannt. Bitte geben Sie die Werte manuell ein.",
