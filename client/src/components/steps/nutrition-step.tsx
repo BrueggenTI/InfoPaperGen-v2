@@ -69,12 +69,41 @@ export default function NutritionStep({
   // AI nutrition extraction mutation
   const extractNutritionMutation = useMutation({
     mutationFn: async (imageData: string) => {
-      const res = await apiRequest("POST", "/api/extract-nutrition", { 
-        image: imageData.split(',')[1] // Remove data:image/jpeg;base64, prefix
-      });
-      return await res.json();
+      try {
+        // Ensure we have valid base64 data
+        let cleanImageData = imageData;
+        if (imageData.includes(',')) {
+          cleanImageData = imageData.split(',')[1];
+        }
+        
+        if (!cleanImageData || cleanImageData.length === 0) {
+          throw new Error("Invalid image data format");
+        }
+
+        console.log("Sending nutrition extraction request with image data length:", cleanImageData.length);
+        
+        const res = await apiRequest("POST", "/api/extract-nutrition", { 
+          image: cleanImageData
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ 
+            message: "Network error occurred",
+            userFriendlyMessage: "Netzwerkfehler aufgetreten. Bitte versuchen Sie es erneut."
+          }));
+          throw new Error(errorData.userFriendlyMessage || errorData.message || "API request failed");
+        }
+        
+        const result = await res.json();
+        console.log("Nutrition extraction response:", result);
+        return result;
+      } catch (fetchError) {
+        console.error("Nutrition extraction fetch error:", fetchError);
+        throw fetchError;
+      }
     },
     onSuccess: (data) => {
+      console.log("Nutrition extraction success:", data);
       if (data && data.nutrition) {
         // Update form with extracted nutrition values
         const nutritionWithDefaults = {
@@ -87,6 +116,13 @@ export default function NutritionStep({
           title: "Nährwerte extrahiert",
           description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
         });
+      } else {
+        console.warn("No nutrition data in response:", data);
+        toast({
+          title: "Keine Daten extrahiert",
+          description: "Keine Nährwerte im Bild erkannt. Bitte geben Sie die Werte manuell ein.",
+          variant: "destructive",
+        });
       }
     },
     onError: (error: any) => {
@@ -98,25 +134,30 @@ export default function NutritionStep({
       try {
         // Try to get the message from various possible error structures
         const message = error?.message || 
+                       error?.userFriendlyMessage ||
                        error?.error?.message || 
                        error?.response?.data?.message ||
                        error?.response?.data?.userFriendlyMessage ||
                        String(error);
         
+        console.log("Error message extracted:", message);
+        
         // Check for specific error patterns and provide appropriate messages
-        if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured")) {
+        if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured") || message.includes("503")) {
           errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
-        } else if (message.includes("too small")) {
+        } else if (message.includes("timeout") || message.includes("504")) {
+          errorMessage = "Die Verarbeitung hat zu lange gedauert. Bitte versuchen Sie es mit einem kleineren Bild.";
+        } else if (message.includes("too small") || message.includes("zu klein")) {
           errorMessage = "Das Bild ist zu klein. Bitte verwenden Sie ein größeres, klareres Bild der Nährwerttabelle.";
-        } else if (message.includes("too large")) {
+        } else if (message.includes("too large") || message.includes("zu groß")) {
           errorMessage = "Das Bild ist zu groß. Bitte verwenden Sie ein Bild unter 10MB.";
-        } else if (message.includes("could not be processed")) {
+        } else if (message.includes("could not be processed") || message.includes("konnte nicht verarbeitet")) {
           errorMessage = "Das Bild konnte nicht verarbeitet werden. Stellen Sie sicher, dass es eine klare Nährwerttabelle zeigt.";
-        } else if (message.includes("Invalid")) {
+        } else if (message.includes("Invalid") || message.includes("ungültig")) {
           errorMessage = "Ungültiges Bildformat. Bitte verwenden Sie JPG, PNG oder WebP Dateien.";
-        } else if (message.includes("503") || message.includes("Service Unavailable")) {
-          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
-        } else if (message && message !== "undefined" && message.length > 0) {
+        } else if (message.includes("Network") || message.includes("Netzwerk")) {
+          errorMessage = "Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.";
+        } else if (message && message !== "undefined" && message.length > 0 && message.length < 200) {
           errorMessage = message;
         }
       } catch (parseError) {

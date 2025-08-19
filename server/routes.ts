@@ -282,82 +282,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Extract nutrition from base64 image
   app.post("/api/extract-nutrition", async (req, res) => {
+    const operationId = `nutrition-extraction-base64-${Date.now()}`;
+    
     try {
+      DebugLogger.info("NUTRITION_EXTRACTION_BASE64", "Started", { 
+        operationId,
+        hasImageData: !!req.body?.image,
+        apiKeyAvailable: !!process.env.OPENAI_API_KEY
+      });
+
       // Check if OpenAI API key is available
       if (!process.env.OPENAI_API_KEY) {
-        console.error("[NUTRITION EXTRACTION] OpenAI API key not available");
-        res.status(503).json({ 
+        DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "API Key Missing", { operationId });
+        return res.status(503).json({ 
           message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
           error: "OpenAI API key not configured",
-          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben.",
+          operationId
         });
-        return;
       }
 
       const { image } = req.body;
       
       if (!image) {
-        res.status(400).json({ 
+        DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "No Image Data", { operationId });
+        return res.status(400).json({ 
           message: "No image data provided",
-          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus."
+          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus.",
+          operationId
         });
-        return;
       }
 
       // Clean base64 data - remove any data URL prefix if present
       let cleanBase64 = image;
-      if (image.includes(',')) {
+      if (typeof image === 'string' && image.includes(',')) {
         cleanBase64 = image.split(',')[1];
       }
 
       // Validate base64 format
-      if (!cleanBase64 || cleanBase64.length === 0) {
-        res.status(400).json({ 
-          message: "Invalid image data format",
-          userFriendlyMessage: "Das Bildformat konnte nicht verarbeitet werden. Bitte versuchen Sie es mit einem anderen Bild."
+      if (!cleanBase64 || typeof cleanBase64 !== 'string' || cleanBase64.length === 0) {
+        DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "Invalid Base64 Format", { 
+          operationId, 
+          hasCleanBase64: !!cleanBase64,
+          base64Length: cleanBase64?.length || 0
         });
-        return;
+        return res.status(400).json({ 
+          message: "Invalid image data format",
+          userFriendlyMessage: "Das Bildformat konnte nicht verarbeitet werden. Bitte versuchen Sie es mit einem anderen Bild.",
+          operationId
+        });
       }
 
       // Validate it's properly base64 encoded
       try {
-        Buffer.from(cleanBase64, 'base64');
-      } catch (e) {
-        res.status(400).json({ 
-          message: "Invalid base64 image data",
-          userFriendlyMessage: "Das Bild konnte nicht gelesen werden. Bitte verwenden Sie ein gültiges Bildformat (JPG, PNG)."
+        const buffer = Buffer.from(cleanBase64, 'base64');
+        if (buffer.length === 0) {
+          throw new Error("Empty buffer after base64 decode");
+        }
+        DebugLogger.info("NUTRITION_EXTRACTION_BASE64", "Base64 Validation Success", { 
+          operationId, 
+          bufferSize: buffer.length 
         });
-        return;
+      } catch (e) {
+        DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "Base64 Validation Failed", { operationId, error: e });
+        return res.status(400).json({ 
+          message: "Invalid base64 image data",
+          userFriendlyMessage: "Das Bild konnte nicht gelesen werden. Bitte verwenden Sie ein gültiges Bildformat (JPG, PNG).",
+          operationId
+        });
       }
 
+      DebugLogger.info("NUTRITION_EXTRACTION_BASE64", "Calling OpenAI", { operationId });
       const extractedNutrition = await extractNutritionFromImage(cleanBase64);
+      
+      DebugLogger.success("NUTRITION_EXTRACTION_BASE64", "Success", { 
+        operationId, 
+        hasNutrition: !!extractedNutrition 
+      });
+      
       res.json({ nutrition: extractedNutrition });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
       const errorType = error instanceof Error ? error.constructor.name : typeof error;
       
-      console.error("[NUTRITION EXTRACTION] Error:", error);
-      console.error("[NUTRITION EXTRACTION] Error details", {
-        errorMessage,
-        errorStack,
-        processingTimeMs: Date.now()
-      });
+      DebugLogger.error("NUTRITION_EXTRACTION_BASE64", "Processing Failed", { 
+        operationId, 
+        errorMessage, 
+        errorType,
+        errorStack: errorStack?.split('\n')[0] // Only first line to avoid too much data
+      }, error as Error);
 
       // Check if this is an API key related error
-      if (errorMessage.includes("OpenAI API key")) {
-        res.status(503).json({ 
+      if (errorMessage.includes("OpenAI API key") || errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+        return res.status(503).json({ 
           message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
-          error: errorMessage,
-          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+          error: "OpenAI API service unavailable",
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben.",
+          operationId
+        });
+      } else if (errorMessage.includes("timeout") || errorMessage.includes("ETIMEDOUT")) {
+        return res.status(504).json({ 
+          message: "Request timeout",
+          error: "Processing timeout",
+          userFriendlyMessage: "Die Verarbeitung hat zu lange gedauert. Bitte versuchen Sie es mit einem kleineren oder klareren Bild.",
+          operationId
         });
       } else {
-        res.status(500).json({ 
+        return res.status(500).json({ 
           message: "Error extracting nutrition", 
           error: errorMessage,
           userFriendlyMessage: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild.",
+          operationId,
           debug: {
-            processingTimeMs: Date.now(),
             timestamp: new Date().toISOString(),
             errorType
           }

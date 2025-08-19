@@ -46,7 +46,7 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
     const cleanBase64 = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
 
     const productType = isBaseProduct ? "base product" : "final product";
-    const contextDescription = isBaseProduct 
+    const contextDescription = isBaseProduct
       ? "This is a base product SAP screenshot. The base product ingredients are components that will be included within a final product. Focus on extracting the ingredient composition of this base component."
       : "This is a final product SAP screenshot. Extract all ingredients from the complete final product, which may include base products as components.";
 
@@ -63,21 +63,21 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
       messages: [
         {
           role: "system",
-          content: `You are an expert at extracting ingredient information from SAP food product screenshots. 
+          content: `You are an expert at extracting ingredient information from SAP food product screenshots.
           ${contextDescription}
-          
-          Analyze the image and extract all ingredients with their percentages if visible. 
-          Return the data in JSON format with this structure: 
+
+          Analyze the image and extract all ingredients with their percentages if visible.
+          Return the data in JSON format with this structure:
           { "ingredients": [{ "name": "ingredient name", "percentage": number or null }] }
           If no percentage is shown, set percentage to null. Be precise and thorough.
-          
+
           IMPORTANT EXTRACTION RULES:
           - Extract ONLY ingredient names and descriptions (e.g., "Haferflocken", "Weizenmehl", "Zucker")
           - Do NOT extract recipe numbers, product codes, or any numerical identifiers
           - Focus on the actual food ingredient names, not internal reference numbers
           - Round all percentages to exactly ONE decimal place
           - Example: Extract "Haferflocken" not "Recipe 12345" or "Mat-Nr 67890"
-          
+
           Pay attention to the relationship between base products and final products:
           - Base products are components used within final products
           - Final products contain all ingredients including those from base products
@@ -88,8 +88,8 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
           content: [
             {
               type: "text",
-              text: `Extract all ingredients and their percentages from this ${productType} SAP screenshot. Focus on ingredient lists, labels, or any text showing ingredient information. 
-              
+              text: `Extract all ingredients and their percentages from this ${productType} SAP screenshot. Focus on ingredient lists, labels, or any text showing ingredient information.
+
               CRITICAL: Extract only the actual ingredient NAMES and DESCRIPTIONS (like "Haferflocken", "Weizenmehl", "Zucker"), never extract recipe numbers, material numbers, or product codes. Round percentages to one decimal place. ${contextDescription}`
             },
             {
@@ -112,7 +112,7 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
     });
 
     const responseContent = response.choices[0]?.message?.content || "{}";
-    
+
     console.log("[OPENAI INGREDIENTS] Received response from OpenAI", {
       hasContent: !!responseContent,
       responseLength: responseContent.length,
@@ -133,7 +133,7 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("[OPENAI INGREDIENTS] Error extracting ingredients:", errorMessage);
-    
+
     // Provide Azure-compatible error handling
     if (errorMessage?.includes('API key')) {
       throw new Error("OpenAI API key configuration issue. Please verify OPENAI_API_KEY environment variable is set.");
@@ -164,9 +164,9 @@ interface TranslationResponse {
 export async function translateIngredients(request: TranslationRequest): Promise<TranslationResponse> {
   try {
     const ingredientNames = request.ingredients.map(ing => ing.name);
-    
-    const prompt = `Translate the following food ingredient names from ${request.sourceLanguage || 'the original language'} to ${request.targetLanguage}. 
-    
+
+    const prompt = `Translate the following food ingredient names from ${request.sourceLanguage || 'the original language'} to ${request.targetLanguage}.
+
 Ingredients to translate:
 ${ingredientNames.map((name, index) => `${index + 1}. ${name}`).join('\n')}
 
@@ -239,13 +239,13 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
       messages: [
         {
           role: "system",
-          content: `You are an expert at extracting nutritional information from food product labels. 
-          
+          content: `You are an expert at extracting nutritional information from food product labels.
+
           CRITICAL: You MUST respond in JSON format only. No other text is allowed.
-          
-          Analyze the nutrition facts label and extract all nutritional values per 100g. 
+
+          Analyze the nutrition facts label and extract all nutritional values per 100g.
           If values are shown per different serving size, convert them to per 100g.
-          
+
           ALWAYS return data in this exact JSON structure, even if you cannot see the image clearly:
           {
             "energy": { "kj": 0, "kcal": 0 },
@@ -258,7 +258,7 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
             "salt": 0,
             "error": "Optional error message if image is unclear"
           }
-          
+
           If you cannot read the nutrition label, set all values to 0 and include an "error" field.
           All numeric values must be numbers, not strings. Use 0 for unavailable values.`,
         },
@@ -289,7 +289,7 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
     });
 
     const responseContent = response.choices[0]?.message?.content || "{}";
-    
+
     console.log("[OPENAI NUTRITION] Received response from OpenAI", {
       hasContent: !!responseContent,
       responseLength: responseContent.length,
@@ -305,12 +305,12 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
       const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
       console.error("[OPENAI NUTRITION] JSON Parse Error:", parseError);
       console.error("[OPENAI NUTRITION] Raw response content:", responseContent);
-      
+
       // If the response indicates the model can't see the image, provide helpful error
       if (responseContent.includes("unable to see") || responseContent.includes("can't see") || responseContent.includes("cannot analyze")) {
         throw new Error("The image could not be processed. Please ensure you're uploading a clear nutrition facts label image.");
       }
-      
+
       // If it's a generic parsing error, return a default structure
       throw new Error(`Invalid response format from OpenAI: ${errorMessage}`);
     }
@@ -338,13 +338,13 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
     const errorType = error instanceof Error ? error.constructor.name : typeof error;
-    
+
     console.error("[OPENAI NUTRITION] Error details:", {
       errorMessage,
       errorStack,
       errorType
     });
-    
+
     // Provide more specific error messages
     if (errorMessage?.includes('image_parse_error')) {
       throw new Error(`Failed to extract nutrition information from image: ${errorMessage}`);
