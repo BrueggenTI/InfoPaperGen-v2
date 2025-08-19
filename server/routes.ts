@@ -73,8 +73,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Extract ingredients from image
   app.post("/api/extract/ingredients", upload.single("image"), async (req, res) => {
     try {
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        console.error("[INGREDIENT EXTRACTION] OpenAI API key not available");
+        res.status(503).json({ 
+          message: "Zutatenlisten-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Zutaten manuell ein.",
+          error: "OpenAI API key not configured",
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell in die Felder eingeben."
+        });
+        return;
+      }
+
       if (!req.file) {
-        res.status(400).json({ message: "No image file provided" });
+        res.status(400).json({ 
+          message: "No image file provided",
+          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus."
+        });
         return;
       }
 
@@ -94,7 +108,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(roundedIngredients);
     } catch (error) {
-      res.status(500).json({ message: "Error extracting ingredients", error: (error as Error).message });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("[INGREDIENT EXTRACTION] Error:", error);
+      
+      // Check if this is an API key related error
+      if (errorMessage.includes("OpenAI API key")) {
+        res.status(503).json({ 
+          message: "Zutatenlisten-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Zutaten manuell ein.",
+          error: errorMessage,
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell in die Felder eingeben."
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Error extracting ingredients", 
+          error: errorMessage,
+          userFriendlyMessage: "Die Zutaten konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild."
+        });
+      }
     }
   });
 
@@ -130,8 +160,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Extract nutrition from image
   app.post("/api/extract/nutrition", upload.single("image"), async (req, res) => {
     try {
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        console.error("[NUTRITION EXTRACTION] OpenAI API key not available");
+        res.status(503).json({ 
+          message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
+          error: "OpenAI API key not configured",
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+        });
+        return;
+      }
+
       if (!req.file) {
-        res.status(400).json({ message: "No image file provided" });
+        res.status(400).json({ 
+          message: "No image file provided",
+          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus."
+        });
         return;
       }
 
@@ -139,17 +183,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const extractedNutrition = await extractNutritionFromImage(base64Image);
       res.json(extractedNutrition);
     } catch (error) {
-      res.status(500).json({ message: "Error extracting nutrition", error: (error as Error).message });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("[NUTRITION EXTRACTION] Error:", error);
+      
+      // Check if this is an API key related error
+      if (errorMessage.includes("OpenAI API key")) {
+        res.status(503).json({ 
+          message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
+          error: errorMessage,
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Error extracting nutrition", 
+          error: errorMessage,
+          userFriendlyMessage: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild."
+        });
+      }
     }
   });
 
   // Extract nutrition from base64 image
   app.post("/api/extract-nutrition", async (req, res) => {
     try {
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        console.error("[NUTRITION EXTRACTION] OpenAI API key not available");
+        res.status(503).json({ 
+          message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
+          error: "OpenAI API key not configured",
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+        });
+        return;
+      }
+
       const { image } = req.body;
       
       if (!image) {
-        res.status(400).json({ message: "No image data provided" });
+        res.status(400).json({ 
+          message: "No image data provided",
+          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus."
+        });
         return;
       }
 
@@ -161,7 +235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate base64 format
       if (!cleanBase64 || cleanBase64.length === 0) {
-        res.status(400).json({ message: "Invalid image data format" });
+        res.status(400).json({ 
+          message: "Invalid image data format",
+          userFriendlyMessage: "Das Bildformat konnte nicht verarbeitet werden. Bitte versuchen Sie es mit einem anderen Bild."
+        });
         return;
       }
 
@@ -169,7 +246,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         Buffer.from(cleanBase64, 'base64');
       } catch (e) {
-        res.status(400).json({ message: "Invalid base64 image data" });
+        res.status(400).json({ 
+          message: "Invalid base64 image data",
+          userFriendlyMessage: "Das Bild konnte nicht gelesen werden. Bitte verwenden Sie ein gültiges Bildformat (JPG, PNG)."
+        });
         return;
       }
 
@@ -186,30 +266,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errorStack,
         processingTimeMs: Date.now()
       });
-      res.status(500).json({ 
-        message: "Error extracting nutrition", 
-        error: errorMessage,
-        debug: {
-          processingTimeMs: Date.now(),
-          timestamp: new Date().toISOString(),
-          errorType
-        }
-      });
+
+      // Check if this is an API key related error
+      if (errorMessage.includes("OpenAI API key")) {
+        res.status(503).json({ 
+          message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
+          error: errorMessage,
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Error extracting nutrition", 
+          error: errorMessage,
+          userFriendlyMessage: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild.",
+          debug: {
+            processingTimeMs: Date.now(),
+            timestamp: new Date().toISOString(),
+            errorType
+          }
+        });
+      }
     }
   });
 
   // Translate ingredients
   app.post("/api/translate-ingredients", async (req, res) => {
     try {
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        console.error("[INGREDIENT TRANSLATION] OpenAI API key not available");
+        res.status(503).json({ 
+          message: "Zutatenlisten-Übersetzung ist derzeit nicht verfügbar.",
+          error: "OpenAI API key not configured",
+          userFriendlyMessage: "Die automatische Übersetzung ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell übersetzen."
+        });
+        return;
+      }
+
       const { ingredients, targetLanguage, sourceLanguage } = req.body;
       
       if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
-        res.status(400).json({ message: "No ingredients provided" });
+        res.status(400).json({ 
+          message: "No ingredients provided",
+          userFriendlyMessage: "Keine Zutaten zum Übersetzen vorhanden."
+        });
         return;
       }
 
       if (!targetLanguage) {
-        res.status(400).json({ message: "Target language is required" });
+        res.status(400).json({ 
+          message: "Target language is required",
+          userFriendlyMessage: "Zielsprache ist erforderlich."
+        });
         return;
       }
 
@@ -221,7 +329,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(translationResult);
     } catch (error) {
-      res.status(500).json({ message: "Error translating ingredients", error: (error as Error).message });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("[INGREDIENT TRANSLATION] Error:", error);
+      
+      // Check if this is an API key related error
+      if (errorMessage.includes("OpenAI API key")) {
+        res.status(503).json({ 
+          message: "Zutatenlisten-Übersetzung ist derzeit nicht verfügbar.",
+          error: errorMessage,
+          userFriendlyMessage: "Die automatische Übersetzung ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell übersetzen."
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Error translating ingredients", 
+          error: errorMessage,
+          userFriendlyMessage: "Die Zutaten konnten nicht übersetzt werden. Bitte versuchen Sie es erneut oder übersetzen Sie sie manuell."
+        });
+      }
     }
   });
 

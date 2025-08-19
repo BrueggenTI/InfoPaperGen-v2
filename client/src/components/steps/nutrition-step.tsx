@@ -72,6 +72,13 @@ export default function NutritionStep({
       const res = await apiRequest("POST", "/api/extract-nutrition", { 
         image: imageData.split(',')[1] // Remove data:image/jpeg;base64, prefix
       });
+      
+      // Check if the response is not ok (status 4xx or 5xx)
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.userFriendlyMessage || errorData.message || "Request failed");
+      }
+      
       return await res.json();
     },
     onSuccess: (data) => {
@@ -84,18 +91,21 @@ export default function NutritionStep({
         form.reset(nutritionWithDefaults);
         onUpdate({ nutrition: nutritionWithDefaults });
         toast({
-          title: "Nutrition values extracted",
-          description: "Nutrition values have been successfully extracted from the image.",
+          title: "Nährwerte extrahiert",
+          description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
         });
       }
     },
     onError: (error: any) => {
       console.error("Nutrition extraction failed:", error);
       
-      // Provide specific error messages based on the error
-      let errorMessage = "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
+      // Use server's user-friendly message if available, otherwise provide fallback
+      let errorMessage = error?.message || "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
       
-      if (error?.message?.includes("too small")) {
+      // Check for specific error patterns and provide appropriate messages
+      if (error?.message?.includes("nicht verfügbar") || error?.message?.includes("not available")) {
+        errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
+      } else if (error?.message?.includes("too small")) {
         errorMessage = "Das Bild ist zu klein. Bitte verwenden Sie ein größeres, klareres Bild der Nährwerttabelle.";
       } else if (error?.message?.includes("too large")) {
         errorMessage = "Das Bild ist zu groß. Bitte verwenden Sie ein Bild unter 10MB.";
