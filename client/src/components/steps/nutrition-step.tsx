@@ -75,17 +75,17 @@ export default function NutritionStep({
         if (imageData.includes(',')) {
           cleanImageData = imageData.split(',')[1];
         }
-        
+
         if (!cleanImageData || cleanImageData.length === 0) {
           throw new Error("Invalid image data format");
         }
 
         console.log("Sending nutrition extraction request with image data length:", cleanImageData.length);
-        
+
         const res = await apiRequest("POST", "/api/extract-nutrition", { 
           image: cleanImageData
         });
-        
+
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({ 
             message: "Network error occurred",
@@ -93,7 +93,7 @@ export default function NutritionStep({
           }));
           throw new Error(errorData.userFriendlyMessage || errorData.message || "API request failed");
         }
-        
+
         const result = await res.json();
         console.log("Nutrition extraction response:", result);
         return result;
@@ -127,21 +127,22 @@ export default function NutritionStep({
     },
     onError: (error: any) => {
       console.error("Nutrition extraction failed:", error);
-      
+
       // Safely extract error message with multiple fallbacks
       let errorMessage = "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
-      
+
       try {
         // Try to get the message from various possible error structures
         const message = error?.message || 
+                       error?.message || 
                        error?.userFriendlyMessage ||
                        error?.error?.message || 
                        error?.response?.data?.message ||
                        error?.response?.data?.userFriendlyMessage ||
                        String(error);
-        
+
         console.log("Error message extracted:", message);
-        
+
         // Check for specific error patterns and provide appropriate messages
         if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured") || message.includes("503")) {
           errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
@@ -164,7 +165,7 @@ export default function NutritionStep({
         console.error("Error parsing error message:", parseError);
         // Use default message if parsing fails
       }
-      
+
       toast({
         title: "Fehler bei der Extraktion",
         description: errorMessage,
@@ -752,7 +753,7 @@ export default function NutritionStep({
             {/* Nutri-Score Section */}
             <div className="bg-white border border-slate-300 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutri-Score Calculation</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Malus Score */}
                 <div className="space-y-3">
@@ -828,7 +829,7 @@ export default function NutritionStep({
             {/* Claims Calculation Section */}
             <div className="bg-white border border-slate-300 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutrient Claims Analysis</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Positive Claims */}
                 <div className="space-y-3">
@@ -924,7 +925,7 @@ export default function NutritionStep({
               <ChevronLeft className="w-4 h-4" />
               <span>Back</span>
             </Button>
-            
+
             <Button 
               type="submit"
               disabled={isLoading}
