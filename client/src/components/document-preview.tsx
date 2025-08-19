@@ -77,40 +77,40 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       if (finalIngredients.length === 0 && baseIngredients.length === 0) {
         return "Ingredients will appear here after extraction...";
       }
+
+      // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
+      const baseFormatted = baseIngredients
+        .filter(ingredient => ingredient.name.trim() !== "")
+        .map(ingredient => {
+          const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
+          // Use current displayed name (which could be translated)
+          return `${ingredient.name}${percentage}`;
+        })
+        .join(', ');
+
+      // Format final ingredients with base ingredients in brackets (same as Kombinierte Vorschau)
+      const finalFormatted = finalIngredients
+        .filter(ingredient => ingredient.name.trim() !== "")
+        .map(ingredient => {
+          const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
+          // Use current displayed name (which could be translated)
+          const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
+
+          // Check if this ingredient is marked as base recipe
+          if (ingredient.isMarkedAsBase && baseFormatted) {
+            return `${ingredientText} [${baseFormatted}]`;
+          }
+
+          return ingredientText;
+        })
+        .join(', ');
+
+      return finalFormatted || "Ingredients will appear here after extraction...";
     } catch (error) {
       debugLog("Error formatting ingredients:", error);
       setComponentError("Error formatting ingredients");
       return "Error formatting ingredients";
     }
-
-    // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
-    const baseFormatted = baseIngredients
-      .filter(ingredient => ingredient.name.trim() !== "")
-      .map(ingredient => {
-        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
-        // Use current displayed name (which could be translated)
-        return `${ingredient.name}${percentage}`;
-      })
-      .join(', ');
-
-    // Format final ingredients with base ingredients in brackets (same as Kombinierte Vorschau)
-    const finalFormatted = finalIngredients
-      .filter(ingredient => ingredient.name.trim() !== "")
-      .map(ingredient => {
-        const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
-        // Use current displayed name (which could be translated)
-        const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
-
-        // Check if this ingredient is marked as base recipe
-        if (ingredient.isMarkedAsBase && baseFormatted) {
-          return `${ingredientText} [${baseFormatted}]`;
-        }
-
-        return ingredientText;
-      })
-      .join(', ');
-
-    return finalFormatted || "Ingredients will appear here after extraction...";
   }, [formData.ingredients, formData.baseProductIngredients]);
 
   // Calculate percentage from base product to whole product using the same formula as ingredients-step

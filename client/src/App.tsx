@@ -18,7 +18,7 @@ const debugLog = (message: string, data?: any) => {
 
 function Router() {
   debugLog("Router component rendered");
-  
+
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
       <Switch>
@@ -35,7 +35,7 @@ function Router() {
 function App() {
   debugLog("App component rendered");
   debugLog("QueryClient available:", !!queryClient);
-  
+
   try {
     return (
       <ErrorBoundary>
