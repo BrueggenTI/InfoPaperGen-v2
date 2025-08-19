@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Extract nutrition from image
+  // Extract nutrition from image - multipart/form-data
   app.post("/api/extract/nutrition", upload.single("image"), async (req, res) => {
     try {
       if (!req.file) {
@@ -133,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Extract nutrition from base64 image with enhanced debugging
+  // Extract nutrition from base64 image (for the nutrition step)
   app.post("/api/extract-nutrition", async (req, res) => {
     const startTime = Date.now();
     console.log("[NUTRITION EXTRACTION] Request received");
@@ -168,9 +168,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const extractedNutrition = await extractNutritionFromImage(image);
       
       const processingTime = Date.now() - startTime;
-      console.log("[NUTRITION EXTRACTION] Extraction completed", { 
+      console.log("[NUTRITION EXTRACTION] Success", { 
         processingTimeMs: processingTime,
-        hasResult: !!extractedNutrition
+        nutritionKeys: Object.keys(extractedNutrition || {})
       });
       
       res.json({ 
@@ -182,11 +182,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      console.error("[NUTRITION EXTRACTION] Error:", error);
+      console.log("[NUTRITION EXTRACTION] Error:", error);
       console.log("[NUTRITION EXTRACTION] Error details", {
         errorMessage: (error as Error).message,
         errorStack: (error as Error).stack,
         processingTimeMs: processingTime
+      });
+      
+      console.log("[SERVER ERROR] POST /api/extract-nutrition 500 in " + processingTime + "ms", {
+        response: {
+          message: "Error extracting nutrition",
+          error: (error as Error).message,
+          debug: {
+            processingTimeMs: processingTime,
+            timestamp: new Date().toISOString(),
+            errorType: (error as Error).constructor.name
+          }
+        },
+        requestHeaders: req.headers,
+        timestamp: new Date().toISOString()
       });
       
       res.status(500).json({ 
@@ -195,11 +209,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         debug: {
           processingTimeMs: processingTime,
           timestamp: new Date().toISOString(),
-          errorType: error.constructor.name
+          errorType: (error as Error).constructor.name
         }
       });
     }
   });
+
+
 
   // Translate ingredients
   app.post("/api/translate-ingredients", async (req, res) => {
