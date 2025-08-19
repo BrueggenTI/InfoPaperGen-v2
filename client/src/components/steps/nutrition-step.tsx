@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,28 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { ProductInfo } from "@shared/schema";
-import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2, Zap, Calculator, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage, formatNutriScoreDetails } from "@/lib/nutri-score";
-import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
-import { v4 as uuidv4 } from 'uuid';
+import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
+import { calculateClaims } from "@/lib/claims-calculator";
 
+// Enhanced nutrition schema with German validation messages
 const nutritionSchema = z.object({
   energy: z.object({
-    kj: z.number().min(0, "Energy (kJ) must be positive"),
-    kcal: z.number().min(0, "Energy (kcal) must be positive"),
+    kj: z.number().min(0, "Energie (kJ) muss positiv sein").max(10000, "Wert zu hoch"),
+    kcal: z.number().min(0, "Energie (kcal) muss positiv sein").max(2500, "Wert zu hoch"),
   }),
-  fat: z.number().min(0, "Fat must be positive"),
-  saturatedFat: z.number().min(0, "Saturated fat must be positive"),
-  carbohydrates: z.number().min(0, "Carbohydrates must be positive"),
-  sugars: z.number().min(0, "Sugars must be positive"),
-  fiber: z.number().min(0, "Fiber must be positive"),
-  protein: z.number().min(0, "Protein must be positive"),
-  salt: z.number().min(0, "Salt must be positive"),
-  fruitVegLegumeContent: z.number().min(0, "Fruit/Veg/Legume content must be positive").max(100, "Percentage cannot exceed 100%"),
+  fat: z.number().min(0, "Fett muss positiv sein").max(100, "Wert zu hoch"),
+  saturatedFat: z.number().min(0, "Gesättigte Fettsäuren müssen positiv sein").max(100, "Wert zu hoch"),
+  carbohydrates: z.number().min(0, "Kohlenhydrate müssen positiv sein").max(100, "Wert zu hoch"),
+  sugars: z.number().min(0, "Zucker muss positiv sein").max(100, "Wert zu hoch"),
+  fiber: z.number().min(0, "Ballaststoffe müssen positiv sein").max(50, "Wert zu hoch"),
+  protein: z.number().min(0, "Protein muss positiv sein").max(100, "Wert zu hoch"),
+  salt: z.number().min(0, "Salz muss positiv sein").max(20, "Wert zu hoch"),
+  fruitVegLegumeContent: z.number().min(0, "Obst-/Gemüse-/Hülsenfrucht-Anteil muss positiv sein").max(100, "Prozent darf 100% nicht überschreiten"),
 });
 
 interface NutritionStepProps {
@@ -38,48 +39,94 @@ interface NutritionStepProps {
   isLoading?: boolean;
 }
 
-// Define the nutrition type from the schema
 type NutritionData = z.infer<typeof nutritionSchema>;
 
-// Debugging component to display API errors
-const DebugPanel: React.FC<{ lastApiError: any }> = ({ lastApiError }) => {
-  if (!lastApiError) return null;
-
-  const errorDetails = lastApiError ? {
-    message: lastApiError.message || 'No message',
-    name: lastApiError.name || 'Unknown Error',
-    stack: lastApiError.stack || 'No stack trace',
-    type: typeof lastApiError,
-    constructor: lastApiError.constructor?.name || 'Unknown Constructor'
-  } : {
-    message: 'No message',
-    name: 'Unknown Error',
-    stack: 'No stack trace',
-    type: 'undefined',
-    constructor: 'Unknown Constructor'
-  };
-
-  return (
-    <Card className="mb-6 border-destructive">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2 text-destructive">
-          <Loader2 className="w-5 h-5" />
-          <span>API Debugging Information</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-2">Last API Error:</p>
-        <div className="bg-secondary/20 p-3 rounded-lg text-xs overflow-auto max-h-48">
-          <p><strong>Type:</strong> {errorDetails.type}</p>
-          <p><strong>Name:</strong> {errorDetails.name}</p>
-          <p><strong>Constructor:</strong> {errorDetails.constructor}</p>
-          <p><strong>Message:</strong> {errorDetails.message}</p>
-          <pre className="mt-2 whitespace-pre-wrap"><code>{errorDetails.stack}</code></pre>
+// AI Status Component
+const AIExtractionStatus = ({ 
+  isExtracting, 
+  error, 
+  onRetry 
+}: { 
+  isExtracting: boolean; 
+  error: string | null; 
+  onRetry: () => void; 
+}) => {
+  if (isExtracting) {
+    return (
+      <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+        <div className="text-blue-800 dark:text-blue-200">
+          <div className="font-medium">KI analysiert Nährwerttabelle...</div>
+          <div className="text-sm opacity-80">Dies kann einige Sekunden dauern</div>
         </div>
-      </CardContent>
-    </Card>
-  );
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-between gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+        <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
+          <AlertCircle className="w-5 h-5" />
+          <div>
+            <div className="font-medium">Extraktion fehlgeschlagen</div>
+            <div className="text-sm opacity-80">{error}</div>
+          </div>
+        </div>
+        <Button size="sm" variant="outline" onClick={onRetry} className="shrink-0">
+          Erneut versuchen
+        </Button>
+      </div>
+    );
+  }
+
+  return null;
 };
+
+// Nutrition Field Component
+const NutritionField = ({
+  label,
+  unit,
+  value,
+  onChange,
+  servingValue,
+  error
+}: {
+  label: string;
+  unit: string;
+  value: number;
+  onChange: (value: number) => void;
+  servingValue?: string;
+  error?: string;
+}) => (
+  <div className="grid grid-cols-12 gap-4 items-center py-2">
+    <div className="col-span-4">
+      <label className="text-sm font-medium">{label}</label>
+    </div>
+    <div className="col-span-3">
+      <div className="relative">
+        <Input
+          type="number"
+          step="0.1"
+          min="0"
+          value={value || ''}
+          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          className={`text-center ${error ? 'border-red-500' : ''}`}
+          data-testid={`input-${label.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+        />
+        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+          {unit}
+        </span>
+      </div>
+    </div>
+    <div className="col-span-2 text-center text-sm text-muted-foreground">
+      {servingValue || '0'}
+    </div>
+    <div className="col-span-3 text-xs text-muted-foreground">
+      je Portion ({parseFloat('40')}g)
+    </div>
+  </div>
+);
 
 export default function NutritionStep({
   formData,
@@ -89,12 +136,13 @@ export default function NutritionStep({
   isLoading = false,
 }: NutritionStepProps) {
   const { toast } = useToast();
-  const nutritionImageInputRef = useRef<HTMLInputElement>(null);
-  const [nutritionImage, setNutritionImage] = useState<string | null>(null);
-  const [lastApiError, setLastApiError] = useState<any>(null); // State to store the last API error
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [extractionError, setExtractionError] = useState<string | null>(null);
+  
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
-  const form = useForm<z.infer<typeof nutritionSchema>>({
+  const form = useForm<NutritionData>({
     resolver: zodResolver(nutritionSchema),
     defaultValues: formData.nutrition || {
       energy: { kj: 0, kcal: 0 },
@@ -111,71 +159,31 @@ export default function NutritionStep({
 
   const watchedValues = form.watch();
 
-  // AI nutrition extraction mutation - replicating ingredients pattern exactly
-  const extractNutritionMutation = useMutation({
+  // AI Extraction Mutation
+  const extractionMutation = useMutation({
     mutationFn: async (file: File) => {
-      const debugId = uuidv4();
-      console.log(`[${debugId}] Starting nutrition extraction with file:`, file.name, file.size);
-      
-      // Validate file
-      if (!file) {
-        console.error(`[${debugId}] No file provided.`);
-        throw new Error("No file provided");
-      }
-
-      console.log(`[${debugId}] Sending nutrition extraction request as FormData...`);
-
-      // Create FormData and append the file (matching server multer expectation)
       const formData = new FormData();
       formData.append('image', file);
 
-      // Send as FormData instead of JSON to match server multer configuration
-      const res = await fetch("/api/extract/nutrition", {
-        method: "POST",
+      const response = await fetch('/api/extract/nutrition', {
+        method: 'POST',
         body: formData,
-        credentials: "include",
       });
 
-      if (!res.ok) {
-        console.warn(`[${debugId}] API request failed with status: ${res.status}`);
-        const errorData = await res.json().catch(() => ({
-          message: "Network error occurred",
-          userFriendlyMessage: "Netzwerkfehler aufgetreten. Bitte versuchen Sie es erneut."
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          message: 'Netzwerkfehler aufgetreten'
         }));
-        console.error(`[${debugId}] API error response:`, errorData);
-        throw new Error(errorData.userFriendlyMessage || errorData.message || "API request failed");
+        throw new Error(errorData.userFriendlyMessage || errorData.message || 'API-Fehler');
       }
 
-      const result = await res.json();
-      console.log(`[${debugId}] Nutrition extraction response:`, result);
-
-      // Handle both response formats - direct nutrition object or wrapped in nutrition property
-      if (result.nutrition) {
-        console.log(`[${debugId}] Nutrition data found within 'nutrition' property.`);
-        return { nutrition: result.nutrition };
-      } else if (result.energy || result.fat || result.protein) {
-        console.log(`[${debugId}] Nutrition data found directly in response.`);
-        return { nutrition: result };
-      }
-
-      console.log(`[${debugId}] No specific nutrition data structure detected in response.`);
-      return result;
+      return response.json();
     },
     onSuccess: (data) => {
-      const debugId = uuidv4();
-      console.log(`[${debugId}] Nutrition extraction success. Data:`, data);
-
-      // Extract nutrition data from response - handle multiple response formats
-      let nutritionData = null;
-      if (data && data.nutrition) {
-        nutritionData = data.nutrition;
-      } else if (data && (data.energy || data.fat || data.protein)) {
-        nutritionData = data;
-      }
-
-      if (nutritionData) {
-        // Ensure all required fields exist with proper defaults
-        const nutritionWithDefaults = {
+      const nutritionData = data.nutrition || data;
+      
+      if (nutritionData && (nutritionData.energy || nutritionData.fat || nutritionData.protein)) {
+        const processedData: NutritionData = {
           energy: nutritionData.energy || { kj: 0, kcal: 0 },
           fat: Number(nutritionData.fat) || 0,
           saturatedFat: Number(nutritionData.saturatedFat) || 0,
@@ -184,878 +192,399 @@ export default function NutritionStep({
           fiber: Number(nutritionData.fiber) || 0,
           protein: Number(nutritionData.protein) || 0,
           salt: Number(nutritionData.salt) || 0,
-          fruitVegLegumeContent: Number(nutritionData.fruitVegLegumeContent) || 0
+          fruitVegLegumeContent: Number(nutritionData.fruitVegLegumeContent) || 0,
         };
 
-        console.log(`[${debugId}] Setting nutrition data with defaults:`, nutritionWithDefaults);
-        form.reset(nutritionWithDefaults);
-        onUpdate({ nutrition: nutritionWithDefaults });
+        form.reset(processedData);
+        onUpdate({ nutrition: processedData });
+        setExtractionError(null);
 
         toast({
-          title: "Nährwerte extrahiert",
-          description: "Die Nährwerte wurden erfolgreich aus dem Bild extrahiert.",
+          title: "Erfolgreich extrahiert",
+          description: "Nährwerte wurden aus dem Bild erkannt und eingetragen",
         });
-        setLastApiError(null); // Clear error on success
       } else {
-        console.warn(`[${debugId}] No nutrition data found in response:`, data);
-        toast({
-          title: "Keine Daten extrahiert",
-          description: "Keine Nährwerte im Bild erkannt. Bitte geben Sie die Werte manuell ein.",
-          variant: "destructive",
-        });
+        throw new Error('Keine Nährwerte im Bild erkannt');
       }
     },
     onError: (error: any) => {
-      const debugId = uuidv4();
-      console.error(`[${debugId}] Nutrition extraction failed. Error:`, error);
-
-      // Safely extract error message with multiple fallbacks
-      let errorMessage = "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
-
-      try {
-        // Try to get the message from various possible error structures
-        const message = error?.message ||
-                       error?.message ||
-                       error?.userFriendlyMessage ||
-                       error?.error?.message ||
-                       error?.response?.data?.message ||
-                       error?.response?.data?.userFriendlyMessage ||
-                       String(error);
-
-        console.log(`[${debugId}] Attempting to parse error message:`, message);
-
-        // Check for specific error patterns and provide appropriate messages
-        if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured") || message.includes("503")) {
-          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
-        } else if (message.includes("timeout") || message.includes("504")) {
-          errorMessage = "Die Verarbeitung hat zu lange gedauert. Bitte versuchen Sie es mit einem kleineren Bild.";
-        } else if (message.includes("too small") || message.includes("zu klein")) {
-          errorMessage = "Das Bild ist zu klein. Bitte verwenden Sie ein größeres, klareres Bild der Nährwerttabelle.";
-        } else if (message.includes("too large") || message.includes("zu groß")) {
-          errorMessage = "Das Bild ist zu groß. Bitte verwenden Sie ein Bild unter 10MB.";
-        } else if (message.includes("could not be processed") || message.includes("konnte nicht verarbeitet")) {
-          errorMessage = "Das Bild konnte nicht verarbeitet werden. Stellen Sie sicher, dass es eine klare Nährwerttabelle zeigt.";
-        } else if (message.includes("Invalid") || message.includes("ungültig")) {
-          errorMessage = "Ungültiges Bildformat. Bitte verwenden Sie JPG, PNG oder WebP Dateien.";
-        } else if (message.includes("Network") || message.includes("Netzwerk")) {
-          errorMessage = "Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.";
-        } else if (message && message !== "undefined" && message.length > 0 && message.length < 200) {
-          errorMessage = message;
-        }
-      } catch (parseError) {
-        console.error(`[${debugId}] Error parsing error message:`, parseError);
-        // Use default message if parsing fails
-      }
-
+      const errorMessage = error?.message || 'Extraktion fehlgeschlagen';
+      setExtractionError(errorMessage);
       toast({
-        title: "Fehler bei der Extraktion",
+        title: "Extraktion fehlgeschlagen",
         description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
-  // Calculate per serving values
-  const calculatePerServing = (per100g: number) => {
-    if (isNaN(per100g) || typeof per100g !== 'number') return '';
-    return (per100g * servingSize / 100).toFixed(1);
-  };
-
-  const handleNutritionImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const debugId = uuidv4();
-    console.log(`[${debugId}] Handling nutrition image upload...`);
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      console.log(`[${debugId}] No file selected.`);
-      return;
-    }
+    if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      console.warn(`[${debugId}] File size exceeds limit (10MB). File size: ${file.size}`);
       toast({
-        title: "File too large",
-        description: "Please select a file under 10MB.",
+        title: "Datei zu groß",
+        description: "Bitte wählen Sie eine Datei unter 10MB",
         variant: "destructive",
       });
       return;
     }
 
-    // Read file for preview display
+    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      console.log(`[${debugId}] File read successfully for preview. Setting image and triggering mutation.`);
-      setNutritionImage(base64);
-      // Send the actual File object instead of base64 to match server multer expectation
-      extractNutritionMutation.mutate(file);
-    };
-    reader.onerror = (e) => {
-      console.error(`[${debugId}] Error reading file:`, e);
-      toast({
-        title: "File read error",
-        description: "Could not read the uploaded file.",
-        variant: "destructive",
-      });
+      setUploadedImage(e.target?.result as string);
     };
     reader.readAsDataURL(file);
+
+    // Start extraction
+    extractionMutation.mutate(file);
   };
 
-  const removeNutritionImage = () => {
-    const debugId = uuidv4();
-    console.log(`[${debugId}] Removing nutrition image.`);
-    setNutritionImage(null);
-    if (nutritionImageInputRef.current) {
-      nutritionImageInputRef.current.value = '';
+  const removeImage = () => {
+    setUploadedImage(null);
+    setExtractionError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-    // Optionally, reset the form if the image removal should also clear extracted data
-    // form.reset({...nutritionSchema.getDefault()});
-    // onUpdate({ nutrition: nutritionSchema.getDefault() });
   };
 
-  const onSubmit = (values: z.infer<typeof nutritionSchema>) => {
-    const debugId = uuidv4();
-    console.log(`[${debugId}] Form submitted with values:`, values);
+  const retryExtraction = () => {
+    if (fileInputRef.current?.files?.[0]) {
+      extractionMutation.mutate(fileInputRef.current.files[0]);
+    }
+  };
+
+  // Calculate per serving values
+  const calculatePerServing = (per100g: number) => {
+    return ((per100g * servingSize) / 100).toFixed(1);
+  };
+
+  // Handle form submission
+  const onSubmit = (values: NutritionData) => {
     onUpdate({ nutrition: values });
     onNext();
   };
 
-  // Performance: Memoize field change handler
-  const handleFieldChange = useCallback((field: keyof NutritionData, value: number, nestedField?: string) => {
-    const debugId = uuidv4();
-    console.log(`[${debugId}] Handling field change: ${field}, Value: ${value}, Nested: ${nestedField}`);
-    
-    // Initialize nutrition data with default values if not exists
-    const defaultNutrition: NutritionData = {
-      energy: { kj: 0, kcal: 0 },
-      fat: 0,
-      saturatedFat: 0,
-      carbohydrates: 0,
-      sugars: 0,
-      fiber: 0,
-      protein: 0,
-      salt: 0,
-      fruitVegLegumeContent: 0,
-    };
-    
-    const currentNutrition = { ...defaultNutrition, ...formData.nutrition };
-    let updateData;
-
-    if (nestedField && typeof value === 'number' && !isNaN(value)) {
-      updateData = {
-        nutrition: {
-          ...currentNutrition,
-          [field]: {
-            ...(currentNutrition[field] as any),
-            [nestedField]: value,
-          },
-        },
-      };
-    } else if (typeof value === 'number' && !isNaN(value)) {
-      updateData = {
-        nutrition: {
-          ...currentNutrition,
-          [field]: value,
-        },
-      };
-    } else {
-      console.warn(`[${debugId}] Invalid value for field ${field}: ${value}`);
-      return; // Do not update if value is invalid
-    }
-    onUpdate(updateData);
-  }, [formData.nutrition, onUpdate]);
-
-  // Effect to log form values when they change
+  // Auto-save on value changes
   useEffect(() => {
-    const debugId = uuidv4();
-    console.log(`[${debugId}] Form values updated:`, watchedValues);
-  }, [watchedValues]);
+    const subscription = form.watch((values) => {
+      if (Object.values(values).some(v => v !== 0 && v !== null && v !== undefined)) {
+        onUpdate({ nutrition: values as NutritionData });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onUpdate]);
+
+  // Calculate Nutri-Score and claims for display
+  const nutriScore = watchedValues ? calculateNutriScore(watchedValues) : null;
+  const claims = watchedValues ? calculateClaims(watchedValues) : [];
+  const validClaims = Array.isArray(claims) ? claims.filter((claim: any) => claim.isValid) : [];
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-primary mb-2">Nutritional Information</h2>
-        <p className="text-muted-foreground">
-          Review and edit the extracted nutritional values per 100g. Values per {servingSize}g serving will be calculated automatically.
-        </p>
+    <div className="w-full space-y-6" data-testid="nutrition-step">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-foreground">Nährwertangaben</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Laden Sie ein Bild der Nährwerttabelle hoch oder geben Sie die Werte manuell ein
+          </p>
+        </div>
+        {nutriScore && (
+          <Badge 
+            variant="outline" 
+            className={`text-white font-bold px-3 py-1`}
+            style={{ backgroundColor: getNutriScoreColor(nutriScore.nutriGrade) }}
+            data-testid="nutri-score-badge"
+          >
+            Nutri-Score: {nutriScore.nutriGrade}
+          </Badge>
+        )}
       </div>
 
-      {/* Debug Panel */}
-      <DebugPanel lastApiError={lastApiError} />
-
-      {/* Nutrition Image Upload */}
-      <Card className="mb-6">
+      {/* AI Upload Section */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Camera className="w-5 h-5" />
-            <span>Upload Nutrition Table</span>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-blue-600" />
+            KI-gestützte Nährwert-Extraktion
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
-            <input
-              ref={nutritionImageInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleNutritionImageUpload}
-              className="hidden"
-            />
-            <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-2">
-              Upload an image of the nutrition table to automatically extract values
-            </p>
+          <div className="flex items-center gap-4">
             <Button
               type="button"
               variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                nutritionImageInputRef.current?.click();
-              }}
-              disabled={isLoading || extractNutritionMutation.isPending}
+              size="lg"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={extractionMutation.isPending}
+              className="flex items-center gap-2"
               data-testid="button-upload-nutrition"
             >
-              {extractNutritionMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Extracting nutrition values...
-                </>
+              {extractionMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                "Upload Nutrition Table"
+                <Upload className="w-4 h-4" />
               )}
+              Nährwerttabelle hochladen
             </Button>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              data-testid="input-nutrition-image"
+            />
+
+            {validClaims.length > 0 && (
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm">{validClaims.length} gültige Auslobung(en)</span>
+              </div>
+            )}
           </div>
 
-          {nutritionImage && (
-            <div className="relative mt-4">
-              <img
-                src={nutritionImage}
-                alt="Nutrition Label"
-                className="w-full max-w-md mx-auto rounded-lg shadow-sm"
+          {uploadedImage && (
+            <div className="relative inline-block">
+              <img 
+                src={uploadedImage} 
+                alt="Hochgeladene Nährwerttabelle" 
+                className="max-w-xs max-h-48 object-contain border rounded-lg"
               />
               <Button
                 type="button"
-                variant="destructive"
                 size="sm"
-                onClick={removeNutritionImage}
-                className="absolute top-2 right-2"
+                variant="destructive"
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
+                onClick={removeImage}
+                data-testid="button-remove-nutrition-image"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
               </Button>
             </div>
           )}
+
+          <AIExtractionStatus
+            isExtracting={extractionMutation.isPending}
+            error={extractionError}
+            onRetry={retryExtraction}
+          />
         </CardContent>
       </Card>
 
-      {/* Nutritional Table - Same format as Live Preview */}
-      <div className="bg-white border border-slate-300 rounded-lg p-4 mb-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Average nutritional value:</h3>
-        <table className="w-full border-collapse border border-slate-400 text-sm">
-          <thead>
-            <tr>
-              <th className="border border-slate-400 p-2 text-left font-semibold">
-                {/* Nutrient names column */}
-              </th>
-              <th className="border border-slate-400 p-2 text-center font-semibold">
-                per 100 g of product
-              </th>
-              <th className="border border-slate-400 p-2 text-center font-semibold">
-                per {servingSize} g of product
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border border-slate-400 p-1">Energy</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.energy?.kj ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('energy.kj', value);
-                      handleFieldChange("energy", value, "kj");
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">kJ /</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.energy?.kcal ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('energy.kcal', value);
-                      handleFieldChange("energy", value, "kcal");
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">kcal</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.energy?.kj) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('energy.kj', per100g);
-                      handleFieldChange("energy", per100g, "kj");
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">kJ /</span>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.energy?.kcal) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('energy.kcal', per100g);
-                      handleFieldChange("energy", per100g, "kcal");
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">kcal</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">Fat</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.fat ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('fat', value);
-                      handleFieldChange("fat", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.fat) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('fat', per100g);
-                      handleFieldChange("fat", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">of which saturates</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.saturatedFat ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('saturatedFat', value);
-                      handleFieldChange("saturatedFat", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.saturatedFat) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('saturatedFat', per100g);
-                      handleFieldChange("saturatedFat", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">Carbohydrates</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.carbohydrates ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('carbohydrates', value);
-                      handleFieldChange("carbohydrates", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.carbohydrates) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('carbohydrates', per100g);
-                      handleFieldChange("carbohydrates", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">of which sugars</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.sugars ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('sugars', value);
-                      handleFieldChange("sugars", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.sugars) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('sugars', per100g);
-                      handleFieldChange("sugars", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">Fibre</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.fiber ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('fiber', value);
-                      handleFieldChange("fiber", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.fiber) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('fiber', per100g);
-                      handleFieldChange("fiber", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">Protein</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.protein ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('protein', value);
-                      handleFieldChange("protein", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.protein) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('protein', per100g);
-                      handleFieldChange("protein", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-slate-400 p-1">Salt</td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={watchedValues.salt ?? ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      form.setValue('salt', value);
-                      handleFieldChange("salt", value);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-              <td className="border border-slate-400 p-1 text-center">
-                <div className="flex items-center justify-center space-x-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={calculatePerServing(watchedValues.salt) || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      const per100g = (value * 100) / servingSize;
-                      form.setValue('salt', per100g);
-                      handleFieldChange("salt", per100g);
-                    }}
-                    className="w-16 h-8 text-xs text-center p-1"
-                  />
-                  <span className="text-xs">g</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* Manual Input Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-green-600" />
+            Nährwerte (pro 100g)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Table Headers */}
+              <div className="grid grid-cols-12 gap-4 pb-2 border-b font-medium text-sm">
+                <div className="col-span-4">Nährwert</div>
+                <div className="col-span-3 text-center">pro 100g</div>
+                <div className="col-span-2 text-center">pro Portion</div>
+                <div className="col-span-3"></div>
+              </div>
 
-      {/* Fruit/Veg/Legume Content Input */}
-      <Form {...form}>
-        <div className="bg-white border border-slate-300 rounded-lg p-4 mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Fruit/Vegetable/Legume Content</h3>
-          <p className="text-sm text-slate-600 mb-3">
-            Enter the percentage of fruits, vegetables, nuts and legumes for accurate Nutri-Score calculation.
-          </p>
-          <FormField
-            control={form.control}
-            name="fruitVegLegumeContent"
-            render={({ field }) => (
-              <FormItem className="w-48">
-                <FormLabel>Fruit/Veg/Legume Content (%)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    placeholder="0"
-                    {...field}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      field.onChange(value);
-                      handleFieldChange("fruitVegLegumeContent", value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              {/* Energy Fields */}
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="energy.kj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <NutritionField
+                        label="Energie"
+                        unit="kJ"
+                        value={field.value}
+                        onChange={field.onChange}
+                        servingValue={calculatePerServing(field.value)}
+                        error={form.formState.errors.energy?.kj?.message}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="energy.kcal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <NutritionField
+                        label=""
+                        unit="kcal"
+                        value={field.value}
+                        onChange={field.onChange}
+                        servingValue={calculatePerServing(field.value)}
+                        error={form.formState.errors.energy?.kcal?.message}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
+              {/* Other Nutrition Fields */}
+              {[
+                { name: 'fat' as const, label: 'Fett', unit: 'g' },
+                { name: 'saturatedFat' as const, label: '  davon gesättigte Fettsäuren', unit: 'g' },
+                { name: 'carbohydrates' as const, label: 'Kohlenhydrate', unit: 'g' },
+                { name: 'sugars' as const, label: '  davon Zucker', unit: 'g' },
+                { name: 'fiber' as const, label: 'Ballaststoffe', unit: 'g' },
+                { name: 'protein' as const, label: 'Eiweiß', unit: 'g' },
+                { name: 'salt' as const, label: 'Salz', unit: 'g' },
+              ].map(({ name, label, unit }) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={name}
+                  render={({ field }) => (
+                    <FormItem>
+                      <NutritionField
+                        label={label}
+                        unit={unit}
+                        value={field.value}
+                        onChange={field.onChange}
+                        servingValue={calculatePerServing(field.value)}
+                        error={form.formState.errors[name]?.message}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+
+              <Separator />
+
+              {/* Fruit/Veg/Legume Content */}
+              <FormField
+                control={form.control}
+                name="fruitVegLegumeContent"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="grid grid-cols-12 gap-4 items-center py-2">
+                      <div className="col-span-4">
+                        <FormLabel className="text-sm font-medium">
+                          Obst-/Gemüse-/Hülsenfrucht-Anteil
+                        </FormLabel>
+                      </div>
+                      <div className="col-span-3">
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              step="1"
+                              min="0"
+                              max="100"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              className="text-center"
+                              data-testid="input-fruit-veg-legume"
+                            />
+                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+                              %
+                            </span>
+                          </div>
+                        </FormControl>
+                      </div>
+                      <div className="col-span-5 text-xs text-muted-foreground">
+                        Für Nutri-Score Berechnung (optional)
+                      </div>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onPrev}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                  data-testid="button-previous"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Zurück
+                </Button>
+                
+                <Button
+                  type="submit"
+                  disabled={isLoading || !form.formState.isValid}
+                  className="flex items-center gap-2"
+                  data-testid="button-next"
+                >
+                  Weiter
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {/* Summary Section */}
+      {nutriScore && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-purple-600" />
+              Zusammenfassung
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-secondary/20 rounded-lg">
+                <div className="text-2xl font-bold" style={{ color: getNutriScoreColor(nutriScore.nutriGrade) }}>
+                  {nutriScore.nutriGrade}
+                </div>
+                <div className="text-sm text-muted-foreground">Nutri-Score</div>
+              </div>
+              
+              <div className="text-center p-4 bg-secondary/20 rounded-lg">
+                <div className="text-2xl font-bold text-foreground">
+                  {validClaims.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Gültige Auslobungen</div>
+              </div>
+              
+              <div className="text-center p-4 bg-secondary/20 rounded-lg">
+                <div className="text-2xl font-bold text-foreground">
+                  {watchedValues.energy.kcal}
+                </div>
+                <div className="text-sm text-muted-foreground">kcal pro 100g</div>
+              </div>
+            </div>
+
+            {validClaims.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-medium mb-2">Mögliche Auslobungen:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {validClaims.map((claim: any, index: number) => (
+                    <Badge key={index} variant="secondary" className="bg-green-100 text-green-800">
+                      {claim.text}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             )}
-          />
-        </div>
-      </Form>
-
-      {/* Nutri-Score Calculation */}
-      {(() => {
-        const nutriScoreResult = calculateNutriScore({
-          energy: watchedValues.energy || { kj: 0, kcal: 0 },
-          fat: watchedValues.fat || 0,
-          saturatedFat: watchedValues.saturatedFat || 0,
-          carbohydrates: watchedValues.carbohydrates || 0,
-          sugars: watchedValues.sugars || 0,
-          fiber: watchedValues.fiber || 0,
-          protein: watchedValues.protein || 0,
-          salt: watchedValues.salt || 0,
-          fruitVegLegumeContent: watchedValues.fruitVegLegumeContent || 0
-        });
-
-        const claimsResult = calculateClaims({
-          protein: watchedValues.protein || 0,
-          fiber: watchedValues.fiber || 0,
-          salt: watchedValues.salt || 0,
-          sugars: watchedValues.sugars || 0,
-          fat: watchedValues.fat || 0,
-          saturatedFat: watchedValues.saturatedFat || 0
-        });
-
-        const validClaims = getValidClaims({
-          protein: watchedValues.protein || 0,
-          fiber: watchedValues.fiber || 0,
-          salt: watchedValues.salt || 0,
-          sugars: watchedValues.sugars || 0,
-          fat: watchedValues.fat || 0,
-          saturatedFat: watchedValues.saturatedFat || 0
-        });
-
-        return (
-          <div className="space-y-6">
-            {/* Nutri-Score Section */}
-            <div className="bg-white border border-slate-300 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutri-Score Calculation</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Malus Score */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-red-600">Malus Score (Negative Nutrients)</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Energy Score:</span>
-                      <span className="font-mono">{nutriScoreResult.energyScore}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Saturated Fat Score:</span>
-                      <span className="font-mono">{nutriScoreResult.saturatedFatScore}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Sugar Score:</span>
-                      <span className="font-mono">{nutriScoreResult.sugarScore}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Salt Score:</span>
-                      <span className="font-mono">{nutriScoreResult.saltScore}</span>
-                    </div>
-                    <div className="flex justify-between border-t pt-2 font-semibold">
-                      <span>Total Malus:</span>
-                      <span className="font-mono text-red-600">{nutriScoreResult.malusScore}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bonus Score */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-green-600">Bonus Score (Positive Nutrients)</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Fruit/Veg/Legume Score:</span>
-                      <span className="font-mono">{nutriScoreResult.fruitVegLegumeScore}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Fiber Score:</span>
-                      <span className="font-mono">{nutriScoreResult.fiberScore}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Protein Score:</span>
-                      <span className="font-mono">{nutriScoreResult.proteinScore}</span>
-                    </div>
-                    <div className="flex justify-between border-t pt-2 font-semibold">
-                      <span>Total Bonus:</span>
-                      <span className="font-mono text-green-600">{nutriScoreResult.bonusScore}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Final Result */}
-              <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold mb-1">Final Nutri-Score</h4>
-                    <p className="text-sm text-slate-600">
-                      {nutriScoreResult.malusScore} (malus) - {nutriScoreResult.bonusScore} (bonus) = {nutriScoreResult.finalScore}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={getNutriScoreImage(nutriScoreResult.nutriGrade)}
-                      alt={`Nutri-Score ${nutriScoreResult.nutriGrade}`}
-                      className="h-8 w-auto"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Claims Calculation Section */}
-            <div className="bg-white border border-slate-300 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Nutrient Claims Analysis</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Positive Claims */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-green-600">Positive Claims</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Protein:</span>
-                      <span className={`font-medium ${claimsResult.protein.bestClaim ? 'text-green-600' : 'text-slate-400'}`}>
-                        {claimsResult.protein.bestClaim || "No claim"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Fiber:</span>
-                      <span className={`font-medium ${claimsResult.fiber.bestClaim ? 'text-green-600' : 'text-slate-400'}`}>
-                        {claimsResult.fiber.bestClaim || "No claim"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Negative Claims (Low/Free) */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-blue-600">Low/Free Claims</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Salt:</span>
-                      <span className={`font-medium ${claimsResult.salt.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
-                        {claimsResult.salt.bestClaim || "No claim"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Sugar:</span>
-                      <span className={`font-medium ${claimsResult.sugar.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
-                        {claimsResult.sugar.bestClaim || "No claim"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Fat:</span>
-                      <span className={`font-medium ${claimsResult.fat.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
-                        {claimsResult.fat.bestClaim || "No claim"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Saturated Fat:</span>
-                      <span className={`font-medium ${claimsResult.saturatedFat.bestClaim ? 'text-blue-600' : 'text-slate-400'}`}>
-                        {claimsResult.saturatedFat.bestClaim || "No claim"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Summary of Valid Claims */}
-              {validClaims.length > 0 && (
-                <div className="mt-6 p-4 bg-green-50 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-green-800">Valid Claims for Product Labeling</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {validClaims.map((claim, index) => (
-                      <span key={index} className="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm font-medium">
-                        {claim}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {validClaims.length === 0 && (
-                <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-                  <p className="text-slate-600 text-sm">No nutrient claims can be made for this product based on current nutrition values.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
-          <div className="flex justify-between mt-8">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onPrev();
-              }}
-              disabled={isLoading}
-              className="flex items-center space-x-2"
-              data-testid="button-previous-nutrition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Back</span>
-            </Button>
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex items-center space-x-2"
-              data-testid="button-next-nutrition"
-            >
-              <span>Continue to Storage & Preparation</span>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </form>
-      </Form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
