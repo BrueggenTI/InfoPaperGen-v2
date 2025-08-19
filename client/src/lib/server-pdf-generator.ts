@@ -35,9 +35,9 @@ export async function downloadPDFFromServer(options: DirectPDFOptions): Promise<
       throw new Error('Produktname ist erforderlich für die PDF-Generierung');
     }
 
-    // API-Aufruf zur direkten PDF-Generierung mit verbesserter Timeout-Behandlung
+    // Performance: Optimierter API-Aufruf mit angepasstem Timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s Timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // Performance: 30s → 45s für komplexe PDFs
 
     const response = await fetch('/api/generate-pdf', {
       method: 'POST',

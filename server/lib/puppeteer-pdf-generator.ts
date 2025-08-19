@@ -165,7 +165,7 @@ export async function generatePDFWithPuppeteer(
       await page.waitForSelector('#document-preview-content', { timeout: 15000 });
       console.log('✅ Live Preview Container gefunden');
 
-      // 2. Warte auf Session-Daten-Ladung (prüfe auf gefüllte Inhalte)
+      // 2. Performance: Optimierte Session-Daten-Ladung (reduziertes Polling)
       await page.waitForFunction(() => {
         // Prüfe ob Produktname und andere Daten geladen sind
         const productNameElements = document.querySelectorAll('[data-testid*="product"], h1, h2, h3');
@@ -184,22 +184,22 @@ export async function generatePDFWithPuppeteer(
 
         console.log(`Content check: hasProductData=${hasProductData}, hasTableData=${hasTableData}, tables=${tables.length}`);
         return hasProductData || hasTableData;
-      }, { timeout: 10000, polling: 1000 });
+      }, { timeout: 8000, polling: 500 }); // Performance: Reduzierte Polling-Zeit von 1000ms auf 500ms
 
       console.log('✅ Daten-Content erfolgreich geladen');
 
-      // 3. Zusätzliche Wartezeit für finales Rendering
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 3. Performance: Reduzierte finale Rendering-Zeit
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Performance: 2000ms → 1000ms
       console.log('✅ Finale Rendering-Zeit abgewartet');
 
     } catch (error) {
       console.log('⚠️ Content-Load-Timeout - verwende verfügbare Inhalte');
-      // Fallback: Mindest-Wartezeit für grundlegendes Laden
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Performance: Reduzierte Fallback-Zeit
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Performance: 3000ms → 1500ms
     }
 
-    // Zusätzliche Wartezeit für finales Rendering
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Performance: Reduzierte zusätzliche Wartezeit
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Performance: 2000ms → 1000ms
 
     console.log('📋 Generiere PDF...');
 

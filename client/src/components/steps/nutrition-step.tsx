@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -137,7 +137,8 @@ export default function NutritionStep({
     onNext();
   };
 
-  const handleFieldChange = (field: string, value: number, nestedField?: string) => {
+  // Performance: Memoize field change handler  
+  const handleFieldChange = useCallback((field: string, value: number, nestedField?: string) => {
     let updateData;
     if (nestedField) {
       updateData = {
@@ -176,7 +177,7 @@ export default function NutritionStep({
       };
     }
     onUpdate(updateData);
-  };
+  }, [formData.nutrition, onUpdate]);
 
   return (
     <div className="p-6">

@@ -5,7 +5,7 @@ import { downloadPDFFromServer } from "@/lib/server-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
 import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -15,13 +15,20 @@ interface DocumentPreviewProps {
 
 export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
+  
+  // Performance: Memoize parsed serving size
+  const servingSize = useMemo(() => 
+    parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), 
+    [formData.servingSize]
+  );
 
-  const calculatePerServing = (per100g: number) => {
+  // Performance: Memoize calculation function 
+  const calculatePerServing = useCallback((per100g: number) => {
     return (per100g * servingSize / 100).toFixed(1);
-  };
+  }, [servingSize]);
 
-  const formatIngredients = () => {
+  // Performance: Memoize ingredients formatting
+  const formattedIngredients = useMemo(() => {
     const finalIngredients = formData.ingredients || [];
     const baseIngredients = formData.baseProductIngredients || [];
 
@@ -57,7 +64,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       .join(', ');
 
     return finalFormatted || "Ingredients will appear here after extraction...";
-  };
+  }, [formData.ingredients, formData.baseProductIngredients]);
 
   // Calculate percentage from base product to whole product using the same formula as ingredients-step
   const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
@@ -282,7 +289,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                 <div 
                   className="text-sm leading-relaxed text-slate-700"
                   dangerouslySetInnerHTML={{
-                    __html: formatIngredients()
+                    __html: formattedIngredients
                   }}
                 />
                 <div className="text-xs text-slate-500 italic mt-1 pt-1 border-t border-slate-200">
@@ -458,17 +465,17 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Nutri-Score Display */}
                 {(() => {
-                  const nutriScore = calculateNutriScore({
-                    energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
-                    fat: formData.nutrition.fat || 0,
-                    saturatedFat: formData.nutrition.saturatedFat || 0,
-                    carbohydrates: formData.nutrition.carbohydrates || 0,
-                    sugars: formData.nutrition.sugars || 0,
-                    fiber: formData.nutrition.fiber || 0,
-                    protein: formData.nutrition.protein || 0,
-                    salt: formData.nutrition.salt || 0,
-                    fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
-                  });
+                  const nutriScore = useMemo(() => calculateNutriScore({
+                    energy: formData.nutrition!.energy || { kj: 0, kcal: 0 },
+                    fat: formData.nutrition!.fat || 0,
+                    saturatedFat: formData.nutrition!.saturatedFat || 0,
+                    carbohydrates: formData.nutrition!.carbohydrates || 0,
+                    sugars: formData.nutrition!.sugars || 0,
+                    fiber: formData.nutrition!.fiber || 0,
+                    protein: formData.nutrition!.protein || 0,
+                    salt: formData.nutrition!.salt || 0,
+                    fruitVegLegumeContent: formData.nutrition!.fruitVegLegumeContent || 0
+                  }), [formData.nutrition]);
 
                   return (
                     <div className="border border-slate-200 rounded-lg p-3">

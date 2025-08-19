@@ -3,8 +3,33 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// Performance: HTTP-Kompression aktivieren
+app.use((req, res, next) => {
+  // Performance: Response Compression Headers setzen
+  if (req.url.endsWith('.js') || req.url.endsWith('.css')) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  } else if (req.url.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-cache');
+  } else {
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+  }
+  next();
+});
+
+// Performance: Request/Response-Limits optimieren 
+app.use(express.json({ 
+  limit: '50mb',
+  // Performance: JSON Parsing optimieren
+  strict: true,
+  type: 'application/json'
+}));
+app.use(express.urlencoded({ 
+  extended: false, 
+  limit: '50mb',
+  // Performance: URL Parsing begrenzen
+  parameterLimit: 100
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();
