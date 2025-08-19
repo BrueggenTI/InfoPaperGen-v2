@@ -45,16 +45,16 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
             <div className="mt-4 text-center">
               <h3 className="text-lg font-medium text-gray-900">
-                Something went wrong
+                Ein Fehler ist aufgetreten
               </h3>
               <p className="mt-2 text-sm text-gray-600">
-                We encountered an unexpected error. Please refresh the page and try again.
+                Ein unerwarteter Fehler ist aufgetreten. Bitte laden Sie die Seite neu und versuchen Sie es erneut.
               </p>
               <button
                 onClick={() => window.location.reload()}
                 className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
-                Refresh Page
+                Seite neu laden
               </button>
             </div>
           </div>

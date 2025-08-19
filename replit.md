@@ -100,6 +100,12 @@ The application is built as a full-stack JavaScript application following a clea
   - **✅ OpenAI Integration Optimized**: Azure-compatible nutrition/ingredient extraction with environment validation, base64 processing, 60s timeout, 3x retry logic, structured error handling, high-detail image processing, and development test endpoints
   - **✅ Environment Configuration**: Production-ready port handling (8080 for Azure, 5000 for Replit), environment variable validation
   - **✅ Security Hardening**: Non-root user in Docker, minimal dependencies, secure secret management
+  - **✅ Deployment Error Handling Fixed (2025-08-19)**: Resolved "Something went wrong" generic error when OpenAI API key missing in deployed environment:
+    - Enhanced backend API routes with explicit OpenAI API key validation and German user-friendly error messages
+    - Updated frontend error handling to properly parse and display server-provided error messages
+    - Improved Error Boundary component with German language interface
+    - Added robust error parsing in mutations to handle various error response formats
+    - Implemented consistent error handling across nutrition and ingredient extraction features
 - **Production Docker Containerization (2025-08-19)**:
   - **✅ Multi-stage Build**: Optimized Dockerfile with development dependencies for build, production-only for runtime
   - **✅ Puppeteer Compatibility**: 43 system libraries installed, 30+ Chrome flags for container environments

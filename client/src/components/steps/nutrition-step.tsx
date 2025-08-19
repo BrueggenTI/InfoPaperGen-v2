@@ -72,13 +72,6 @@ export default function NutritionStep({
       const res = await apiRequest("POST", "/api/extract-nutrition", { 
         image: imageData.split(',')[1] // Remove data:image/jpeg;base64, prefix
       });
-      
-      // Check if the response is not ok (status 4xx or 5xx)
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.userFriendlyMessage || errorData.message || "Request failed");
-      }
-      
       return await res.json();
     },
     onSuccess: (data) => {
@@ -99,20 +92,36 @@ export default function NutritionStep({
     onError: (error: any) => {
       console.error("Nutrition extraction failed:", error);
       
-      // Use server's user-friendly message if available, otherwise provide fallback
-      let errorMessage = error?.message || "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
+      // Safely extract error message with multiple fallbacks
+      let errorMessage = "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
       
-      // Check for specific error patterns and provide appropriate messages
-      if (error?.message?.includes("nicht verfügbar") || error?.message?.includes("not available")) {
-        errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
-      } else if (error?.message?.includes("too small")) {
-        errorMessage = "Das Bild ist zu klein. Bitte verwenden Sie ein größeres, klareres Bild der Nährwerttabelle.";
-      } else if (error?.message?.includes("too large")) {
-        errorMessage = "Das Bild ist zu groß. Bitte verwenden Sie ein Bild unter 10MB.";
-      } else if (error?.message?.includes("could not be processed")) {
-        errorMessage = "Das Bild konnte nicht verarbeitet werden. Stellen Sie sicher, dass es eine klare Nährwerttabelle zeigt.";
-      } else if (error?.message?.includes("Invalid")) {
-        errorMessage = "Ungültiges Bildformat. Bitte verwenden Sie JPG, PNG oder WebP Dateien.";
+      try {
+        // Try to get the message from various possible error structures
+        const message = error?.message || 
+                       error?.error?.message || 
+                       error?.response?.data?.message ||
+                       error?.response?.data?.userFriendlyMessage ||
+                       String(error);
+        
+        // Check for specific error patterns and provide appropriate messages
+        if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured")) {
+          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
+        } else if (message.includes("too small")) {
+          errorMessage = "Das Bild ist zu klein. Bitte verwenden Sie ein größeres, klareres Bild der Nährwerttabelle.";
+        } else if (message.includes("too large")) {
+          errorMessage = "Das Bild ist zu groß. Bitte verwenden Sie ein Bild unter 10MB.";
+        } else if (message.includes("could not be processed")) {
+          errorMessage = "Das Bild konnte nicht verarbeitet werden. Stellen Sie sicher, dass es eine klare Nährwerttabelle zeigt.";
+        } else if (message.includes("Invalid")) {
+          errorMessage = "Ungültiges Bildformat. Bitte verwenden Sie JPG, PNG oder WebP Dateien.";
+        } else if (message.includes("503") || message.includes("Service Unavailable")) {
+          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell in die Felder ein.";
+        } else if (message && message !== "undefined" && message.length > 0) {
+          errorMessage = message;
+        }
+      } catch (parseError) {
+        console.error("Error parsing error message:", parseError);
+        // Use default message if parsing fails
       }
       
       toast({

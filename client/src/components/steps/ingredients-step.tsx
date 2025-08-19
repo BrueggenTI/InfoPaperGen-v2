@@ -100,10 +100,33 @@ export default function IngredientsStep({
         description: "Final Recipe ingredients have been successfully extracted.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Final ingredients extraction failed:", error);
+      
+      // Safely extract error message with multiple fallbacks
+      let errorMessage = "Die Zutaten konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
+      
+      try {
+        const message = error?.message || 
+                       error?.error?.message || 
+                       error?.response?.data?.message ||
+                       error?.response?.data?.userFriendlyMessage ||
+                       String(error);
+        
+        if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured")) {
+          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Zutaten manuell ein.";
+        } else if (message.includes("503") || message.includes("Service Unavailable")) {
+          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Zutaten manuell ein.";
+        } else if (message && message !== "undefined" && message.length > 0) {
+          errorMessage = message;
+        }
+      } catch (parseError) {
+        console.error("Error parsing error message:", parseError);
+      }
+      
       toast({
-        title: "Error",
-        description: "Error extracting Final Recipe ingredients.",
+        title: "Fehler bei der Extraktion",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -135,10 +158,33 @@ export default function IngredientsStep({
         description: "Base Recipe ingredients have been successfully extracted.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Base ingredients extraction failed:", error);
+      
+      // Safely extract error message with multiple fallbacks
+      let errorMessage = "Die Basis-Rezept Zutaten konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
+      
+      try {
+        const message = error?.message || 
+                       error?.error?.message || 
+                       error?.response?.data?.message ||
+                       error?.response?.data?.userFriendlyMessage ||
+                       String(error);
+        
+        if (message.includes("nicht verfügbar") || message.includes("not available") || message.includes("not configured")) {
+          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Basis-Rezept Zutaten manuell ein.";
+        } else if (message.includes("503") || message.includes("Service Unavailable")) {
+          errorMessage = "Die automatische Bildanalyse ist derzeit nicht verfügbar. Bitte geben Sie die Basis-Rezept Zutaten manuell ein.";
+        } else if (message && message !== "undefined" && message.length > 0) {
+          errorMessage = message;
+        }
+      } catch (parseError) {
+        console.error("Error parsing error message:", parseError);
+      }
+      
       toast({
-        title: "Error",
-        description: "Error extracting Base Recipe ingredients.",
+        title: "Fehler bei der Extraktion",
+        description: errorMessage,
         variant: "destructive",
       });
     },
