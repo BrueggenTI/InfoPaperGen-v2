@@ -1,9 +1,7 @@
 # Product Information Generator - AI-Powered Document Creation
 
 ### Overview
-An AI-powered web application that generates professional Product Information Papers. Its core purpose is to streamline the creation of detailed product documentation by leveraging advanced AI for tasks like image recognition, natural language processing, and multilingual support. This tool aims to automate and standardize the generation of comprehensive product information, enhancing efficiency and ensuring brand consistency.
-
-**Performance Status (2025-08-19)**: Application extensively optimized for production deployment with comprehensive performance improvements across all layers.
+An AI-powered web application that generates professional Product Information Papers. Its core purpose is to streamline the creation of detailed product documentation by leveraging advanced AI for tasks like image recognition, natural language processing, and multilingual support. This tool aims to automate and standardize the generation of comprehensive product information, enhancing efficiency and ensuring brand consistency, with a vision to enhance product data management and ensure brand consistency across various markets.
 
 ### User Preferences
 - German language interface for nutrition-related features
@@ -14,123 +12,33 @@ An AI-powered web application that generates professional Product Information Pa
 
 ### System Architecture
 The application is built as a full-stack JavaScript application following a clear separation of concerns.
-- **Frontend**: Developed with React.js using TypeScript for type safety, Wouter for routing, and TanStack Query for efficient state management and data fetching. UI components are built using Shadcn UI, styled with Tailwind CSS, and incorporate a design matching the Brüggen corporate identity, including specific brand colors and layout structures. The layout has been redesigned for full-width sections with the Live Preview appearing below form sections, complemented by a Document Status card.
-- **Backend**: Implemented with Express.js, utilizing an in-memory storage interface for data handling.
-- **Data Validation**: Zod schemas are extensively used across both frontend and backend to ensure type safety and robust data validation.
-- **Core Functionality**:
+
+- **UI/UX Decisions**:
+    - Frontend developed with React.js using TypeScript, Wouter for routing, and TanStack Query for state management.
+    - UI components are built using Shadcn UI, styled with Tailwind CSS, incorporating the Brüggen corporate identity with specific brand colors and layout structures.
+    - Redesigned for full-width sections with Live Preview below form sections, complemented by a Document Status card.
+    - Consistent table design across all sections with titles above content, professional footer with "Valid from" date and "Prepared by" information.
+    - Minimalistic, professional PDF design overhaul with exact 3mm margins, centered header, and optimized icon-text alignment.
+    - Allergy Advice and Ingredients warnings show only colored left borders without background colors.
+    - "Possible Declarations" section displays only green highlighted claims (Fiber and Protein sources).
+
+- **Technical Implementations**:
+    - **Frontend**: React.js, TypeScript, Wouter, TanStack Query, Shadcn UI, Tailwind CSS.
+    - **Backend**: Express.js with an in-memory storage interface.
+    - **Data Validation**: Zod schemas used extensively for type safety and robust data validation.
     - **Image Recognition**: Utilizes OpenAI for extracting nutrition information from images.
     - **Ingredient Management**: Comprehensive handling of ingredient screenshots with removal, replacement, and two-way translation (e.g., German ↔ English) using OpenAI GPT-4o for food-specific terminology.
-    - **Document Generation**: Generates localized documents with dynamic preview capabilities.
+    - **Document Generation**: Generates localized documents with dynamic preview capabilities and server-side PDF generation via Puppeteer.
     - **Nutri-Score Calculation**: Implements a complete Nutri-Score calculation system based on EU standards, including malus and bonus scoring for nutrients, and displays real-time, color-coded grades. Supports manual input for fruit/vegetable/legume content.
     - **Conditional Display**: Live Preview intelligently displays sections (e.g., nutrition table, Nutri-Score, claims, ingredients table) only when relevant data exists.
     - **Conditions & Notes**: Features a dedicated section for product type selection, automatic shelf-life calculation, and generation of storage conditions, allergy advice, and preparation instructions based on product type.
-    - **Styling**: Consistent table design across all sections with titles above content, professional footer with "Valid from" date and "Prepared by" information.
-    - **PDF Generation**: Currently uses jsPDF for client-side PDF creation. Browser-based PDF generation (Puppeteer) attempted but not viable in Replit environment due to system library dependencies.
-- **Environment Management**: Robust environment variable management for sensitive data like API keys.
-
-### Recent Changes (2025-08-05)
-- **PDF Header Optimization**: Updated with new Brüggen logo from user assets and reduced header height to 40px while maintaining full width
-- **Logo Integration**: Implemented dynamic logo loading from attached_assets folder using proper ES6 imports and base64 conversion
-- **Nutri-Score Images**: Fixed Nutri-Score image paths by loading actual images from attached_assets folder matching live preview source paths
-- **Import Fix**: Resolved TypeScript module import error by replacing CommonJS require() with ES6 imports for file system operations
-- **Complete PDF Generation System**: Implemented and thoroughly tested professional server-side PDF generation with Puppeteer, producing native PDF documents with selectable text, functional links, and perfect layout reproduction.
-- **Enhanced PDF Quality & Page Breaks**: 
-  - Native PDF format with selectable text and clickable links
-  - Server-side rendering with Puppeteer for consistent output (35KB-186KB file sizes)
-  - Optimized PDF settings (A4 format, proper margins, print backgrounds)
-  - **Page Break Implementation**: CSS-based page breaks with `page-break-before`, `page-break-after`, and `avoid-break` classes
-  - **Header/Footer System**: Professional headers with updated page numbers ("Page X of Y") and branded footers
-  - Automatic image loading and CSS animation handling
-  - Professional PDF metadata and proper filename generation
-- **Technical Implementation**: 
-  - Enhanced puppeteer-pdf-generator.ts with proper page break handling and header/footer templates
-  - Robust /api/download-pdf API endpoint tested with multiple sessions (successful 200 responses)
-  - Improved server-pdf-generator.ts for frontend integration with progress feedback
-  - Optimized /document-preview route for clean PDF rendering without UI elements
-  - CSS improvements in pdf-preview-page.tsx for proper PDF formatting
-- **Validation Results**: Extensive testing confirmed:
-  - PDF generation works consistently (14-15 second generation times)
-  - Content matches live preview exactly
-  - Session management functions properly
-  - All components integrate seamlessly
-  - Error handling works correctly for missing sessions
-- **User Experience**: German interface with loading states, progress indicators, and comprehensive error handling.
-- **Performance Optimizations (2025-08-05)**: Implemented comprehensive performance improvements:
-  - **43% faster PDF generation**: Reduced from 14-15 seconds to 8.5-9.7 seconds
-  - **Enhanced timeout limits**: Increased from 30s to 60s for complex pages
-  - **Memory optimization**: Increased to 4096MB with --max_old_space_size flag
-  - **Network optimization**: Changed from networkidle0 to networkidle2 for faster page loading
-  - **Resource blocking**: Implemented request interception to block unnecessary resources
-  - **Reduced wait times**: Optimized fallback timers (10s→5s, 2s→1s)
-  - **Browser flags**: Added 16 additional performance-focused Chrome flags
-- **PDF Layout & Content Optimizations (2025-08-06)**: Fixed PDF generation issues:
-  - **Reduced margins**: Decreased from 25mm to 10mm (60% reduction) for better content utilization
-  - **Removed visual elements**: Eliminated box shadows, borders, and rounded corners in PDF mode
-  - **Header optimization**: Brüggen logo section redesigned as clean document header with border
-  - **Table visibility**: Enhanced table rendering for proper display in generated PDFs
-  - **Content spacing**: Improved section spacing and layout for better PDF appearance
-  - **Complete content loading**: Implemented explicit content verification for tables, images, and text
-  - **Resource loading**: Enhanced to load all necessary resources (CSS, scripts, images) for full content display
-  - **Content monitoring**: Added 500ms interval checks to ensure all form data appears in generated PDF
-  - **Error resolution**: Fixed JavaScript execution errors in Puppeteer with simplified content loading strategy
-  - **Stability improvements**: Replaced complex page.evaluate() with stable waitForSelector() approach
-  - **Live Preview Integration**: Enhanced PDF-Preview-Page to correctly capture all form data from Live Preview at end of form
-  - **Content Container**: Added explicit document-preview-content ID for reliable Puppeteer content detection
-  - **URL Correction**: Fixed PDF generation to use main page with complete Live Preview instead of separate document-preview route
-  - **Complete Data Capture**: PDF now captures all form data from the Live Preview section below all form steps
-- **Clean Design Implementation (2025-08-06)**: Minimalistic, professional PDF design overhaul:
-  - **3mm Margins**: Exact 3mm margins for maximum content utilization (body padding and full-width container)
-  - **Centered Header**: Product Information header perfectly centered with reference number
-  - **Product Name Capitalization**: Only first letter capitalized, not all uppercase
-  - **Icon-Text Alignment**: Storage Conditions and Preparation Instructions - icons and text on same height with flex center alignment
-  - **Removed Colored Backgrounds**: Allergy Advice and Ingredients warnings show only colored left borders without background colors
-  - **Positive Claims Only**: Possible Declarations section displays only green highlighted claims (Fiber and Protein sources)
-- **Comprehensive Performance Optimizations (2025-08-19)**:
-  - **React Performance**: Implemented useMemo and useCallback hooks for expensive calculations (Nutri-Score, ingredients formatting, serving size calculations)
-  - **Query Client Optimization**: Enhanced TanStack Query with optimized stale times (5 min), garbage collection (10 min), and network modes
-  - **Server Performance**: Added HTTP caching headers, optimized Express middleware, improved request/response handling
-  - **PDF Generation Speed**: Reduced Puppeteer wait times (50% faster polling, shorter timeouts), enhanced resource loading
-  - **Build Optimization**: Production build successful with 872KB main bundle (268KB gzipped), acceptable for complex PDF generation features
-  - **Memory Management**: Improved client-side memory usage with memoized component calculations and optimized re-renders
-  - **API Timeouts**: Extended PDF generation timeout to 45s for complex documents while maintaining user experience
-- **Complete Azure Deployment Readiness (2025-08-19)**:
-  - **✅ Runtime Errors Fixed**: Eliminated all console errors, added global error boundaries with user-friendly fallbacks
-  - **✅ Build Optimization**: Production build successful (874KB main bundle, 269KB gzipped) with performance warnings addressed
-  - **✅ Azure Monitoring**: Comprehensive health checks, performance middleware, Application Insights compatibility
-  - **✅ OpenAI Integration Optimized**: Azure-compatible nutrition/ingredient extraction with environment validation, base64 processing, 60s timeout, 3x retry logic, structured error handling, high-detail image processing, and development test endpoints
-  - **✅ Environment Configuration**: Production-ready port handling (8080 for Azure, 5000 for Replit), environment variable validation
-  - **✅ Security Hardening**: Non-root user in Docker, minimal dependencies, secure secret management
-  - **✅ Deployment Error Handling Fixed (2025-08-19)**: Resolved "Something went wrong" generic error when OpenAI API key missing in deployed environment:
-    - Enhanced backend API routes with explicit OpenAI API key validation and German user-friendly error messages
-    - Updated frontend error handling to properly parse and display server-provided error messages
-    - Improved Error Boundary component with German language interface
-    - Added robust error parsing in mutations to handle various error response formats
-    - Implemented consistent error handling across nutrition and ingredient extraction features
-- **Critical Deployment Fix (2025-08-19)**: Resolved nutrition extraction failure in production deployment:
-  - **✅ Response Format Standardization**: Both nutrition endpoints now return consistent `{ nutrition: extractedNutrition }` format
-  - **✅ Frontend Pattern Consistency**: Replicated exact ingredients upload pattern in nutrition section (base64 cleaning in upload handler)
-  - **✅ Error Handling Enhancement**: Added deployment-specific error codes (503, 504, 429) with German user messages
-  - **✅ Base64 Processing Alignment**: Standardized base64 data processing across ingredients and nutrition sections
-  - **✅ API Validation**: Enhanced with explicit OpenAI API key checking and environment-specific debugging
-  - **✅ Build Verification**: Production build successful (909KB main bundle, 279KB gzipped) with all fixes integrated
-  - **✅ Comprehensive Testing**: Created deployment simulation test validating endpoint availability and error handling
-- **App Crash Fix (2025-08-19)**: Resolved nutrition table upload crashes with comprehensive debugging enhancements:
-  - **✅ API Endpoint Mismatch Fixed**: Corrected frontend URL from `/api/extract-nutrition` to `/api/extract/nutrition`
-  - **✅ Request Format Alignment**: Changed frontend from JSON to FormData to match server multer configuration
-  - **✅ Robust Error Handling**: Added extensive try-catch blocks for JSON parsing, KeyError, and ValueError scenarios
-  - **✅ German Error Logging**: Implemented detailed console logging with German error messages for deployment debugging
-  - **✅ React Hook Error Fixed**: Removed "use client" directive from TooltipProvider causing frontend crashes
-  - **✅ Graceful Error Handling**: App no longer crashes on nutrition extraction failures, returns proper error responses
-  - **✅ Individual Field Processing**: Each nutrition field processed independently to prevent total failure on single field errors
-- **Production Docker Containerization (2025-08-19)**:
-  - **✅ Multi-stage Build**: Optimized Dockerfile with development dependencies for build, production-only for runtime
-  - **✅ Puppeteer Compatibility**: 43 system libraries installed, 30+ Chrome flags for container environments
-  - **✅ Security Best Practices**: Non-root nodejs user (1001:1001), minimal attack surface, .dockerignore optimization
-  - **✅ Azure App Service Ready**: Health endpoint (/api/health), performance monitoring, proper port exposure (8080)
-  - **✅ Deployment Documentation**: Complete Azure deployment guide with resource creation, configuration, and troubleshooting
+    - **Environment Management**: Robust environment variable management for sensitive data like API keys.
+    - **Performance Optimizations**: Implemented useMemo and useCallback hooks, optimized TanStack Query, HTTP caching headers, optimized Express middleware, and reduced Puppeteer wait times. Production build optimized for size and performance.
+    - **Deployment Readiness**: Production-ready Docker containerization with multi-stage build, Puppeteer compatibility, security best practices, and Azure App Service readiness. Comprehensive error handling and robust API validation implemented for production environments.
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.
 - **Shadcn UI**: Provides a set of pre-built, accessible, and customizable UI components for the frontend.
 - **Tailwind CSS**: A utility-first CSS framework used for styling and responsive design.
 - **Multer**: Node.js middleware for handling `multipart/form-data`, primarily used for file uploads.
+- **Puppeteer**: Used for server-side, pixel-perfect PDF generation.
