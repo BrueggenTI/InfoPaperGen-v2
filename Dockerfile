@@ -1,69 +1,61 @@
-# Verwende Node.js 18 Slim als Basis-Image für optimale Größe
+# Schritt 1: Basis-Image festlegen
+# Wir verwenden ein offizielles, schlankes Node.js-Image. Version 18 ist eine stabile Wahl.
 FROM node:18-slim
 
-# Setze Arbeitsverzeichnis im Container
-WORKDIR /usr/src/app
-
-# Installiere Systemabhängigkeiten für Puppeteer und Chromium
-# Diese Pakete sind essentiell für headless Browser-Operationen
+# Schritt 2: Systemabhängigkeiten für Puppeteer installieren
+# Dies ist der entscheidende Teil, der Chromium in die Umgebung bringt.
 RUN apt-get update && apt-get install -y \
-    # Chromium Browser und grundlegende Abhängigkeiten
-    chromium \
-    # Schriftarten für korrekte PDF-Darstellung
+    ca-certificates \
     fonts-liberation \
-    fonts-noto-color-emoji \
-    fonts-noto-cjk \
-    # Grafik- und Audio-Bibliotheken
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
-    libatspi2.0-0 \
+    libcairo2 \
     libcups2 \
     libdbus-1-3 \
-    libdrm2 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
     libgtk-3-0 \
-    libgtk-4-1 \
     libnspr4 \
     libnss3 \
-    libwayland-client0 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
     libxcomposite1 \
+    libxcursor1 \
     libxdamage1 \
+    libxext6 \
     libxfixes3 \
-    libxkbcommon0 \
+    libxi6 \
     libxrandr2 \
+    libxrender1 \
     libxss1 \
     libxtst6 \
-    # Zusätzliche Bibliotheken für stabile Browser-Ausführung
-    xvfb \
-    # Aufräumen des Package-Cache zur Reduzierung der Image-Größe
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    lsb-release \
+    wget \
+    xdg-utils \
+    --no-install-recommends
 
-# Setze Umgebungsvariable für Puppeteer, um lokales Chromium zu verwenden
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Schritt 3: Arbeitsverzeichnis einrichten
+WORKDIR /usr/src/app
 
-# Kopiere Package-Dateien zuerst (für besseren Docker Layer Cache)
+# Schritt 4: App-Abhängigkeiten installieren
+# Dies nutzt den Layer-Cache von Docker, um die Installation zu beschleunigen.
 COPY package*.json ./
+RUN npm install --production
 
-# Installiere nur Produktionsabhängigkeiten
-RUN npm ci --only=production
-
-# Kopiere den restlichen Anwendungscode
+# Schritt 5: Quellcode in den Container kopieren
 COPY . .
 
-# Erstelle Produktions-Build der Anwendung
-RUN npm run build
+# Schritt 6: Port freigeben, auf dem die App lauscht
+# Azure App Service leitet den externen Traffic automatisch an diesen Port weiter.
+EXPOSE 8080
 
-# Exponiere den Standard-Port für die Anwendung
-EXPOSE 5000
-
-# Erstelle einen non-root Benutzer für Sicherheit
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /usr/src/app
-USER appuser
-
-# Setze NODE_ENV auf production
-ENV NODE_ENV=production
-
-# Starte die Anwendung
-CMD ["npm", "start"]
+# Schritt 7: Startbefehl definieren
+CMD [ "npm", "start" ]

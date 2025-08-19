@@ -9,7 +9,7 @@ docker build -t product-info-generator .
 
 ### 2. Container lokal starten
 ```bash
-docker run -p 5000:5000 -e OPENAI_API_KEY=your_api_key product-info-generator
+docker run -p 8080:8080 -e OPENAI_API_KEY=your_api_key product-info-generator
 ```
 
 ### 3. Mit Docker Compose (empfohlen für Tests)
@@ -33,11 +33,11 @@ docker push your-registry.azurecr.io/product-info-generator:latest
 
 ### 2. Azure App Service Konfiguration
 - **Basis-Image**: `your-registry.azurecr.io/product-info-generator:latest`
-- **Port**: `5000`
+- **Port**: `8080`
 - **Umgebungsvariablen**:
   - `OPENAI_API_KEY`: Ihr OpenAI API Schlüssel
   - `NODE_ENV`: `production`
-  - `PORT`: `5000`
+  - `PORT`: `8080`
 
 ## Docker Image Optimierungen
 

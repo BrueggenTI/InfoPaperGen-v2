@@ -66,13 +66,13 @@ az webapp config appsettings set \
 az webapp config appsettings set \
   --resource-group product-info-rg \
   --name product-info-app \
-  --settings WEBSITES_PORT=5000
+  --settings WEBSITES_PORT=8080
 
 # Node.js Umgebung
 az webapp config appsettings set \
   --resource-group product-info-rg \
   --name product-info-app \
-  --settings NODE_ENV=production
+  --settings NODE_ENV=production PORT=8080
 ```
 
 ## Schritt 5: Container Registry Zugriff konfigurieren
