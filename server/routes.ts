@@ -15,6 +15,7 @@ const upload = multer({
 
 import { azureHealthCheck } from "./middleware/azure-monitoring";
 import { registerTestRoutes } from "./routes-test";
+import { DebugLogger } from "./utils/debug-logger";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Azure Health Check Endpoint
@@ -72,29 +73,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Extract ingredients from image
   app.post("/api/extract/ingredients", upload.single("image"), async (req, res) => {
+    const operationId = `ingredient-extraction-${Date.now()}`;
+    
     try {
+      DebugLogger.info("INGREDIENT_EXTRACTION", "Started", { 
+        operationId,
+        hasFile: !!req.file,
+        fileSize: req.file?.size,
+        apiKeyAvailable: !!process.env.OPENAI_API_KEY
+      });
+
       // Check if OpenAI API key is available
       if (!process.env.OPENAI_API_KEY) {
-        console.error("[INGREDIENT EXTRACTION] OpenAI API key not available");
+        DebugLogger.error("INGREDIENT_EXTRACTION", "API Key Missing", { operationId }, "OpenAI API key not configured");
         res.status(503).json({ 
           message: "Zutatenlisten-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Zutaten manuell ein.",
           error: "OpenAI API key not configured",
-          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell in die Felder eingeben."
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell in die Felder eingeben.",
+          debugInfo: { operationId, step: "API_KEY_VALIDATION", error: "Missing OPENAI_API_KEY environment variable" }
         });
         return;
       }
 
       if (!req.file) {
+        DebugLogger.error("INGREDIENT_EXTRACTION", "No File Provided", { operationId });
         res.status(400).json({ 
           message: "No image file provided",
-          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus."
+          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus.",
+          debugInfo: { operationId, step: "FILE_VALIDATION", error: "No file in request" }
         });
         return;
       }
 
+      DebugLogger.info("INGREDIENT_EXTRACTION", "Converting to Base64", { 
+        operationId, 
+        fileSize: req.file.size, 
+        mimeType: req.file.mimetype 
+      });
+
       const base64Image = req.file.buffer.toString("base64");
+      
+      DebugLogger.info("INGREDIENT_EXTRACTION", "Calling OpenAI API", { 
+        operationId, 
+        base64Length: base64Image.length 
+      });
+
       const extractedIngredients = await extractIngredientsFromImage(base64Image);
       
+      DebugLogger.success("INGREDIENT_EXTRACTION", "OpenAI Response Received", { 
+        operationId, 
+        ingredientCount: extractedIngredients.ingredients?.length || 0 
+      });
+
       // Round all percentages to one decimal place
       const roundedIngredients = {
         ...extractedIngredients,
@@ -106,23 +136,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }))
       };
       
+      DebugLogger.success("INGREDIENT_EXTRACTION", "Processing Complete", { 
+        operationId, 
+        finalIngredientCount: roundedIngredients.ingredients?.length || 0 
+      });
+
       res.json(roundedIngredients);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("[INGREDIENT EXTRACTION] Error:", error);
+      DebugLogger.error("INGREDIENT_EXTRACTION", "Processing Failed", { 
+        operationId, 
+        errorMessage, 
+        errorStack: error instanceof Error ? error.stack : undefined 
+      }, error as Error);
       
       // Check if this is an API key related error
       if (errorMessage.includes("OpenAI API key")) {
         res.status(503).json({ 
           message: "Zutatenlisten-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Zutaten manuell ein.",
           error: errorMessage,
-          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell in die Felder eingeben."
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Zutaten manuell in die Felder eingeben.",
+          debugInfo: { operationId, step: "OPENAI_API_CALL", error: errorMessage }
         });
       } else {
         res.status(500).json({ 
           message: "Error extracting ingredients", 
           error: errorMessage,
-          userFriendlyMessage: "Die Zutaten konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild."
+          userFriendlyMessage: "Die Zutaten konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild.",
+          debugInfo: { operationId, step: "IMAGE_PROCESSING", error: errorMessage }
         });
       }
     }
@@ -159,45 +200,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Extract nutrition from image
   app.post("/api/extract/nutrition", upload.single("image"), async (req, res) => {
+    const operationId = `nutrition-extraction-${Date.now()}`;
+    
     try {
+      DebugLogger.info("NUTRITION_EXTRACTION", "Started", { 
+        operationId,
+        hasFile: !!req.file,
+        fileSize: req.file?.size,
+        apiKeyAvailable: !!process.env.OPENAI_API_KEY
+      });
+
       // Check if OpenAI API key is available
       if (!process.env.OPENAI_API_KEY) {
-        console.error("[NUTRITION EXTRACTION] OpenAI API key not available");
+        DebugLogger.error("NUTRITION_EXTRACTION", "API Key Missing", { operationId }, "OpenAI API key not configured");
         res.status(503).json({ 
           message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
           error: "OpenAI API key not configured",
-          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben.",
+          debugInfo: { operationId, step: "API_KEY_VALIDATION", error: "Missing OPENAI_API_KEY environment variable" }
         });
         return;
       }
 
       if (!req.file) {
+        DebugLogger.error("NUTRITION_EXTRACTION", "No File Provided", { operationId });
         res.status(400).json({ 
           message: "No image file provided",
-          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus."
+          userFriendlyMessage: "Kein Bild wurde hochgeladen. Bitte wählen Sie ein Bild aus.",
+          debugInfo: { operationId, step: "FILE_VALIDATION", error: "No file in request" }
         });
         return;
       }
 
+      DebugLogger.info("NUTRITION_EXTRACTION", "Converting to Base64", { 
+        operationId, 
+        fileSize: req.file.size, 
+        mimeType: req.file.mimetype 
+      });
+
       const base64Image = req.file.buffer.toString("base64");
+      
+      DebugLogger.info("NUTRITION_EXTRACTION", "Calling OpenAI API", { 
+        operationId, 
+        base64Length: base64Image.length 
+      });
+
       const extractedNutrition = await extractNutritionFromImage(base64Image);
+      
+      DebugLogger.success("NUTRITION_EXTRACTION", "Processing Complete", { 
+        operationId, 
+        hasNutritionData: !!extractedNutrition 
+      });
+
       res.json(extractedNutrition);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("[NUTRITION EXTRACTION] Error:", error);
+      DebugLogger.error("NUTRITION_EXTRACTION", "Processing Failed", { 
+        operationId, 
+        errorMessage, 
+        errorStack: error instanceof Error ? error.stack : undefined 
+      }, error as Error);
       
       // Check if this is an API key related error
       if (errorMessage.includes("OpenAI API key")) {
         res.status(503).json({ 
           message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
           error: errorMessage,
-          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben."
+          userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben.",
+          debugInfo: { operationId, step: "OPENAI_API_CALL", error: errorMessage }
         });
       } else {
         res.status(500).json({ 
           message: "Error extracting nutrition", 
           error: errorMessage,
-          userFriendlyMessage: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild."
+          userFriendlyMessage: "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein oder versuchen Sie es mit einem klareren Bild.",
+          debugInfo: { operationId, step: "IMAGE_PROCESSING", error: errorMessage }
         });
       }
     }
@@ -354,6 +431,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Direct PDF generation from form data
   app.post("/api/generate-pdf", handleDirectPDFGeneration);
+
+  // Debug endpoints for troubleshooting
+  app.get("/api/debug/logs", (req, res) => {
+    const operation = req.query.operation as string;
+    const logs = DebugLogger.getLogs(operation);
+    res.json({
+      logs,
+      totalLogs: logs.length,
+      operations: Array.from(new Set(DebugLogger.getLogs().map(log => log.operation)))
+    });
+  });
+
+  app.get("/api/debug/status", (req, res) => {
+    res.json({
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      openaiConfigured: !!process.env.OPENAI_API_KEY,
+      recentErrors: DebugLogger.getLogs().filter(log => log.status === 'error').slice(0, 5),
+      systemInfo: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        memory: process.memoryUsage()
+      }
+    });
+  });
+
+  app.post("/api/debug/clear", (req, res) => {
+    DebugLogger.clearLogs();
+    res.json({ message: "Debug logs cleared", timestamp: new Date().toISOString() });
+  });
 
   const httpServer = createServer(app);
   return httpServer;

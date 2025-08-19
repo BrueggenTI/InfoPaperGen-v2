@@ -10,6 +10,7 @@ import ProductGenerator from "@/pages/product-generator";
 import DocumentPreviewPage from "@/pages/document-preview-page";
 import PDFPreview from "@/pages/pdf-preview";
 import PDFPreviewPage from "@/pages/pdf-preview-page";
+import { DebugPanel } from "@/components/debug-panel";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/preview" component={() => <DocumentPreviewPage />} />
       <Route path="/pdf-preview" component={PDFPreview} />
       <Route path="/document-preview" component={() => <PDFPreviewPage />} />
+      <Route path="/debug" component={() => <DebugPanel />} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -12,6 +12,8 @@ import { ConditionsStep } from "@/components/steps/conditions-step";
 import StepIndicator from "@/components/ui/step-indicator";
 import DocumentPreview from "@/components/document-preview";
 import BruggenHeader from "@/components/bruggen-header";
+import { Link } from "wouter";
+import { Bug } from "lucide-react";
 
 const STEPS = [
   { id: 1, name: "Product Details", component: ProductDetailsStep },
@@ -117,6 +119,17 @@ export default function ProductGenerator() {
   return (
     <>
       <BruggenHeader />
+      
+      {/* Debug Link - Only in development */}
+      {import.meta.env.DEV && (
+        <div className="fixed top-4 right-4 z-50">
+          <Link href="/debug">
+            <button className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors" title="Debug Panel">
+              <Bug className="h-4 w-4" />
+            </button>
+          </Link>
+        </div>
+      )}
       
       {/* Navigation Bar */}
       <nav className="bg-white border-b border-border sticky top-0 z-40 shadow-sm">
