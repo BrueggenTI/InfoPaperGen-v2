@@ -54,7 +54,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     const baseFormatted = baseIngredients
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
-        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
+        const percentage = ingredient.percentage ? ` ${ingredient.percentage.toFixed(1)}%*` : '';
         return `${ingredient.name}${percentage}`;
       })
       .join(', ');
@@ -63,7 +63,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     const finalFormatted = finalIngredients
       .filter(ingredient => ingredient.name.trim() !== "")
       .map(ingredient => {
-        const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
+        const percentage = ingredient.percentage ? ` (${ingredient.percentage.toFixed(1)}%)` : '';
         const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
 
         if (ingredient.isMarkedAsBase && baseFormatted) {

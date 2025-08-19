@@ -70,7 +70,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const base64Image = req.file.buffer.toString("base64");
       const extractedIngredients = await extractIngredientsFromImage(base64Image);
-      res.json(extractedIngredients);
+      
+      // Round all percentages to one decimal place
+      const roundedIngredients = {
+        ...extractedIngredients,
+        ingredients: extractedIngredients.ingredients.map(ingredient => ({
+          ...ingredient,
+          percentage: ingredient.percentage !== null && ingredient.percentage !== undefined 
+            ? Math.round(ingredient.percentage * 10) / 10 
+            : ingredient.percentage
+        }))
+      };
+      
+      res.json(roundedIngredients);
     } catch (error) {
       res.status(500).json({ message: "Error extracting ingredients", error: (error as Error).message });
     }
@@ -87,7 +99,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const extractedIngredients = await extractIngredientsFromImage(image, isBaseProduct);
-      res.json(extractedIngredients);
+      
+      // Round all percentages to one decimal place
+      const roundedIngredients = {
+        ...extractedIngredients,
+        ingredients: extractedIngredients.ingredients.map(ingredient => ({
+          ...ingredient,
+          percentage: ingredient.percentage !== null && ingredient.percentage !== undefined 
+            ? Math.round(ingredient.percentage * 10) / 10 
+            : ingredient.percentage
+        }))
+      };
+      
+      res.json(roundedIngredients);
     } catch (error) {
       res.status(500).json({ message: "Error extracting ingredients", error: (error as Error).message });
     }

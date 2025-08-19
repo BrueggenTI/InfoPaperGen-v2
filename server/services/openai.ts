@@ -46,6 +46,13 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
           { "ingredients": [{ "name": "ingredient name", "percentage": number or null }] }
           If no percentage is shown, set percentage to null. Be precise and thorough.
           
+          IMPORTANT EXTRACTION RULES:
+          - Extract ONLY ingredient names and descriptions (e.g., "Haferflocken", "Weizenmehl", "Zucker")
+          - Do NOT extract recipe numbers, product codes, or any numerical identifiers
+          - Focus on the actual food ingredient names, not internal reference numbers
+          - Round all percentages to exactly ONE decimal place
+          - Example: Extract "Haferflocken" not "Recipe 12345" or "Mat-Nr 67890"
+          
           Pay attention to the relationship between base products and final products:
           - Base products are components used within final products
           - Final products contain all ingredients including those from base products
@@ -56,7 +63,9 @@ export async function extractIngredientsFromImage(base64Image: string, isBasePro
           content: [
             {
               type: "text",
-              text: `Extract all ingredients and their percentages from this ${productType} SAP screenshot. Focus on ingredient lists, labels, or any text showing ingredient information. ${contextDescription}`
+              text: `Extract all ingredients and their percentages from this ${productType} SAP screenshot. Focus on ingredient lists, labels, or any text showing ingredient information. 
+              
+              CRITICAL: Extract only the actual ingredient NAMES and DESCRIPTIONS (like "Haferflocken", "Weizenmehl", "Zucker"), never extract recipe numbers, material numbers, or product codes. Round percentages to one decimal place. ${contextDescription}`
             },
             {
               type: "image_url",

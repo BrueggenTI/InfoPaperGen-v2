@@ -90,9 +90,9 @@ export default function IngredientsStep({
       }));
       setFinalProductIngredients(ingredientsWithMarking);
       onUpdate({ ingredients: ingredientsWithMarking });
-      // Update text representation with percentages in parentheses
+      // Update text representation with percentages in parentheses (rounded to 1 decimal)
       const text = ingredientsWithMarking.map((ing: Ingredient) => 
-        `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
+        `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`
       ).join(', ');
       setFinalRecipeText(text);
       toast({
@@ -125,9 +125,9 @@ export default function IngredientsStep({
       }));
       setBaseProductIngredients(ingredientsWithMarking);
       onUpdate({ baseProductIngredients: ingredientsWithMarking });
-      // Update text representation with percentages in parentheses
+      // Update text representation with percentages in parentheses (rounded to 1 decimal)
       const text = ingredientsWithMarking.map((ing: Ingredient) => 
-        `${ing.name}${ing.percentage ? ` (${ing.percentage}%)` : ''}`
+        `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`
       ).join(', ');
       setBaseRecipeText(text);
       toast({
@@ -345,7 +345,7 @@ export default function IngredientsStep({
       return {
         name,
         originalName: name,
-        percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
+        percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
         origin: "",
         isMarkedAsBase: false,
         language: 'original' as const
@@ -367,7 +367,7 @@ export default function IngredientsStep({
       return {
         name,
         originalName: name,
-        percentage: percentageMatch ? parseFloat(percentageMatch[1]) : undefined,
+        percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
         origin: "",
         language: 'original' as const
       };
@@ -381,7 +381,7 @@ export default function IngredientsStep({
     const baseFormatted = baseProductIngredients
       .filter(ing => ing.name.trim())
       .map(ing => {
-        const percentage = ing.percentage ? ` ${ing.percentage}%*` : '';
+        const percentage = ing.percentage ? ` ${ing.percentage.toFixed(1)}%*` : '';
         return `${ing.name}${percentage}`;
       })
       .join(', ');
@@ -389,7 +389,7 @@ export default function IngredientsStep({
     const finalFormatted = finalProductIngredients
       .filter(ing => ing.name.trim())
       .map(ing => {
-        const percentage = ing.percentage ? ` **(${ing.percentage}%)**` : '';
+        const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
         const ingredientText = `**${ing.name}${percentage}**`;
         
         // Check if this ingredient is marked as base recipe
