@@ -585,7 +585,7 @@ export async function generateEnhancedPDF(formData: ProductInfo) {
       
       const indentedLabel = row.label.startsWith('of which') ? `    ${row.label}` : row.label;
       const labelStyle = row.isMain ? 'bold' : 'normal';
-      const labelColor = row.isMain ? [51, 65, 85] : [100, 116, 139];
+      const labelColor: [number, number, number] = row.isMain ? [51, 65, 85] : [100, 116, 139];
       
       addText(indentedLabel, nutritionColX[0] + 1, rowY + 2.5, { fontSize: 6, fontStyle: labelStyle, color: labelColor });
       addText(row.value100g, nutritionColX[1] + 1, rowY + 2.5, { fontSize: 6, color: [71, 85, 105] });
@@ -718,7 +718,7 @@ export async function generateEnhancedPDF(formData: ProductInfo) {
         const badgeWidth = 8;
         pdf.roundedRect(claimsX + twoColumnWidth - badgeWidth - 2, claimY - 0.2, badgeWidth, 1.5, 0.5, 0.5, 'F');
         
-        addText(claim.claim, claimsX + twoColumnWidth - badgeWidth + 2, claimY + 0.8, { 
+        addText(claim.claim || '', claimsX + twoColumnWidth - badgeWidth + 2, claimY + 0.8, { 
           fontSize: 4, 
           color: [255, 255, 255],
           align: 'center'
