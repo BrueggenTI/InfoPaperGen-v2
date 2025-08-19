@@ -143,10 +143,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const extractedNutrition = await extractNutritionFromImage(image);
+      // Clean base64 data - remove any data URL prefix if present
+      let cleanBase64 = image;
+      if (image.includes(',')) {
+        cleanBase64 = image.split(',')[1];
+      }
+
+      // Validate base64 format
+      if (!cleanBase64 || cleanBase64.length === 0) {
+        res.status(400).json({ message: "Invalid image data format" });
+        return;
+      }
+
+      // Validate it's properly base64 encoded
+      try {
+        Buffer.from(cleanBase64, 'base64');
+      } catch (e) {
+        res.status(400).json({ message: "Invalid base64 image data" });
+        return;
+      }
+
+      const extractedNutrition = await extractNutritionFromImage(cleanBase64);
       res.json({ nutrition: extractedNutrition });
     } catch (error) {
-      res.status(500).json({ message: "Error extracting nutrition", error: (error as Error).message });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      const errorType = error instanceof Error ? error.constructor.name : typeof error;
+      
+      console.error("[NUTRITION EXTRACTION] Error:", error);
+      console.error("[NUTRITION EXTRACTION] Error details", {
+        errorMessage,
+        errorStack,
+        processingTimeMs: Date.now()
+      });
+      res.status(500).json({ 
+        message: "Error extracting nutrition", 
+        error: errorMessage,
+        debug: {
+          processingTimeMs: Date.now(),
+          timestamp: new Date().toISOString(),
+          errorType
+        }
+      });
     }
   });
 

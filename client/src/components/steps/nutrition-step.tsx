@@ -89,10 +89,25 @@ export default function NutritionStep({
         });
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Nutrition extraction failed:", error);
+      
+      // Provide specific error messages based on the error
+      let errorMessage = "Die Nährwerte konnten nicht aus dem Bild extrahiert werden. Bitte geben Sie sie manuell ein.";
+      
+      if (error?.message?.includes("too small")) {
+        errorMessage = "Das Bild ist zu klein. Bitte verwenden Sie ein größeres, klareres Bild der Nährwerttabelle.";
+      } else if (error?.message?.includes("too large")) {
+        errorMessage = "Das Bild ist zu groß. Bitte verwenden Sie ein Bild unter 10MB.";
+      } else if (error?.message?.includes("could not be processed")) {
+        errorMessage = "Das Bild konnte nicht verarbeitet werden. Stellen Sie sicher, dass es eine klare Nährwerttabelle zeigt.";
+      } else if (error?.message?.includes("Invalid")) {
+        errorMessage = "Ungültiges Bildformat. Bitte verwenden Sie JPG, PNG oder WebP Dateien.";
+      }
+      
       toast({
-        title: "Extraction error",
-        description: "Nutrition values could not be extracted from the image. Please enter them manually.",
+        title: "Fehler bei der Extraktion",
+        description: errorMessage,
         variant: "destructive",
       });
     },

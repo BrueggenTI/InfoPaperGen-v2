@@ -148,51 +148,136 @@ Important guidelines:
 
 export async function extractNutritionFromImage(base64Image: string): Promise<ExtractedNutrition> {
   try {
+    // Validate base64 image before sending to OpenAI
+    if (!base64Image || typeof base64Image !== 'string') {
+      throw new Error("Invalid base64 image data provided");
+    }
+
+    // Check if base64 string has reasonable length (min 100 bytes, max 20MB in base64)
+    if (base64Image.length < 100) {
+      throw new Error("Image data appears too small to be a valid image");
+    }
+    if (base64Image.length > 28000000) { // ~20MB in base64
+      throw new Error("Image data too large (max 20MB)");
+    }
+
+    console.log("[OPENAI NUTRITION] Attempting to extract nutrition from image...", {
+      imageSize: `${Math.round(base64Image.length / 1024)}KB`,
+      timestamp: new Date().toISOString()
+    });
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
           content: `You are an expert at extracting nutritional information from food product labels. 
+          
+          CRITICAL: You MUST respond in JSON format only. No other text is allowed.
+          
           Analyze the nutrition facts label and extract all nutritional values per 100g. 
           If values are shown per different serving size, convert them to per 100g.
-          Return the data in JSON format with this exact structure:
+          
+          ALWAYS return data in this exact JSON structure, even if you cannot see the image clearly:
           {
-            "energy": { "kj": number, "kcal": number },
-            "fat": number,
-            "saturatedFat": number,
-            "carbohydrates": number,
-            "sugars": number,
-            "fiber": number,
-            "protein": number,
-            "salt": number
+            "energy": { "kj": 0, "kcal": 0 },
+            "fat": 0,
+            "saturatedFat": 0,
+            "carbohydrates": 0,
+            "sugars": 0,
+            "fiber": 0,
+            "protein": 0,
+            "salt": 0,
+            "error": "Optional error message if image is unclear"
           }
-          All values should be numbers (use 0 if not available). Energy should include both kJ and kcal.`,
+          
+          If you cannot read the nutrition label, set all values to 0 and include an "error" field.
+          All numeric values must be numbers, not strings. Use 0 for unavailable values.`,
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Extract nutritional information from this nutrition facts label. Convert all values to per 100g if they're shown in different serving sizes."
+              text: "Extract nutritional information from this nutrition facts label and return ONLY the JSON object. Convert all values to per 100g if needed."
             },
             {
               type: "image_url",
               image_url: {
-                url: `data:image/jpeg;base64,${base64Image}`
+                url: `data:image/png;base64,${base64Image}`
               }
             }
           ],
         },
       ],
       response_format: { type: "json_object" },
-      max_tokens: 800,
+      max_tokens: 500,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
-    return result as ExtractedNutrition;
+    const responseContent = response.choices[0]?.message?.content || "{}";
+    
+    console.log("[OPENAI NUTRITION] Received response from OpenAI", {
+      hasContent: !!responseContent,
+      responseLength: responseContent.length,
+      contentPreview: responseContent.substring(0, 100),
+      timestamp: new Date().toISOString()
+    });
+
+    // Try to parse the JSON response
+    let result;
+    try {
+      result = JSON.parse(responseContent);
+    } catch (parseError) {
+      const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+      console.error("[OPENAI NUTRITION] JSON Parse Error:", parseError);
+      console.error("[OPENAI NUTRITION] Raw response content:", responseContent);
+      
+      // If the response indicates the model can't see the image, provide helpful error
+      if (responseContent.includes("unable to see") || responseContent.includes("can't see") || responseContent.includes("cannot analyze")) {
+        throw new Error("The image could not be processed. Please ensure you're uploading a clear nutrition facts label image.");
+      }
+      
+      // If it's a generic parsing error, return a default structure
+      throw new Error(`Invalid response format from OpenAI: ${errorMessage}`);
+    }
+
+    // Validate the result has the expected structure
+    if (!result || typeof result !== 'object') {
+      throw new Error("OpenAI returned invalid nutrition data format");
+    }
+
+    // Ensure all required fields exist with defaults
+    const nutritionData: ExtractedNutrition = {
+      energy: result.energy || { kj: 0, kcal: 0 },
+      fat: Number(result.fat) || 0,
+      saturatedFat: Number(result.saturatedFat) || 0,
+      carbohydrates: Number(result.carbohydrates) || 0,
+      sugars: Number(result.sugars) || 0,
+      fiber: Number(result.fiber) || 0,
+      protein: Number(result.protein) || 0,
+      salt: Number(result.salt) || 0
+    };
+
+    console.log("[OPENAI NUTRITION] Successfully extracted nutrition data:", nutritionData);
+    return nutritionData;
   } catch (error) {
-    console.error("Error extracting nutrition:", error);
-    throw new Error("Failed to extract nutrition information from image");
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    const errorType = error instanceof Error ? error.constructor.name : typeof error;
+    
+    console.error("[OPENAI NUTRITION] Error details:", {
+      errorMessage,
+      errorStack,
+      errorType
+    });
+    
+    // Provide more specific error messages
+    if (errorMessage?.includes('image_parse_error')) {
+      throw new Error(`Failed to extract nutrition information from image: ${errorMessage}`);
+    } else if (errorMessage?.includes('unsupported image')) {
+      throw new Error(`Failed to extract nutrition information from image: ${errorMessage}`);
+    } else {
+      throw new Error(`Failed to extract nutrition information from image: ${errorMessage}`);
+    }
   }
 }
