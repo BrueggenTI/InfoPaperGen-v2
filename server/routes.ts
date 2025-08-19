@@ -251,7 +251,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         nutritionData: extractedNutrition
       });
 
-      res.json(extractedNutrition);
+      // Ensure consistent response format across all nutrition endpoints
+      res.json({ nutrition: extractedNutrition });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       DebugLogger.error("NUTRITION_EXTRACTION", "Processing Failed", { 
@@ -356,7 +357,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[${operationId}] Sending response with nutrition data:`, { nutrition: extractedNutrition });
 
-      res.json({ nutrition: extractedNutrition });
+      // Make sure response format matches frontend expectations
+      const response = { nutrition: extractedNutrition };
+      res.json(response);
 
       console.log(`[${operationId}] Response sent successfully`);
     } catch (error) {
@@ -374,20 +377,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString()
       }, error as Error);
 
-      // Check if this is an API key related error
-      if (errorMessage.includes("OpenAI API key") || errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+      // Enhanced error handling for deployment issues
+      if (errorMessage.includes("OpenAI API key") || errorMessage.includes("401") || errorMessage.includes("Unauthorized") || errorMessage.includes("not configured")) {
         return res.status(503).json({ 
           message: "Nährwert-Extraktion ist derzeit nicht verfügbar. Bitte geben Sie die Nährwerte manuell ein.",
           error: "OpenAI API service unavailable",
           userFriendlyMessage: "Die automatische Bildanalyse ist in der aktuellen Umgebung nicht verfügbar. Sie können die Nährwerte manuell in die Felder eingeben.",
-          operationId
+          operationId,
+          debugInfo: {
+            step: "API_KEY_VALIDATION",
+            environment: process.env.NODE_ENV,
+            hasApiKey: !!process.env.OPENAI_API_KEY,
+            timestamp: new Date().toISOString()
+          }
         });
-      } else if (errorMessage.includes("timeout") || errorMessage.includes("ETIMEDOUT")) {
+      } else if (errorMessage.includes("timeout") || errorMessage.includes("ETIMEDOUT") || errorMessage.includes("ECONNRESET")) {
         return res.status(504).json({ 
           message: "Request timeout",
-          error: "Processing timeout",
+          error: "Processing timeout", 
           userFriendlyMessage: "Die Verarbeitung hat zu lange gedauert. Bitte versuchen Sie es mit einem kleineren oder klareren Bild.",
-          operationId
+          operationId,
+          debugInfo: {
+            step: "TIMEOUT_ERROR",
+            timestamp: new Date().toISOString()
+          }
+        });
+      } else if (errorMessage.includes("rate limit") || errorMessage.includes("Too Many Requests") || errorMessage.includes("429")) {
+        return res.status(429).json({
+          message: "Rate limit exceeded",
+          error: "Too many requests",
+          userFriendlyMessage: "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+          operationId,
+          debugInfo: {
+            step: "RATE_LIMIT_ERROR",
+            timestamp: new Date().toISOString()
+          }
         });
       } else {
         return res.status(500).json({ 
