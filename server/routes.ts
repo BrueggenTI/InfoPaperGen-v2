@@ -133,20 +133,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Extract nutrition from base64 image
+  // Extract nutrition from base64 image with enhanced debugging
   app.post("/api/extract-nutrition", async (req, res) => {
+    const startTime = Date.now();
+    console.log("[NUTRITION EXTRACTION] Request received");
+    
     try {
       const { image } = req.body;
+      console.log("[NUTRITION EXTRACTION] Request body received", { 
+        hasImage: !!image,
+        imageLength: image ? image.length : 0
+      });
       
       if (!image) {
-        res.status(400).json({ message: "No image data provided" });
+        console.log("[NUTRITION EXTRACTION] Error: No image data provided");
+        res.status(400).json({ 
+          message: "No image data provided",
+          debug: { timestamp: new Date().toISOString() }
+        });
         return;
       }
 
+      // Validate base64 format
+      if (typeof image !== 'string') {
+        console.log("[NUTRITION EXTRACTION] Error: Image data is not a string");
+        res.status(400).json({ 
+          message: "Invalid image data format",
+          debug: { imageType: typeof image }
+        });
+        return;
+      }
+
+      console.log("[NUTRITION EXTRACTION] Starting OpenAI extraction...");
       const extractedNutrition = await extractNutritionFromImage(image);
-      res.json({ nutrition: extractedNutrition });
+      
+      const processingTime = Date.now() - startTime;
+      console.log("[NUTRITION EXTRACTION] Extraction completed", { 
+        processingTimeMs: processingTime,
+        hasResult: !!extractedNutrition
+      });
+      
+      res.json({ 
+        nutrition: extractedNutrition,
+        debug: {
+          processingTimeMs: processingTime,
+          timestamp: new Date().toISOString()
+        }
+      });
     } catch (error) {
-      res.status(500).json({ message: "Error extracting nutrition", error: (error as Error).message });
+      const processingTime = Date.now() - startTime;
+      console.error("[NUTRITION EXTRACTION] Error:", error);
+      console.log("[NUTRITION EXTRACTION] Error details", {
+        errorMessage: (error as Error).message,
+        errorStack: (error as Error).stack,
+        processingTimeMs: processingTime
+      });
+      
+      res.status(500).json({ 
+        message: "Error extracting nutrition", 
+        error: (error as Error).message,
+        debug: {
+          processingTimeMs: processingTime,
+          timestamp: new Date().toISOString(),
+          errorType: error.constructor.name
+        }
+      });
     }
   });
 

@@ -7,6 +7,11 @@ import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/l
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 import { useState, useMemo, useCallback } from "react";
 
+// Debug logging function
+const debugLog = (message: string, data?: any) => {
+  console.log(`[DOCUMENT_PREVIEW DEBUG] ${message}`, data);
+};
+
 // Helper function to format ingredients list
 const formatIngredients = (ingredients: any[]) => {
   if (!ingredients || ingredients.length === 0) return "";
@@ -29,25 +34,53 @@ interface DocumentPreviewProps {
 
 export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [componentError, setComponentError] = useState<string | null>(null);
 
-  // Performance: Memoize parsed serving size
-  const servingSize = useMemo(() => 
-    parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), 
-    [formData.servingSize]
-  );
+  debugLog("DocumentPreview rendered", { 
+    formData: !!formData, 
+    sessionId, 
+    isPDFMode,
+    hasIngredients: !!formData?.ingredients,
+    hasBaseIngredients: !!formData?.baseProductIngredients,
+    hasNutrition: !!formData?.nutrition
+  });
+
+  // Performance: Memoize parsed serving size with error handling
+  const servingSize = useMemo(() => {
+    try {
+      const size = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
+      debugLog("Serving size calculated:", size);
+      return size;
+    } catch (error) {
+      debugLog("Error calculating serving size:", error);
+      setComponentError("Error calculating serving size");
+      return 40;
+    }
+  }, [formData.servingSize]);
 
   // Performance: Memoize calculation function 
   const calculatePerServing = useCallback((per100g: number) => {
     return (per100g * servingSize / 100).toFixed(1);
   }, [servingSize]);
 
-  // Performance: Memoize ingredients formatting
+  // Performance: Memoize ingredients formatting with error handling
   const formattedIngredients = useMemo(() => {
-    const finalIngredients = formData.ingredients || [];
-    const baseIngredients = formData.baseProductIngredients || [];
+    try {
+      debugLog("Formatting ingredients", {
+        finalIngredientsCount: formData.ingredients?.length || 0,
+        baseIngredientsCount: formData.baseProductIngredients?.length || 0
+      });
 
-    if (finalIngredients.length === 0 && baseIngredients.length === 0) {
-      return "Ingredients will appear here after extraction...";
+      const finalIngredients = formData.ingredients || [];
+      const baseIngredients = formData.baseProductIngredients || [];
+
+      if (finalIngredients.length === 0 && baseIngredients.length === 0) {
+        return "Ingredients will appear here after extraction...";
+      }
+    } catch (error) {
+      debugLog("Error formatting ingredients:", error);
+      setComponentError("Error formatting ingredients");
+      return "Error formatting ingredients";
     }
 
     // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
@@ -139,12 +172,16 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
   };
 
   const handleDownloadPDF = async () => {
+    debugLog("PDF download initiated", { sessionId, hasFormData: !!formData });
+
     if (!sessionId) {
+      debugLog("PDF download failed: No session ID");
       alert('Keine Session-ID verfügbar. Bitte laden Sie die Seite neu.');
       return;
     }
 
     if (!formData) {
+      debugLog("PDF download failed: No form data");
       alert('Keine Formular-Daten verfügbar. Bitte füllen Sie das Formular aus.');
       return;
     }
@@ -152,15 +189,15 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     setIsGeneratingPDF(true);
 
     try {
-      // Verwende die neue direkte PDF-Generierung mit Formular-Daten
-      // Diese erstellt ein sauberes PDF nur mit den ausgefüllten Formular-Informationen
+      debugLog("Starting PDF generation...");
       await downloadPDFFromServer({
         formData: formData,
         sessionId: sessionId
       });
+      debugLog("PDF generation completed successfully");
     } catch (error) {
+      debugLog('PDF generation error:', error);
       console.error('Fehler beim Generieren des PDFs:', error);
-      // Zeige benutzerfreundliche Fehlermeldung
       alert(error instanceof Error ? error.message : 'Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
     } finally {
       setIsGeneratingPDF(false);
@@ -214,6 +251,22 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
       </div>
     </div>
   );
+
+  // Show error if component has issues
+  if (componentError) {
+    return (
+      <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+        <h2 className="text-red-800 font-bold">Component Error</h2>
+        <p className="text-red-700">{componentError}</p>
+        <button 
+          onClick={() => setComponentError(null)}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`${isPDFMode ? 'p-4 bg-white' : 'p-6 bg-gradient-to-br from-slate-50 to-slate-100'} min-h-screen`}>
