@@ -1,0 +1,54 @@
+# Azure App Service Configuration
+# This file can be used as reference for Azure deployment settings
+
+# App Service Plan Settings
+plan:
+  name: "product-info-generator-plan"
+  tier: "Standard"
+  size: "S1"
+  location: "West Europe"
+
+# App Service Settings
+app:
+  name: "product-info-generator"
+  runtime: "NODE|18-lts"
+  platform: "linux"
+  
+# Environment Variables
+environment:
+  NODE_ENV: "production"
+  PORT: "8080"
+  # Add your OpenAI API key in Azure Portal under Configuration > Application settings
+  # OPENAI_API_KEY: "your-api-key-here"
+
+# App Service Configuration
+settings:
+  alwaysOn: true
+  httpVersion: "2.0"
+  platform: "64bit"
+  nodeVersion: "18-lts"
+  
+# Health Check
+healthCheck:
+  path: "/api/health"
+  intervalInSeconds: 30
+  
+# Scaling Settings
+scaling:
+  minInstances: 1
+  maxInstances: 3
+  rules:
+    - metricName: "CpuPercentage"
+      operator: "GreaterThan"
+      threshold: 70
+      direction: "Increase"
+    - metricName: "CpuPercentage"
+      operator: "LessThan"
+      threshold: 30
+      direction: "Decrease"
+
+# Monitoring
+monitoring:
+  applicationInsights: true
+  logging: true
+  metricsEnabled: true

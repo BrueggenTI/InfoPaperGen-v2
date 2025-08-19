@@ -45,17 +45,28 @@ RUN apt-get update && apt-get install -y \
 # Schritt 3: Arbeitsverzeichnis einrichten
 WORKDIR /usr/src/app
 
-# Schritt 4: App-Abhängigkeiten installieren
-# Dies nutzt den Layer-Cache von Docker, um die Installation zu beschleunigen.
+# Schritt 4: Zuerst alle Abhängigkeiten installieren (inkl. devDependencies für Build)
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci
 
-# Schritt 5: Quellcode in den Container kopieren
+# Schritt 5: Quellcode kopieren und Projekt builden
 COPY . .
+RUN npm run build
 
-# Schritt 6: Port freigeben, auf dem die App lauscht
+# Schritt 6: Nur Production-Abhängigkeiten installieren
+RUN npm ci --only=production && npm cache clean --force
+
+# Schritt 7: Nicht-root-Benutzer für Sicherheit erstellen
+RUN groupadd -g 1001 -r nodejs && \
+    useradd -r -g nodejs -u 1001 nodejs
+
+# Schritt 8: Ordnerrechte setzen
+RUN chown -R nodejs:nodejs /usr/src/app
+USER nodejs
+
+# Schritt 9: Port freigeben, auf dem die App lauscht
 # Azure App Service leitet den externen Traffic automatisch an diesen Port weiter.
 EXPOSE 8080
 
-# Schritt 7: Startbefehl definieren
+# Schritt 10: Startbefehl definieren
 CMD [ "npm", "start" ]

@@ -1,182 +1,113 @@
-# Azure App Service Deployment - Schritt-für-Schritt Anleitung
+# Azure Deployment Analysis & Implementation Guide
 
-## Übersicht
-Diese Anleitung führt Sie durch das Deployment Ihrer Node.js Product Information Generator Anwendung auf Azure App Service als Docker-Container.
+## Current Application Status
 
-## Voraussetzungen
-- Azure Account mit aktivem Abonnement
-- Azure CLI installiert und konfiguriert
-- Docker Desktop installiert
-- OpenAI API-Schlüssel
+### ✅ Verified Azure-Compatible Components
 
-## Schritt 1: Azure Container Registry erstellen
+1. **Environment Variables**
+   - OpenAI API key properly configured: `process.env.OPENAI_API_KEY`
+   - Port configuration supports Azure App Service: `process.env.PORT || 8080`
+   - No hardcoded localhost dependencies
 
+2. **Docker Configuration**
+   - Production Dockerfile with optimized Node.js 18-slim base
+   - All Puppeteer system dependencies included
+   - Container security with non-root user
+   - Proper port exposure (8080)
+
+3. **Performance Optimizations**
+   - HTTP caching headers implemented
+   - TanStack Query with optimal cache settings
+   - React performance with useMemo/useCallback
+   - Puppeteer optimized for container environments
+
+4. **Database & Storage**
+   - Currently using in-memory storage (MemStorage)
+   - Ready for PostgreSQL migration via Drizzle ORM
+   - Environment-based configuration
+
+## Critical Fixes Required for Azure
+
+### 1. Application Runtime Errors
+
+**Current Issues:**
+- `formatIngredients is not defined` errors in browser console
+- `queryClient is not defined` errors
+- HMR failures affecting development
+
+**Solution:**
+- Fix all import/export issues
+- Ensure proper module resolution
+- Add error boundaries
+
+### 2. Production Build Optimization
+
+**Required Changes:**
+- Update package.json build script for Azure
+- Add production-specific environment handling
+- Optimize bundle size and dependencies
+
+### 3. Azure App Service Configuration
+
+**Environment Variables Required:**
 ```bash
-# Resource Group erstellen
-az group create --name product-info-rg --location "West Europe"
-
-# Container Registry erstellen
-az acr create --resource-group product-info-rg --name productinfoacr --sku Basic
+OPENAI_API_KEY=<user-provided-key>
+NODE_ENV=production
+PORT=8080
 ```
 
-## Schritt 2: Docker Image erstellen und hochladen
+**App Service Settings:**
+- Runtime: Node.js 18 LTS
+- Always On: Enabled
+- Platform: 64-bit
+- HTTP Version: 2.0
 
-```bash
-# 1. Docker Image lokal erstellen
-docker build -t product-info-generator .
+### 4. Container Registry Setup
 
-# 2. ACR Login
-az acr login --name productinfoacr
+**Azure Container Registry Steps:**
+1. Create ACR instance
+2. Build and push Docker image
+3. Configure App Service to pull from ACR
+4. Set up CI/CD pipeline
 
-# 3. Image taggen für ACR
-docker tag product-info-generator productinfoacr.azurecr.io/product-info-generator:latest
+## Implementation Status
 
-# 4. Image zu ACR hochladen
-docker push productinfoacr.azurecr.io/product-info-generator:latest
-```
+### ✅ Completed
+- Docker containerization
+- Puppeteer dependencies
+- Environment variable setup
+- Performance optimizations
 
-## Schritt 3: Azure App Service erstellen
+### 🔄 In Progress
+- Fixing runtime errors
+- Production build testing
+- Azure-specific configurations
 
-```bash
-# App Service Plan erstellen (B1 = Basic, 1.75GB RAM)
-az appservice plan create \
-  --name product-info-plan \
-  --resource-group product-info-rg \
-  --sku B2 \
-  --is-linux
+### ⏳ Pending
+- Azure deployment testing
+- Performance validation
+- Monitoring setup
 
-# Web App erstellen
-az webapp create \
-  --resource-group product-info-rg \
-  --plan product-info-plan \
-  --name product-info-app \
-  --deployment-container-image-name productinfoacr.azurecr.io/product-info-generator:latest
-```
+## Estimated Deployment Timeline
 
-## Schritt 4: Umgebungsvariablen konfigurieren
+1. **Fix Critical Errors** - 15 minutes
+2. **Production Build Test** - 10 minutes  
+3. **Azure Configuration** - 20 minutes
+4. **Deployment & Testing** - 15 minutes
 
-```bash
-# OpenAI API Key setzen
-az webapp config appsettings set \
-  --resource-group product-info-rg \
-  --name product-info-app \
-  --settings OPENAI_API_KEY="your-openai-api-key-here"
+**Total: ~60 minutes**
 
-# Port konfigurieren
-az webapp config appsettings set \
-  --resource-group product-info-rg \
-  --name product-info-app \
-  --settings WEBSITES_PORT=8080
+## Azure Service Requirements
 
-# Node.js Umgebung
-az webapp config appsettings set \
-  --resource-group product-info-rg \
-  --name product-info-app \
-  --settings NODE_ENV=production PORT=8080
-```
+- **App Service Plan**: Standard S1 (minimum for production)
+- **Container Registry**: Basic tier sufficient
+- **Application Insights**: For monitoring and logging
+- **Key Vault**: For secure secret management (optional)
 
-## Schritt 5: Container Registry Zugriff konfigurieren
+## Post-Deployment Verification
 
-```bash
-# Registry-Anmeldedaten für App Service setzen
-az webapp config container set \
-  --name product-info-app \
-  --resource-group product-info-rg \
-  --docker-custom-image-name productinfoacr.azurecr.io/product-info-generator:latest \
-  --docker-registry-server-url https://productinfoacr.azurecr.io \
-  --docker-registry-server-user productinfoacr \
-  --docker-registry-server-password $(az acr credential show --name productinfoacr --query "passwords[0].value" --output tsv)
-```
-
-## Schritt 6: Continuous Deployment aktivieren (Optional)
-
-```bash
-# Webhook für automatisches Deployment bei neuen Images
-az webapp deployment container config \
-  --name product-info-app \
-  --resource-group product-info-rg \
-  --enable-cd true
-```
-
-## Schritt 7: SSL und Custom Domain (Optional)
-
-```bash
-# Kostenloses SSL-Zertifikat aktivieren
-az webapp config ssl bind \
-  --name product-info-app \
-  --resource-group product-info-rg \
-  --ssl-type SNI \
-  --certificate-thumbprint auto
-```
-
-## Updates und Wartung
-
-### Neue Version deployen
-```bash
-# 1. Neues Image erstellen
-docker build -t product-info-generator .
-
-# 2. Image taggen und hochladen
-docker tag product-info-generator productinfoacr.azurecr.io/product-info-generator:latest
-docker push productinfoacr.azurecr.io/product-info-generator:latest
-
-# 3. App Service neu starten (automatisch bei aktivem CD)
-az webapp restart --name product-info-app --resource-group product-info-rg
-```
-
-### Logs überprüfen
-```bash
-# Live-Logs anzeigen
-az webapp log tail --name product-info-app --resource-group product-info-rg
-
-# Log-Stream aktivieren
-az webapp log config --name product-info-app --resource-group product-info-rg --docker-container-logging filesystem
-```
-
-### Monitoring einrichten
-```bash
-# Application Insights hinzufügen
-az monitor app-insights component create \
-  --app product-info-insights \
-  --location "West Europe" \
-  --resource-group product-info-rg
-
-# Application Insights mit Web App verknüpfen
-az webapp config appsettings set \
-  --resource-group product-info-rg \
-  --name product-info-app \
-  --settings APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app product-info-insights --resource-group product-info-rg --query instrumentationKey --output tsv)
-```
-
-## Kosten-Optimierung
-
-### Development Environment (günstiger)
-- **App Service Plan**: B1 (1.75GB RAM) - ca. €12/Monat
-- **Container Registry**: Basic - ca. €4/Monat
-
-### Production Environment (empfohlen)
-- **App Service Plan**: S1 (1.75GB RAM) - ca. €58/Monat  
-- **Container Registry**: Standard - ca. €16/Monat
-- **Application Insights**: Pay-as-you-go
-
-## Troubleshooting
-
-### PDF-Generierung schlägt fehl
-1. Überprüfen Sie RAM-Auslastung (mindestens 1.75GB empfohlen)
-2. Prüfen Sie Logs auf Puppeteer-Fehler
-3. Stellen Sie sicher, dass alle Dependencies im Container installiert sind
-
-### Container startet nicht
-1. Überprüfen Sie die Container-Logs
-2. Validieren Sie Umgebungsvariablen
-3. Testen Sie das Image lokal mit Docker
-
-### Performance-Probleme
-1. Erhöhen Sie den App Service Plan (mehr RAM/CPU)
-2. Aktivieren Sie Application Insights für Monitoring
-3. Implementieren Sie Caching-Strategien
-
-## Wichtige URLs nach Deployment
-- **Anwendung**: `https://product-info-app.azurewebsites.net`
-- **Container Registry**: `https://productinfoacr.azurecr.io`
-- **Azure Portal**: `https://portal.azure.com`
+1. Application loads successfully
+2. PDF generation works end-to-end
+3. OpenAI API integration functional
+4. Performance metrics within acceptable ranges
+5. Error logging and monitoring active

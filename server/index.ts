@@ -1,8 +1,14 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { azurePerformanceMiddleware } from "./middleware/azure-monitoring";
 
 const app = express();
+
+// Azure monitoring middleware (should be first)
+if (process.env.NODE_ENV === 'production') {
+  app.use(azurePerformanceMiddleware);
+}
 
 // Performance: HTTP-Kompression aktivieren
 app.use((req, res, next) => {
@@ -82,10 +88,9 @@ app.use((req, res, next) => {
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 8080 for Azure App Service compatibility.
+  // Azure App Service and Docker compatibility: Default to 8080, fallback to 5000 for Replit
   // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '8080', 10);
+  const port = parseInt(process.env.PORT || (process.env.NODE_ENV === 'production' ? '8080' : '5000'), 10);
   server.listen({
     port,
     host: "0.0.0.0",
