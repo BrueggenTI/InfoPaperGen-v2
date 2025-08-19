@@ -93,6 +93,11 @@ The application is built as a full-stack JavaScript application following a clea
   - **Build Optimization**: Production build successful with 872KB main bundle (268KB gzipped), acceptable for complex PDF generation features
   - **Memory Management**: Improved client-side memory usage with memoized component calculations and optimized re-renders
   - **API Timeouts**: Extended PDF generation timeout to 45s for complex documents while maintaining user experience
+- **Azure Deployment Readiness (2025-08-19)**:
+  - **✅ OpenAI Portability**: Uses standard `process.env.OPENAI_API_KEY` environment variable (Azure-compatible)
+  - **✅ Puppeteer Docker Compatibility**: Configured with `--no-sandbox`, `--disable-setuid-sandbox`, `--disable-dev-shm-usage` for container environments
+  - **✅ Environment Variables**: Portable configuration for both Replit and Azure App Service deployment
+  - **✅ Server Arguments**: 30+ optimized Chrome flags for headless server operation in Docker containers
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.
