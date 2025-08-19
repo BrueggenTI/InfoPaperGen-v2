@@ -7,6 +7,20 @@ import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/l
 import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 import { useState, useMemo, useCallback } from "react";
 
+// Helper function to format ingredients list
+const formatIngredients = (ingredients: any[]) => {
+  if (!ingredients || ingredients.length === 0) return "";
+
+  return ingredients
+    .map(ingredient => {
+      if (ingredient.percentage && ingredient.percentage > 0) {
+        return `${ingredient.name} (${ingredient.percentage}%)`;
+      }
+      return ingredient.name;
+    })
+    .join(", ");
+};
+
 interface DocumentPreviewProps {
   formData: ProductInfo;
   sessionId?: string;
@@ -15,7 +29,7 @@ interface DocumentPreviewProps {
 
 export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  
+
   // Performance: Memoize parsed serving size
   const servingSize = useMemo(() => 
     parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), 
