@@ -106,6 +106,14 @@ The application is built as a full-stack JavaScript application following a clea
     - Improved Error Boundary component with German language interface
     - Added robust error parsing in mutations to handle various error response formats
     - Implemented consistent error handling across nutrition and ingredient extraction features
+- **Critical Deployment Fix (2025-08-19)**: Resolved nutrition extraction failure in production deployment:
+  - **✅ Response Format Standardization**: Both nutrition endpoints now return consistent `{ nutrition: extractedNutrition }` format
+  - **✅ Frontend Pattern Consistency**: Replicated exact ingredients upload pattern in nutrition section (base64 cleaning in upload handler)
+  - **✅ Error Handling Enhancement**: Added deployment-specific error codes (503, 504, 429) with German user messages
+  - **✅ Base64 Processing Alignment**: Standardized base64 data processing across ingredients and nutrition sections
+  - **✅ API Validation**: Enhanced with explicit OpenAI API key checking and environment-specific debugging
+  - **✅ Build Verification**: Production build successful (909KB main bundle, 279KB gzipped) with all fixes integrated
+  - **✅ Comprehensive Testing**: Created deployment simulation test validating endpoint availability and error handling
 - **Production Docker Containerization (2025-08-19)**:
   - **✅ Multi-stage Build**: Optimized Dockerfile with development dependencies for build, production-only for runtime
   - **✅ Puppeteer Compatibility**: 43 system libraries installed, 30+ Chrome flags for container environments

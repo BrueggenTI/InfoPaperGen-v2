@@ -111,60 +111,48 @@ export default function NutritionStep({
 
   const watchedValues = form.watch();
 
-  // AI nutrition extraction mutation
+  // AI nutrition extraction mutation - replicating ingredients pattern exactly
   const extractNutritionMutation = useMutation({
     mutationFn: async (imageData: string) => {
       const debugId = uuidv4();
-      console.log(`[${debugId}] Starting nutrition extraction with image data...`);
-      try {
-        // Ensure we have valid base64 data
-        let cleanImageData = imageData;
-        if (imageData.includes(',')) {
-          cleanImageData = imageData.split(',')[1];
-        }
-
-        if (!cleanImageData || cleanImageData.length === 0) {
-          console.error(`[${debugId}] Invalid image data format received.`);
-          throw new Error("Invalid image data format");
-        }
-
-        console.log(`[${debugId}] Sending nutrition extraction request with image data length:`, cleanImageData.length);
-
-        const res = await apiRequest("POST", "/api/extract-nutrition", {
-          image: cleanImageData
-        });
-
-        if (!res.ok) {
-          console.warn(`[${debugId}] API request failed with status: ${res.status}`);
-          const errorData = await res.json().catch(() => ({
-            message: "Network error occurred",
-            userFriendlyMessage: "Netzwerkfehler aufgetreten. Bitte versuchen Sie es erneut."
-          }));
-          console.error(`[${debugId}] API error response:`, errorData);
-          throw new Error(errorData.userFriendlyMessage || errorData.message || "API request failed");
-        }
-
-        const result = await res.json();
-        console.log(`[${debugId}] Nutrition extraction response:`, result);
-
-        // Handle both response formats - direct nutrition object or wrapped in nutrition property
-        if (result.nutrition) {
-          console.log(`[${debugId}] Nutrition data found within 'nutrition' property.`);
-          return { nutrition: result.nutrition };
-        } else if (result.energy || result.fat || result.protein) {
-          console.log(`[${debugId}] Nutrition data found directly in response.`);
-          return { nutrition: result };
-        }
-
-        console.log(`[${debugId}] No specific nutrition data structure detected in response.`);
-        return result;
-      } catch (fetchError: any) {
-        console.log(`[${debugId}] Error stack:`, fetchError.stack);
-        console.error(`[${debugId}] Error type:`, typeof fetchError);
-        console.error(`[${debugId}] Error constructor:`, fetchError.constructor.name);
-        setLastApiError(fetchError);
-        throw fetchError;
+      console.log(`[${debugId}] Starting nutrition extraction with image data length:`, imageData.length);
+      
+      // Validate base64 data (should already be clean from upload handler)
+      if (!imageData || imageData.length === 0) {
+        console.error(`[${debugId}] Invalid image data format received.`);
+        throw new Error("Invalid image data format");
       }
+
+      console.log(`[${debugId}] Sending nutrition extraction request...`);
+
+      const res = await apiRequest("POST", "/api/extract-nutrition", {
+        image: imageData
+      });
+
+      if (!res.ok) {
+        console.warn(`[${debugId}] API request failed with status: ${res.status}`);
+        const errorData = await res.json().catch(() => ({
+          message: "Network error occurred",
+          userFriendlyMessage: "Netzwerkfehler aufgetreten. Bitte versuchen Sie es erneut."
+        }));
+        console.error(`[${debugId}] API error response:`, errorData);
+        throw new Error(errorData.userFriendlyMessage || errorData.message || "API request failed");
+      }
+
+      const result = await res.json();
+      console.log(`[${debugId}] Nutrition extraction response:`, result);
+
+      // Handle both response formats - direct nutrition object or wrapped in nutrition property
+      if (result.nutrition) {
+        console.log(`[${debugId}] Nutrition data found within 'nutrition' property.`);
+        return { nutrition: result.nutrition };
+      } else if (result.energy || result.fat || result.protein) {
+        console.log(`[${debugId}] Nutrition data found directly in response.`);
+        return { nutrition: result };
+      }
+
+      console.log(`[${debugId}] No specific nutrition data structure detected in response.`);
+      return result;
     },
     onSuccess: (data) => {
       const debugId = uuidv4();
@@ -288,9 +276,10 @@ export default function NutritionStep({
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
-      console.log(`[${debugId}] File read successfully. Setting image and triggering mutation.`);
+      const base64Data = base64.split(',')[1]; // Extract only base64 part, matching ingredients pattern
+      console.log(`[${debugId}] File read successfully. Setting image and triggering mutation. Base64 data length:`, base64Data.length);
       setNutritionImage(base64);
-      extractNutritionMutation.mutate(base64);
+      extractNutritionMutation.mutate(base64Data);
     };
     reader.onerror = (e) => {
       console.error(`[${debugId}] Error reading file:`, e);
