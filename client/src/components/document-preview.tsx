@@ -80,6 +80,22 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     return finalFormatted || "Ingredients will appear here after extraction...";
   }, [formData.ingredients, formData.baseProductIngredients]);
 
+  // Performance: Memoize Nutri-Score calculation
+  const nutriScore = useMemo(() => {
+    if (!formData.nutrition) return null;
+    return calculateNutriScore({
+      energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
+      fat: formData.nutrition.fat || 0,
+      saturatedFat: formData.nutrition.saturatedFat || 0,
+      carbohydrates: formData.nutrition.carbohydrates || 0,
+      sugars: formData.nutrition.sugars || 0,
+      fiber: formData.nutrition.fiber || 0,
+      protein: formData.nutrition.protein || 0,
+      salt: formData.nutrition.salt || 0,
+      fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
+    });
+  }, [formData.nutrition]);
+
   // Calculate percentage from base product to whole product using the same formula as ingredients-step
   const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
     return +((basePercentage * markedIngredientPercentage) / 100).toFixed(1);
@@ -478,39 +494,25 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
             {formData.nutrition && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Nutri-Score Display */}
-                {(() => {
-                  const nutriScore = useMemo(() => calculateNutriScore({
-                    energy: formData.nutrition!.energy || { kj: 0, kcal: 0 },
-                    fat: formData.nutrition!.fat || 0,
-                    saturatedFat: formData.nutrition!.saturatedFat || 0,
-                    carbohydrates: formData.nutrition!.carbohydrates || 0,
-                    sugars: formData.nutrition!.sugars || 0,
-                    fiber: formData.nutrition!.fiber || 0,
-                    protein: formData.nutrition!.protein || 0,
-                    salt: formData.nutrition!.salt || 0,
-                    fruitVegLegumeContent: formData.nutrition!.fruitVegLegumeContent || 0
-                  }), [formData.nutrition]);
-
-                  return (
-                    <div className="border border-slate-200 rounded-lg p-3">
-                      <h3 className="font-semibold text-base text-slate-800 mb-2">Nutri-Score Rating</h3>
-                      <div className="text-center">
-                        <div className="flex justify-center">
-                          <div className="bg-white p-2 rounded-lg shadow-md border border-slate-200">
-                            <img 
-                              src={getNutriScoreImage(nutriScore.nutriGrade)} 
-                              alt={`Nutri-Score ${nutriScore.nutriGrade}`}
-                              className="h-16 w-auto"
-                            />
-                          </div>
+                {nutriScore && (
+                  <div className="border border-slate-200 rounded-lg p-3">
+                    <h3 className="font-semibold text-base text-slate-800 mb-2">Nutri-Score Rating</h3>
+                    <div className="text-center">
+                      <div className="flex justify-center">
+                        <div className="bg-white p-2 rounded-lg shadow-md border border-slate-200">
+                          <img 
+                            src={getNutriScoreImage(nutriScore.nutriGrade)} 
+                            alt={`Nutri-Score ${nutriScore.nutriGrade}`}
+                            className="h-16 w-auto"
+                          />
                         </div>
-                        <p className="text-sm text-slate-700 mt-2 font-medium">
-                          Grade: {nutriScore.nutriGrade} • Score: {nutriScore.finalScore}
-                        </p>
                       </div>
+                      <p className="text-sm text-slate-700 mt-2 font-medium">
+                        Grade: {nutriScore.nutriGrade} • Score: {nutriScore.finalScore}
+                      </p>
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
 
                 {/* Declarations - Calculated Claims */}
                 <div className="border border-slate-200 rounded-lg">
