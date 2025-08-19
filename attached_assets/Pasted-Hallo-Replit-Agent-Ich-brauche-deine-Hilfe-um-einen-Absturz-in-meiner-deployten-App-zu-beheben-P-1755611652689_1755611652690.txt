@@ -1,0 +1,56 @@
+Hallo Replit Agent. Ich brauche deine Hilfe, um einen Absturz in meiner deployten App zu beheben.
+Problembeschreibung:
+Meine App hat zwei fast identische Funktionen, die Bilder mit KI verarbeiten:
+Zutatenliste hochladen: Funktioniert perfekt.
+Nährwertetabelle hochladen: Führt immer zu einem Absturz der App ("Application failed to respond").
+Das Problem muss also spezifisch im Code für die Verarbeitung der Nährwertetabelle liegen.
+Meine Hypothese:
+Der KI-Prompt für die Nährwertetabelle bittet um eine strukturierte JSON-Antwort. Ich vermute, dass mein Python-Code abstürzt, wenn er versucht, diese Antwort zu parsen. Mögliche Fehlerquellen sind:
+Die KI antwortet nicht mit validem JSON.
+Ein erwarteter Schlüssel (z.B. "Kalorien") fehlt in der Antwort.
+Ein Wert kann nicht in eine Zahl umgewandelt werden (z.B. float("N/A")).
+Code-Ausschnitte:
+Hier ist der Code für die Nährwertetabelle, der den Absturz verursacht:
+code
+Python
+# --- FÜGE HIER DEINEN CODE FÜR DIE NÄHRWERTETABELLE EIN ---
+# Beispiel:
+# @app.route('/upload-nutrition', methods=['POST'])
+# def handle_nutrition_upload():
+#     image_file = request.files['screenshot']
+#     
+#     # KI-Anfrage
+#     prompt = "Extrahiere die Nährwerte aus diesem Bild als JSON mit den Schlüsseln: Kalorien, Fett, Zucker."
+#     ki_response = call_my_ai_service(image_file, prompt)
+#     
+#     # VERMUTLICHE FEHLERQUELLE
+#     nutrition_data = json.loads(ki_response)
+#     calories = nutrition_data['calories']
+#     
+#     save_to_database(calories)
+#     return "Success"
+# --- ENDE DEINES CODES ---
+Und hier zum Vergleich der funktionierende Code für die Zutatenliste:
+code
+Python
+# --- FÜGE HIER DEINEN FUNKTIONIERENDEN CODE FÜR DIE ZUTATENLISTE EIN ---
+# Beispiel:
+# @app.route('/upload-ingredients', methods=['POST'])
+# def handle_ingredients_upload():
+#     image_file = request.files['screenshot']
+#     
+#     # KI-Anfrage
+#     prompt = "Extrahiere die Zutaten als Text."
+#     ki_response = call_my_ai_service(image_file, prompt)
+#     
+#     # Simple Textverarbeitung
+#     ingredients_text = ki_response
+#     
+#     save_to_database(ingredients_text)
+#     return "Success"
+# --- ENDE DEINES CODES ---
+Deine Aufgabe:
+Analysiere den Code für die Nährwertetabelle (/upload-nutrition).
+Schreibe den Code um und füge ein robustes try...except Konstrukt hinzu. Dieses soll alle potenziellen Fehler beim Parsen der KI-Antwort abfangen (z.B. JSONDecodeError, KeyError, ValueError).
+Füge im except-Block Logging hinzu. Gib die rohe KI-Antwort (ki_response) und die genaue Fehlermeldung (Exception as e) aus. So kann ich in der Replit Konsole sehen, was genau schiefgeht.
+Das Ziel ist, dass die App nicht mehr abstürzt, auch wenn die KI-Antwort fehlerhaft ist, und ich stattdessen eine klare Fehlermeldung im Log sehe.
