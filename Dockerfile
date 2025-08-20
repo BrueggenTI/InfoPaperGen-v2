@@ -100,8 +100,6 @@ RUN npm install --omit=dev
 
 # Kopiert den fertigen 'dist'-Ordner aus der "Builder"-Stufe
 COPY --from=builder /app/dist ./dist
-# Kopiert den 'public'-Ordner (falls benötigt von der App)
-COPY --from=builder /app/public ./public
 
 # Sicherheitsmaßnahme: Einen nicht-privilegierten Benutzer erstellen
 RUN useradd --system --uid 1001 --gid 0 appuser
