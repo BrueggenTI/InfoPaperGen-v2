@@ -100,25 +100,46 @@ az containerapp create \
 
 ### 1.7 Service Principal für GitHub Actions erstellen
 
+**Schritt 1: Subscription ID abrufen**
 ```bash
-# Service Principal erstellen und JSON-Output abrufen
+# Subscription ID notieren
+az account show --query id --output tsv
+```
+
+**Schritt 2: Service Principal erstellen**
+```bash
+# Service Principal erstellen (OHNE --sdk-auth für neuere Azure CLI Versionen)
+az ad sp create-for-rbac \
+  --name "product-info-github-actions" \
+  --role contributor \
+  --scopes /subscriptions/DEINE_SUBSCRIPTION_ID/resourceGroups/rg-product-info-generator
+```
+
+**Schritt 3: JSON für AZURE_CREDENTIALS manuell erstellen**
+
+Aus der Ausgabe des Service Principal Befehls erhältst du:
+- `appId` (wird zu `clientId`)
+- `password` (wird zu `clientSecret`)
+- `tenant` (wird zu `tenantId`)
+
+Erstelle das JSON für GitHub Secret `AZURE_CREDENTIALS`:
+```json
+{
+  "clientId": "DEINE_APP_ID_HIER",
+  "clientSecret": "DEIN_PASSWORD_HIER",
+  "subscriptionId": "DEINE_SUBSCRIPTION_ID_HIER",
+  "tenantId": "DEINE_TENANT_ID_HIER"
+}
+```
+
+**Alternative (wenn --sdk-auth funktioniert):**
+```bash
+# Falls deine Azure CLI Version --sdk-auth unterstützt
 az ad sp create-for-rbac \
   --name "product-info-github-actions" \
   --role contributor \
   --scopes /subscriptions/$(az account show --query id --output tsv)/resourceGroups/rg-product-info-generator \
   --sdk-auth
-```
-
-**WICHTIG:** Kopiere die komplette JSON-Ausgabe! Diese benötigst du für GitHub Secret `AZURE_CREDENTIALS`.
-
-Format der Ausgabe:
-```json
-{
-  "clientId": "12345678-1234-1234-1234-123456789012",
-  "clientSecret": "deinClientSecret",
-  "subscriptionId": "12345678-1234-1234-1234-123456789012",
-  "tenantId": "12345678-1234-1234-1234-123456789012"
-}
 ```
 
 ## 🔐 Teil 2: OpenAI API-Key in Azure Container App konfigurieren
@@ -184,7 +205,7 @@ Erstelle diese 4 Secrets:
 | `ACR_LOGIN_SERVER` | `productinfoacr.azurecr.io` | Azure Portal → Container Registry → Overview → Login server |
 | `ACR_USERNAME` | `productinfoacr` | Azure Portal → Container Registry → Access keys → Username |
 | `ACR_PASSWORD` | `[Passwort aus ACR]` | Azure Portal → Container Registry → Access keys → Password |
-| `AZURE_CREDENTIALS` | `[JSON von Service Principal]` | Ausgabe vom `az ad sp create-for-rbac` Kommando |
+| `AZURE_CREDENTIALS` | `[JSON von Service Principal]` | Manuell erstelltes JSON mit clientId, clientSecret, subscriptionId, tenantId |
 
 ### 3.3 GitHub Actions Workflow testen
 

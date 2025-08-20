@@ -126,5 +126,6 @@ jobs:
 # 4. AZURE_CREDENTIALS
 #    - Wert: JSON-Output des Service Principal Commands (siehe ANLEITUNG.md)
 #    - Format: {"clientId":"xxx","clientSecret":"xxx","subscriptionId":"xxx","tenantId":"xxx"}
+#    - WICHTIG: Das JSON muss exakt dieses Format haben, ohne Leerzeichen oder Zeilenumbrüche
 #
 # WICHTIG: Stelle sicher, dass "Admin user" in deiner Container Registry aktiviert ist!
