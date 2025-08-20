@@ -87,12 +87,12 @@ export async function generatePDFWithPuppeteer(
       ]
     };
 
-    // Versuche verschiedene Browser-Pfade (Docker-Pfade haben Priorität)
+    // Azure Container Apps optimierte Browser-Pfade
     const possiblePaths = [
+      process.env.PUPPETEER_EXECUTABLE_PATH, // Docker Umgebungsvariable (höchste Priorität)
       '/usr/bin/google-chrome-stable', // Docker Standard-Installation
       '/usr/bin/google-chrome', // Alternative Docker-Installation
-      process.env.PUPPETEER_EXECUTABLE_PATH, // Umgebungsvariable
-      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium-browser', // Fallback Chromium
       '/usr/bin/chromium',
       '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
     ].filter(Boolean);

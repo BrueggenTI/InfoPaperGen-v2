@@ -1,0 +1,130 @@
+# GitHub Actions Workflow für Azure Container Apps Deployment
+# Dieser Workflow baut und deployed die Node.js-App automatisch bei jedem Push auf main
+
+name: Build and Deploy to Azure Container Apps
+
+# Trigger: Bei jedem Push auf den main-Branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Umgebungsvariablen für den gesamten Workflow
+env:
+  REGISTRY_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+  REGISTRY_USERNAME: ${{ secrets.ACR_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+  CONTAINER_APP_NAME: product-info-generator
+  RESOURCE_GROUP: rg-product-info-generator
+  IMAGE_NAME: product-info-generator
+
+jobs:
+  # Job 1: Docker Image bauen und in Azure Container Registry pushen
+  build:
+    runs-on: ubuntu-latest
+    
+    outputs:
+      # Image-Tag für den Deploy-Job verfügbar machen
+      image-tag: ${{ steps.meta.outputs.tags }}
+      
+    steps:
+    - name: 📥 Code auschecken
+      uses: actions/checkout@v4
+      
+    - name: 🔑 Bei Azure Container Registry anmelden
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.REGISTRY_LOGIN_SERVER }}
+        username: ${{ env.REGISTRY_USERNAME }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+    
+    - name: 🏷️ Docker Metadaten extrahieren
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}
+        tags: |
+          # Branch name für feature branches
+          type=ref,event=branch
+          # Git commit SHA für eindeutige Identifikation
+          type=sha,prefix={{branch}}-
+          # Latest tag für main branch
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: 🔨 Docker Image bauen und pushen
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        # Build Args für optimierte Builds
+        build-args: |
+          NODE_ENV=production
+
+  # Job 2: Deployment zu Azure Container Apps (hängt von build ab)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    # Nur bei erfolgreichen Builds auf main branch deployen
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: 🔐 Bei Azure anmelden
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: 🚀 Container App aktualisieren
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        # Container App Details
+        containerAppName: ${{ env.CONTAINER_APP_NAME }}
+        resourceGroup: ${{ env.RESOURCE_GROUP }}
+        
+        # Image Details
+        imageToDeploy: ${{ needs.build.outputs.image-tag }}
+        
+        # Optional: Registry-Anmeldeinformationen (falls private)
+        registryUrl: ${{ env.REGISTRY_LOGIN_SERVER }}
+        registryUsername: ${{ env.REGISTRY_USERNAME }}
+        registryPassword: ${{ env.REGISTRY_PASSWORD }}
+
+  # Job 3: Deployment-Status benachrichtigen (optional)
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    if: always()
+    
+    steps:
+    - name: 📢 Deployment-Status ausgeben
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "✅ Deployment erfolgreich!"
+          echo "🌐 App ist verfügbar unter: https://${{ env.CONTAINER_APP_NAME }}.azurecontainerapps.io"
+        else
+          echo "❌ Deployment fehlgeschlagen!"
+        fi
+
+# BENÖTIGTE GITHUB SECRETS:
+# Erstelle diese Secrets in deinem GitHub Repository unter Settings > Secrets and variables > Actions
+#
+# 1. ACR_LOGIN_SERVER
+#    - Wert: Deine Azure Container Registry URL (z.B.: myregistry.azurecr.io)
+#    - Findest du in: Azure Portal > Container Registry > Overview > Login server
+#
+# 2. ACR_USERNAME  
+#    - Wert: Der Username für deine Container Registry
+#    - Findest du in: Azure Portal > Container Registry > Access keys > Username
+#
+# 3. ACR_PASSWORD
+#    - Wert: Das Passwort für deine Container Registry  
+#    - Findest du in: Azure Portal > Container Registry > Access keys > Password
+#
+# 4. AZURE_CREDENTIALS
+#    - Wert: JSON-Output des Service Principal Commands (siehe ANLEITUNG.md)
+#    - Format: {"clientId":"xxx","clientSecret":"xxx","subscriptionId":"xxx","tenantId":"xxx"}
+#
+# WICHTIG: Stelle sicher, dass "Admin user" in deiner Container Registry aktiviert ist!

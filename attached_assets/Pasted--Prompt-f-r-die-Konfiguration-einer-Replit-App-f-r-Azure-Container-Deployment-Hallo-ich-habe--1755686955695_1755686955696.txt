@@ -1,0 +1,51 @@
+**Prompt für die Konfiguration einer Replit-App für Azure Container Deployment**
+
+Hallo, ich habe in diesem Repl eine Node.js-Anwendung entwickelt, die OpenAI und Puppeteer zur PDF-Generierung verwendet. Ich möchte diese Anwendung als Docker-Container auf Azure bereitstellen, idealerweise in einer **Azure Container App**. Der gesamte CI/CD-Prozess soll über GitHub Actions automatisiert werden.
+
+Bitte konfiguriere mein Projekt optimal für dieses Ziel.
+
+**1. Dockerfile erstellen und optimieren**
+
+Erstelle ein `Dockerfile` im Hauptverzeichnis. Dieses Dockerfile muss folgende Aufgaben erfüllen:
+*   Ein aktuelles, schlankes Node.js-Image als Basis verwenden (z.B. `node:20-slim`).
+*   Alle notwendigen System-Abhängigkeiten für Puppeteer und Chromium in einer Debian/Ubuntu-Umgebung installieren (z.B. `libgbm-dev`, `libasound2`, `libnss3`, etc.).
+*   **Wichtig:** Den `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` Environment-Variable auf `true` setzen und stattdessen das stabile `chromium`-Paket direkt über `apt-get` installieren. Dies ist die zuverlässigste Methode.
+*   Das Arbeitsverzeichnis auf `/app` setzen.
+*   `package.json` und `package-lock.json` kopieren und `npm install` ausführen, um die Node-Module-Ebene im Image-Cache zu nutzen.
+*   Den restlichen Anwendungscode kopieren (inklusive des `dist`-Verzeichnisses, das beim Build entsteht).
+*   Den Port freigeben, den meine Anwendung nutzt (z.B. 8080).
+*   Den finalen Startbefehl definieren, der meine gebaute Anwendung startet (z.B. `CMD ["node", "dist/index.js"]`).
+
+Gib mir zusätzlich einen Hinweis, wie ich meinen Puppeteer-Code anpassen muss, damit er den im Dockerfile installierten Chromium-Browser unter `/usr/bin/chromium` mit den `--no-sandbox`-Argumenten verwendet.
+
+**2. GitHub Actions Workflow für CI/CD erstellen**
+
+Erstelle eine GitHub Actions Workflow-Datei unter `.github/workflows/main.yml`. Der Workflow soll:
+*   Bei jedem Push auf den `main`-Branch starten.
+*   Zwei Jobs haben: `build` und `deploy`.
+*   **Im `build`-Job:**
+    1.  Code auschecken.
+    2.  Bei meiner Azure Container Registry (ACR) anmelden.
+    3.  Das Docker-Image basierend auf dem `Dockerfile` bauen.
+    4.  Das Image mit einem eindeutigen Tag (dem GitHub Commit SHA) versehen und in meine ACR pushen.
+*   **Im `deploy`-Job (der vom `build`-Job abhängt):**
+    1.  Sich bei Azure mit den Anmeldeinformationen eines Service Principals anmelden.
+    2.  Die Azure Container App anweisen, das soeben gepushte Docker-Image zu verwenden und eine neue Revision zu erstellen.
+
+Bitte kommentiere die Workflow-Datei ausführlich und gib an, welche GitHub Secrets ich anlegen muss (z.B. `ACR_LOGIN_SERVER`, `ACR_USERNAME`, `ACR_PASSWORD`, `AZURE_CREDENTIALS`).
+
+**3. Umgang mit dem OpenAI API-Key**
+
+Meine Anwendung benötigt einen `OPENAI_API_KEY`. Dieser darf auf keinen Fall im Docker-Image landen. Gib mir eine klare Anweisung, wie ich diesen Key als "Secret" in der Azure Container App sicher hinterlegen kann, damit er meiner Anwendung zur Laufzeit als Umgebungsvariable zur Verfügung steht.
+
+**4. Anleitung für die manuellen Schritte (`ANLEITUNG.md`)**
+
+Erstelle eine Markdown-Datei namens `ANLEITUNG.md`, die mich durch die einmalige Einrichtung führt:
+*   **Azure-Setup:**
+    1.  Erstellen einer Ressourcengruppe.
+    2.  Erstellen einer Azure Container Registry (ACR).
+    3.  Erstellen der Azure Container App.
+    4.  Erstellen eines Service Principals mit den nötigen Rechten und wie ich dessen JSON-Output bekomme.
+*   **GitHub-Setup:**
+    1.  Erstellen des GitHub-Repositorys.
+    2.  Genaues Einrichten der vier benötigten GitHub Secrets und wo ich die jeweiligen Werte in Azure finde.

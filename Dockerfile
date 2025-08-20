@@ -1,6 +1,6 @@
 # Schritt 1: Basis-Image festlegen
-# Wir verwenden ein offizielles, schlankes Node.js-Image. Version 18 ist eine stabile Wahl.
-FROM node:18-slim
+# Wir verwenden ein aktuelles, schlankes Node.js-Image für Azure Container Apps
+FROM node:20-slim
 
 # Schritt 2: Root-Benutzer für Paketinstallation
 USER root
@@ -59,8 +59,12 @@ RUN apt-get update \
     && apt-get install -y google-chrome-stable --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Schritt 6: Arbeitsverzeichnis einrichten
-WORKDIR /usr/src/app
+# Schritt 6: Arbeitsverzeichnis einrichten (Azure Container Apps Standard)
+WORKDIR /app
+
+# Schritt 6.1: Umgebungsvariable für Puppeteer setzen
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Schritt 7: Zuerst alle Abhängigkeiten installieren (inkl. devDependencies für Build)
 COPY package*.json ./
@@ -78,12 +82,12 @@ RUN groupadd -g 1001 -r nodejs && \
     useradd -r -g nodejs -u 1001 nodejs
 
 # Schritt 11: Ordnerrechte setzen
-RUN chown -R nodejs:nodejs /usr/src/app
+RUN chown -R nodejs:nodejs /app
 USER nodejs
 
 # Schritt 12: Port freigeben, auf dem die App lauscht
-# Azure App Service leitet den externen Traffic automatisch an diesen Port weiter.
+# Azure Container Apps leitet den externen Traffic automatisch an diesen Port weiter.
 EXPOSE 8080
 
 # Schritt 13: Startbefehl definieren
-CMD [ "npm", "start" ]
+CMD [ "node", "dist/server/index.js" ]

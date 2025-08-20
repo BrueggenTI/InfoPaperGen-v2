@@ -28,11 +28,11 @@ export async function generatePDFFromSessionId(sessionId: string): Promise<Buffe
       ]
     };
 
-    // Versuche Browser-Pfade für Docker-Umgebung
+    // Azure Container Apps optimierte Browser-Pfade
     const possiblePaths = [
+      process.env.PUPPETEER_EXECUTABLE_PATH, // Docker Umgebungsvariable (höchste Priorität)
       '/usr/bin/google-chrome-stable',
       '/usr/bin/google-chrome',
-      process.env.PUPPETEER_EXECUTABLE_PATH,
       '/usr/bin/chromium-browser',
       '/usr/bin/chromium'
     ].filter(Boolean);
