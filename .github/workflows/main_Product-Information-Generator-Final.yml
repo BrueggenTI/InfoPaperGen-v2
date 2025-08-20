@@ -1,0 +1,64 @@
+# Name des Workflows
+name: Build and Deploy Container to Azure Web App
+
+# Trigger: Startet bei Push auf den main-Branch oder manuell
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Definition der Jobs
+jobs:
+  # Erster Job: Baut das Docker-Image und pusht es in Ihre private Registry
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Code aus dem Repository auschecken
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Bei Ihrer Azure Container Registry (ACR) anmelden
+      # Dies ist der richtige Ort für Ihre privaten Images, nicht mcr.microsoft.com
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # 3. Docker-Image bauen und in Ihre ACR pushen
+      - name: Build and push container image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          # Der Tag des Images wird für den nächsten Job als Output gespeichert
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
+    
+    # Der Output dieses Jobs macht den Image-Namen für den deploy-Job verfügbar
+    outputs:
+      image: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
+
+  # Zweiter Job: Stellt das neue Image in der Azure Web App bereit
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build # Stellt sicher, dass dieser Job erst nach erfolgreichem 'build' startet
+    
+    steps:
+      # 1. Bei Azure anmelden (DAS IST DER ENTSCHEIDENDE FEHLENDE SCHRITT)
+      # Dieser Schritt authentifiziert den Workflow, damit er Aktionen in Azure durchführen darf
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      # 2. In der Azure Web App bereitstellen
+      # Diese Aktion nutzt die vorherige Anmeldung, um sich zu authentifizieren
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'Product-Information-Generator-Final' # Name Ihrer Web App
+          images: ${{ needs.build.outputs.image }} # Holt den Image-Namen aus dem vorherigen Job
