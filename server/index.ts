@@ -3,6 +3,11 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { azurePerformanceMiddleware } from "./middleware/azure-monitoring";
 
+// Azure Node.js 20 compatibility
+if (typeof globalThis.__dirname === 'undefined') {
+  globalThis.__dirname = process.cwd();
+}
+
 const app = express();
 
 // Azure monitoring middleware (should be first)
