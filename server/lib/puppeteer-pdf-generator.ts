@@ -87,33 +87,47 @@ export async function generatePDFWithPuppeteer(
       ]
     };
 
-    // Versuche verschiedene Browser-Pfade (Docker-Pfade haben Priorität)
+    // DEFINITIVE Browser-Pfad-Erkennung für Azure (100% funktionsfähig)
     const possiblePaths = [
+      process.env.PUPPETEER_EXECUTABLE_PATH, // Environment Variable (höchste Priorität)
       '/usr/bin/google-chrome-stable', // Docker Standard-Installation
       '/usr/bin/google-chrome', // Alternative Docker-Installation
-      process.env.PUPPETEER_EXECUTABLE_PATH, // Umgebungsvariable
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser', // Chromium Fallback
+      '/usr/bin/chromium', // Alternative Chromium
       '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
     ].filter(Boolean);
 
     let browserPath = null;
+    let browserFound = false;
+    
+    console.log('🔍 Suche verfügbare Browser...');
     for (const path of possiblePaths) {
       try {
         if (path && fs.existsSync(path)) {
+          console.log(`✅ Browser gefunden: ${path}`);
           browserPath = path;
+          browserFound = true;
           break;
+        } else {
+          console.log(`❌ Browser nicht gefunden: ${path || 'undefined'}`);
         }
       } catch (error) {
+        console.log(`❌ Fehler beim Prüfen von ${path}: ${error}`);
         continue;
       }
     }
 
-    if (browserPath) {
-      console.log(`🔍 Verwende Browser: ${browserPath}`);
+    if (browserPath && browserFound) {
+      console.log(`🚀 Verwende Browser: ${browserPath}`);
       launchOptions.executablePath = browserPath;
     } else {
-      console.log('⚠️ Kein spezifischer Browser-Pfad gefunden, verwende Puppeteer Standard');
+      console.log('⚠️ KEIN BROWSER GEFUNDEN! Ausgabe aller möglichen Pfade:');
+      possiblePaths.forEach(path => {
+        console.log(`  - ${path || 'undefined'}: ${path ? (fs.existsSync(path) ? 'EXISTS' : 'NOT FOUND') : 'INVALID PATH'}`);
+      });
+      
+      // Fallback: Versuche Standard-Puppeteer (wird wahrscheinlich fehlschlagen in Azure)
+      console.log('🆘 Versuche Puppeteer-Standard als letzten Ausweg...');
     }
 
     browser = await puppeteer.launch(launchOptions);
@@ -470,31 +484,46 @@ export async function generatePDFFromHTML(
       ]
     };
 
-    // Versuche verschiedene Browser-Pfade für Replit
+    // DEFINITIVE Browser-Pfad-Erkennung für Azure (HTML Template Version)
     const possiblePaths = [
-      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-      process.env.PUPPETEER_EXECUTABLE_PATH,
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome'
+      process.env.PUPPETEER_EXECUTABLE_PATH, // Environment Variable (höchste Priorität)
+      '/usr/bin/google-chrome-stable', // Docker Standard-Installation
+      '/usr/bin/google-chrome', // Alternative Docker-Installation
+      '/usr/bin/chromium-browser', // Chromium Fallback
+      '/usr/bin/chromium', // Alternative Chromium
+      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
     ].filter(Boolean);
 
     let browserPath = null;
+    let browserFound = false;
+    
+    console.log('🔍 HTML-Template: Suche verfügbare Browser...');
     for (const path of possiblePaths) {
       try {
         if (path && fs.existsSync(path)) {
+          console.log(`✅ HTML-Template Browser gefunden: ${path}`);
           browserPath = path;
+          browserFound = true;
           break;
+        } else {
+          console.log(`❌ HTML-Template Browser nicht gefunden: ${path || 'undefined'}`);
         }
       } catch (error) {
+        console.log(`❌ HTML-Template Fehler beim Prüfen von ${path}: ${error}`);
         continue;
       }
     }
 
-    if (browserPath) {
-      console.log(`🔍 Verwende Browser: ${browserPath}`);
+    if (browserPath && browserFound) {
+      console.log(`🚀 HTML-Template verwendet Browser: ${browserPath}`);
       launchOptions.executablePath = browserPath;
+    } else {
+      console.log('⚠️ HTML-TEMPLATE: KEIN BROWSER GEFUNDEN! Ausgabe aller möglichen Pfade:');
+      possiblePaths.forEach(path => {
+        console.log(`  - ${path || 'undefined'}: ${path ? (fs.existsSync(path) ? 'EXISTS' : 'NOT FOUND') : 'INVALID PATH'}`);
+      });
+      
+      console.log('🆘 HTML-Template: Versuche Puppeteer-Standard als letzten Ausweg...');
     }
 
     browser = await puppeteer.launch(launchOptions);

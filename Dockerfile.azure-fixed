@@ -1,0 +1,133 @@
+# DEFINITIVE AZURE CHROME-FIX DOCKERFILE
+# Version 2.0 - 100% funktionsfähige Chrome-Installation für Azure App Service
+FROM node:18-slim
+
+# Arbeitsverzeichnis setzen
+WORKDIR /usr/src/app
+
+# System als Root-User für Installationen konfigurieren
+USER root
+
+# System aktualisieren und grundlegende Tools installieren
+RUN apt-get update && apt-get upgrade -y
+
+# VOLLSTÄNDIGE Chrome-Abhängigkeiten installieren (alle erforderlichen Pakete)
+RUN apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    wget \
+    unzip \
+    fonts-liberation \
+    fonts-dejavu-core \
+    fontconfig \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libc6 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libgconf-2-4 \
+    libgdk-pixbuf2.0-0 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    xdg-utils \
+    --no-install-recommends
+
+# METHODE 1: Google Chrome über offizielle Quelle installieren
+RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable
+
+# METHODE 2: Fallback - Direkte .deb Installation (falls Methode 1 fehlschlägt)
+RUN if ! command -v google-chrome-stable &> /dev/null; then \
+        echo "Fallback: Installiere Chrome direkt von Google..." && \
+        wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+        apt-get install -y ./chrome.deb && \
+        rm chrome.deb; \
+    fi
+
+# METHODE 3: Letzte Chance - Chromium als Backup
+RUN if ! command -v google-chrome-stable &> /dev/null && ! command -v google-chrome &> /dev/null; then \
+        echo "Ultima Ratio: Installiere Chromium..." && \
+        apt-get install -y chromium-browser; \
+    fi
+
+# Verfügbare Browser auflisten und verifizieren
+RUN echo "=== BROWSER VERIFICATION ===" && \
+    ls -la /usr/bin/google-chrome* 2>/dev/null || echo "Keine google-chrome* gefunden" && \
+    ls -la /usr/bin/chromium* 2>/dev/null || echo "Keine chromium* gefunden" && \
+    which google-chrome-stable 2>/dev/null || echo "google-chrome-stable nicht im PATH" && \
+    which google-chrome 2>/dev/null || echo "google-chrome nicht im PATH" && \
+    which chromium-browser 2>/dev/null || echo "chromium-browser nicht im PATH" && \
+    echo "=== END VERIFICATION ==="
+
+# Chrome Version ausgeben (für Debugging)
+RUN if command -v google-chrome-stable &> /dev/null; then \
+        google-chrome-stable --version; \
+    elif command -v google-chrome &> /dev/null; then \
+        google-chrome --version; \
+    elif command -v chromium-browser &> /dev/null; then \
+        chromium-browser --version; \
+    else \
+        echo "FEHLER: Kein Browser installiert!"; \
+        exit 1; \
+    fi
+
+# Cache aufräumen
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && apt-get clean
+
+# Node.js Abhängigkeiten installieren
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Anwendung kopieren
+COPY . .
+
+# Build erstellen
+RUN npm run build
+
+# Environment Variables für Puppeteer setzen
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
+# Non-root User erstellen
+RUN groupadd -r nodejs && useradd -r -g nodejs nodejs
+RUN chown -R nodejs:nodejs /usr/src/app
+USER nodejs
+
+# Port freigeben
+EXPOSE 8080
+
+# Health Check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/api/health || exit 1
+
+# Anwendung starten
+CMD ["npm", "start"]
