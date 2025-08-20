@@ -4,7 +4,7 @@ export async function generatePDFFromSessionId(sessionId: string): Promise<Buffe
   try {
     const puppeteer = require('puppeteer');
     const fs = require('fs');
-    
+
     // Fetch session data
     const session = await storage.getProductInfoSession(sessionId);
     if (!session) {
@@ -57,14 +57,14 @@ export async function generatePDFFromSessionId(sessionId: string): Promise<Buffe
     const browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
-    
+
     // Set viewport for consistent rendering
     await page.setViewport({ width: 1200, height: 800 });
-    
+
     // Get the current URL for the preview page
     const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://your-app-url.replit.app';
     const previewUrl = `${baseUrl}/pdf-preview?session=${sessionId}`;
-    
+
     // Navigate to the PDF preview page
     await page.goto(previewUrl, { 
       waitUntil: 'networkidle0',
@@ -86,7 +86,7 @@ export async function generatePDFFromSessionId(sessionId: string): Promise<Buffe
     await browser.close();
 
     return pdfBuffer;
-    
+
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw new Error('PDF generation failed: ' + (error as Error).message);
