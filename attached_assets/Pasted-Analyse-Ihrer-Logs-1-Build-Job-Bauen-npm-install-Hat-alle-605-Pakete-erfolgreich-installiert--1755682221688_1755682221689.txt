@@ -1,0 +1,41 @@
+Analyse Ihrer Logs
+1. Build-Job (Bauen):
+npm install: Hat alle 605 Pakete erfolgreich installiert.
+npm run build: Ihr Build-Befehl (vite build && esbuild ...) wurde erfolgreich ausgeführt.
+Vite hat das Frontend gebaut (✓ built in 7.72s).
+esbuild hat Ihr Backend kompiliert (dist/index.js 105.3kb).
+actions/upload-artifact@v4: Das gesamte gebaute Projekt wurde erfolgreich als node-app.zip verpackt und für den nächsten Job hochgeladen.
+Fazit Build: Der Code wurde korrekt gebaut und vorbereitet.
+2. Deploy-Job (Bereitstellen):
+actions/download-artifact@v4: Das node-app.zip wurde erfolgreich heruntergeladen.
+azure/webapps-deploy@v3:
+Die Aktion hat sich erfolgreich mit Azure verbunden.
+Die Zeile Successfully deployed web package to App Service. bestätigt, dass der Inhalt der ZIP-Datei erfolgreich in Ihrer App Service Instanz platziert wurde.
+Fazit Deploy: Die gebauten Dateien wurden korrekt auf Azure installiert.
+Die entscheidende Schlussfolgerung
+Das führt uns zu einer sehr wichtigen Erkenntnis:
+Das Problem liegt NICHT in Ihrem GitHub Actions Workflow (CI/CD-Pipeline). Die Pipeline macht exakt das, was sie soll: Sie baut den Code und liefert ihn an Azure aus.
+Das Problem tritt erst NACH der Bereitstellung auf, wenn Azure versucht, Ihre Anwendung zu starten. Wir sind also genau wieder bei den "Laufzeit"-Problemen, die wir zuvor besprochen haben.
+Was jetzt zu tun ist: Fokus auf die Laufzeitumgebung
+Die guten Nachrichten sind, dass wir jetzt die gesamte Build- und Deploy-Kette als Fehlerquelle ausschließen können. Wir müssen uns zu 100% darauf konzentrieren, was innerhalb des Azure-Containers passiert.
+Ihr neuer Aktionsplan:
+1. Überprüfen Sie Ihr start-Skript in package.json:
+Ihr Build-Prozess erstellt ein Verzeichnis namens dist. Ihre finale Anwendung liegt also in dist/index.js. Der Befehl npm start in Ihrer package.json muss darauf verweisen.
+Frage: Wie sieht der "start"-Eintrag im "scripts"-Abschnitt Ihrer package.json aus?
+Er sollte so oder so ähnlich aussehen:
+code
+JSON
+"scripts": {
+  "start": "node dist/index.js"
+}
+Wenn dort etwas anderes steht (z.B. node server/index.ts), wird das fehlschlagen, weil auf dem Server kein TypeScript-Compiler läuft. Es muss die gebaute JavaScript-Datei ausgeführt werden.
+2. Aktivieren Sie die Logs und beobachten Sie den Log-Stream (Wichtigster Schritt!)
+Dies ist der Schritt, der uns die endgültige Antwort geben wird.
+Haben Sie, wie im vorherigen Schritt beschrieben, die Anwendungsprotokollierung in den "App Service-Protokollen" aktiviert?
+Wenn ja, gehen Sie bitte direkt nach einem Deploy zum Log-Stream und beobachten Sie die Ausgabe.
+Posten Sie alles, was dort nach dem Neustart der App erscheint. Wir erwarten jetzt, die echo-Ausgaben aus unserem startup.sh-Skript zu sehen und – höchstwahrscheinlich – eine konkrete Fehlermeldung von Node.js.
+3. Überprüfen Sie erneut Port und Umgebungsvariablen:
+Auch wenn der Build funktioniert, stürzt die App beim Start ab, wenn:
+Der Port falsch ist: Ihre App muss auf process.env.PORT || 8080 lauschen.
+Der API-Key fehlt: Ihre App in Azure unter Konfiguration -> Anwendungseinstellungen den OPENAI_API_KEY hat.
+Zusammenfassend: Ihr CI/CD ist einwandfrei. Der Fehler liegt im Startverhalten Ihrer Anwendung in der Azure-Umgebung. Die Container-Logs aus dem Log-Stream werden uns die genaue Ursache verraten.
