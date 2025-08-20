@@ -1,0 +1,6 @@
+[config]
+# Azure App Service Deployment Configuration
+# Diese Datei steuert das Deployment-Verhalten in Azure App Service
+
+# Verwende das Startup-Skript für die Initialisierung
+command = bash startup.sh

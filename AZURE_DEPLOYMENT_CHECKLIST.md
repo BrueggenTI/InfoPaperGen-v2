@@ -1,115 +1,179 @@
-# ✅ Azure Deployment Checklist
+# 🚀 Azure App Service Deployment Checklist
 
-Verwenden Sie diese Checkliste, um sicherzustellen, dass Ihr Azure-Deployment erfolgreich durchgeführt wird.
+## ✅ Vor dem Deployment
 
-## 📋 Pre-Deployment Checklist
+### 1. Repository Setup
+- [ ] Code ist in GitHub Repository verfügbar
+- [ ] `.github/workflows/main.yml` existiert
+- [ ] `startup.sh` ist ausführbar (`chmod +x startup.sh`)
+- [ ] `azure-deployment-guide.md` wurde gelesen
 
-### Azure-Ressourcen
-- [ ] Azure Container Registry (ACR) erstellt
-- [ ] ACR Admin-Zugriff aktiviert
-- [ ] Container App Environment erstellt
-- [ ] Container App erstellt und konfiguriert
-- [ ] Service Principal mit korrekten Berechtigungen erstellt
-- [ ] Alle Azure-Ressourcen in derselben Resource Group
+### 2. Build Check
+- [ ] `npm run build` läuft erfolgreich durch
+- [ ] `dist/index.js` wurde erstellt
+- [ ] Alle Dependencies sind in `package.json` definiert
 
-### GitHub Repository
-- [ ] Repository erstellt (privat oder öffentlich)
-- [ ] Lokaler Code committed und gepusht
-- [ ] GitHub Actions Workflow-Datei vorhanden (`.github/workflows/azure-deployment.yml`)
+### 3. Environment Variables Check
+- [ ] OpenAI API Key ist verfügbar
+- [ ] `OPENAI_API_KEY` wird im Code korrekt verwendet
+- [ ] Keine Secrets im Code hart codiert
 
-### GitHub Secrets konfiguriert
-- [ ] `ACR_LOGIN_SERVER` (z.B. `myregistry.azurecr.io`)
-- [ ] `ACR_NAME` (z.B. `myregistry`)
-- [ ] `ACR_USERNAME` (aus Azure Portal ACR → Zugriffsschlüssel)
-- [ ] `ACR_PASSWORD` (aus Azure Portal ACR → Zugriffsschlüssel)
-- [ ] `AZURE_CREDENTIALS` (JSON von Service Principal)
-- [ ] `AZURE_CONTAINER_APP_NAME` (Name Ihrer Container App)
-- [ ] `AZURE_RESOURCE_GROUP` (Name Ihrer Resource Group)
+---
 
-### Container App Umgebungsvariablen
-- [ ] `OPENAI_API_KEY` in Azure Container App konfiguriert
-- [ ] Weitere erforderliche Umgebungsvariablen gesetzt
+## 🔧 Azure App Service Konfiguration
 
-## 🚀 Deployment Process
+### 1. App Service Erstellung
+- [ ] **Runtime Stack**: Node.js 18 LTS
+- [ ] **Operating System**: Linux (erforderlich für Chromium)
+- [ ] **Pricing Tier**: Minimum B1 Basic (empfohlen: S1 Standard)
+- [ ] **Region**: Gewählt
 
-### 1. Erstes Deployment
-- [ ] Code-Änderung zu `main`-Branch gepusht
-- [ ] GitHub Actions Workflow erfolgreich ausgeführt
-- [ ] Docker Image in ACR sichtbar
-- [ ] Container App automatisch aktualisiert
+### 2. Application Settings
+In Azure Portal → App Service → Configuration → Application Settings:
 
-### 2. Deployment-Verifikation
-- [ ] Container App läuft (Status: Running)
-- [ ] Health-Endpoint erreichbar (`/api/health`)
-- [ ] Hauptanwendung über Container App URL erreichbar
+```
+OPENAI_API_KEY = sk-proj-... (Ihr OpenAI API Key)
+NODE_ENV = production
+PUPPETEER_EXECUTABLE_PATH = /usr/bin/chromium-browser
+```
+
+### 3. Startup Command
+- [ ] **Startup Command**: `bash startup.sh`
+- [ ] Konfiguration gespeichert (App wird neugestartet)
+
+---
+
+## 🔐 GitHub Actions Setup
+
+### 1. Publish Profile
+- [ ] Azure Portal → App Service → Deployment Center
+- [ ] "Download publish profile" geklickt
+- [ ] `.publishsettings` Datei heruntergeladen
+
+### 2. GitHub Secrets
+- [ ] GitHub Repository → Settings → Secrets and variables → Actions
+- [ ] **Secret Name**: `AZURE_WEBAPP_PUBLISH_PROFILE`
+- [ ] **Secret Value**: Kompletter Inhalt der `.publishsettings` Datei
+- [ ] Secret gespeichert
+
+### 3. Optional: App Name Secret
+- [ ] **Secret Name**: `AZURE_WEBAPP_NAME`
+- [ ] **Secret Value**: Ihr Azure App Service Name
+
+---
+
+## 🚀 Deployment Durchführung
+
+### 1. Code Push
+```bash
+git add .
+git commit -m "Azure deployment ready"
+git push origin main
+```
+
+### 2. GitHub Actions Monitor
+- [ ] GitHub → Actions Tab geöffnet
+- [ ] Workflow "Deploy Node.js App to Azure App Service" überwacht
+- [ ] ✅ Grüner Haken bei erfolgreichem Deployment
+- [ ] ❌ Bei Fehlern: Logs überprüft
+
+### 3. App Funktionalität Test
+- [ ] App erreichbar unter: `https://ihr-app-name.azurewebsites.net`
+- [ ] Frontend lädt korrekt
 - [ ] PDF-Generierung funktioniert
-- [ ] OpenAI-Integration funktioniert
+- [ ] OpenAI Integration funktioniert
 
-## 🔍 Fehlerbehebung
+---
 
-### GitHub Actions Fehler
-- [ ] Alle Secrets korrekt konfiguriert (keine Leerzeichen, richtige Namen)
-- [ ] Service Principal hat ausreichende Berechtigungen
-- [ ] ACR-Anmeldeinformationen sind korrekt
+## 🐛 Troubleshooting Guide
 
-### Container App Fehler
-- [ ] Image-Tag in Container App korrekt
-- [ ] Port-Konfiguration ist 8080
-- [ ] Ingress ist aktiviert und external
-- [ ] Umgebungsvariablen sind gesetzt
+### Häufige Probleme und Lösungen
 
-### Anwendungsfehler
-- [ ] `OPENAI_API_KEY` ist korrekt gesetzt
-- [ ] Chrome/Puppeteer funktioniert (PDF-Generierung)
-- [ ] Logs in Azure Portal überprüft
+#### ❌ "Could not find Chrome/Chromium"
+**Ursache**: Chromium nicht installiert oder falscher Pfad
+**Lösung**:
+1. Startup Command überprüfen: `bash startup.sh`
+2. Azure Portal → Log stream prüfen
+3. Linux als OS bestätigen
 
-## 📊 Monitoring und Wartung
+#### ❌ "OpenAI API Key not found"
+**Ursache**: Environment Variable nicht gesetzt
+**Lösung**:
+1. App Service → Configuration → Application Settings
+2. `OPENAI_API_KEY` hinzufügen
+3. Save & Restart
 
-### Laufende Überwachung
-- [ ] Azure Container App Logs regelmäßig überprüft
-- [ ] GitHub Actions Status überwachen
-- [ ] Performance-Metriken beobachten
+#### ❌ "Module not found" Fehler
+**Ursache**: Dependencies nicht korrekt installiert
+**Lösung**:
+1. `package.json` überprüfen
+2. GitHub Actions Logs prüfen
+3. Build-Schritt überprüfen
 
-### Updates und Deployments
-- [ ] Jeder Push zu `main` löst automatisches Deployment aus
-- [ ] Rolling Updates funktionieren ohne Downtime
-- [ ] Rollback-Strategie definiert
+#### ❌ GitHub Actions schlägt fehl
+**Ursache**: Publish Profile oder Secrets falsch
+**Lösung**:
+1. Publish Profile neu herunterladen
+2. Gesamten `.publishsettings` Inhalt als Secret
+3. Secret Name exakt: `AZURE_WEBAPP_PUBLISH_PROFILE`
 
-## 🔧 Hilfreiche Befehle
+---
 
-### Azure CLI Befehle
-```bash
-# Container App Logs anzeigen
-az containerapp logs show --name [APP_NAME] --resource-group [RG_NAME] --follow
+## 📊 Nach dem Deployment
 
-# Container App Status überprüfen
-az containerapp show --name [APP_NAME] --resource-group [RG_NAME]
+### 1. Monitoring aktivieren
+- [ ] Azure Portal → App Service → Log stream
+- [ ] Application Insights aktiviert (optional)
+- [ ] Health Check konfiguriert
 
-# Umgebungsvariable setzen
-az containerapp update --name [APP_NAME] --resource-group [RG_NAME] --set-env-vars OPENAI_API_KEY=your-key
-```
+### 2. Performance Check
+- [ ] App Ladezeiten geprüft
+- [ ] PDF-Generierung Geschwindigkeit getestet
+- [ ] Memory Usage überwacht
 
-### Lokale Tests
-```bash
-# Docker Image lokal bauen und testen
-docker build -t product-info-generator .
-docker run -p 8080:8080 -e OPENAI_API_KEY=your-key product-info-generator
+### 3. Security Check
+- [ ] HTTPS aktiviert (Standard in Azure)
+- [ ] Custom Domain konfiguriert (optional)
+- [ ] SSL Zertifikat aktiv
 
-# Mit Docker Compose testen
-docker-compose -f docker-compose.azure.yml up
-```
+---
 
-## 📞 Support-Ressourcen
+## 🔄 Wartung und Updates
 
-- **Azure Container Apps Dokumentation**: https://docs.microsoft.com/en-us/azure/container-apps/
-- **GitHub Actions Dokumentation**: https://docs.github.com/en/actions
-- **Azure CLI Referenz**: https://docs.microsoft.com/en-us/cli/azure/containerapp
+### Automatische Deployments
+- [x] Bei jedem Push zu `main` Branch
+- [x] GitHub Actions Workflow aktiv
+- [x] Deployment Status Monitoring
 
-## ✅ Erfolg!
+### Environment Variables Update
+1. Azure Portal → App Service → Configuration
+2. Application Settings ändern
+3. Save (App wird automatisch neugestartet)
 
-Wenn alle Checkboxen abgehakt sind, läuft Ihre Anwendung erfolgreich auf Azure mit automatischem CI/CD über GitHub Actions!
+### Code Updates
+1. Lokale Änderungen vornehmen
+2. `git push origin main`
+3. Automatisches Deployment via GitHub Actions
 
-**Wichtige URLs:**
-- 🌐 **Ihre App**: [Von Azure Container App URL]
-- 📊 **GitHub Actions**: `https://github.com/[USERNAME]/[REPO]/actions`
-- 🔧 **Azure Portal**: `https://portal.azure.com`
+---
+
+## ✅ Deployment erfolgreich!
+
+Nach erfolgreichem Setup haben Sie:
+- ✅ Automatisches CI/CD Pipeline via GitHub Actions
+- ✅ Skalierbare Azure App Service Infrastruktur
+- ✅ Sichere OpenAI API Key Verwaltung
+- ✅ Funktionsfähige Puppeteer PDF-Generierung
+- ✅ Production-ready Node.js Anwendung
+- ✅ Monitoring und Logging Setup
+
+**🎉 Ihre App ist jetzt produktiv und automatisch deployable!**
+
+---
+
+## 📞 Support Ressourcen
+
+- **Azure Dokumentation**: [App Service für Node.js](https://docs.microsoft.com/azure/app-service/)
+- **GitHub Actions**: [Azure Web Apps Deploy](https://github.com/Azure/webapps-deploy)
+- **Puppeteer Troubleshooting**: [Azure Guide](https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md)
+- **OpenAI API**: [Dokumentation](https://platform.openai.com/docs)

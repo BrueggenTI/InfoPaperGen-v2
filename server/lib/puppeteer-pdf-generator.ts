@@ -87,13 +87,13 @@ export async function generatePDFWithPuppeteer(
       ]
     };
 
-    // DEFINITIVE Browser-Pfad-Erkennung für Azure (100% funktionsfähig)
+    // DEFINITIVE Browser-Pfad-Erkennung für Azure App Service (100% funktionsfähig)
     const possiblePaths = [
       process.env.PUPPETEER_EXECUTABLE_PATH, // Environment Variable (höchste Priorität)
+      '/usr/bin/chromium-browser', // Azure App Service Standard-Installation
+      '/usr/bin/chromium', // Alternative Chromium für Azure
       '/usr/bin/google-chrome-stable', // Docker Standard-Installation
       '/usr/bin/google-chrome', // Alternative Docker-Installation
-      '/usr/bin/chromium-browser', // Chromium Fallback
-      '/usr/bin/chromium', // Alternative Chromium
       '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
     ].filter(Boolean);
 
