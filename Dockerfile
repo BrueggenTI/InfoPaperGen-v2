@@ -90,4 +90,4 @@ USER nodejs
 EXPOSE 8080
 
 # Schritt 13: Startbefehl definieren
-CMD [ "node", "dist/server/index.js" ]
+CMD [ "node", "dist/index.js" ]

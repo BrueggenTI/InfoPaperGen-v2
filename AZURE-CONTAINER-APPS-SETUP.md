@@ -18,7 +18,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Startbefehl für gebaute Anwendung
-CMD [ "node", "dist/server/index.js" ]
+CMD [ "node", "dist/index.js" ]
 ```
 
 ## 🚀 GitHub Actions Workflow
