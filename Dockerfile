@@ -1,93 +1,110 @@
-# Schritt 1: Basis-Image festlegen
-# Wir verwenden ein aktuelles, schlankes Node.js-Image für Azure Container Apps
+# =================================================================
+# Stufe 1: "Builder"
+# Diese Stufe ist eine temporäre Bau-Werkstatt. Ihr einziger Zweck
+# ist es, Ihre Anwendung mit ALLEN Werkzeugen zu bauen (npm run build).
+# =================================================================
+FROM node:20-slim AS builder
+
+# Arbeitsverzeichnis für den Bauprozess
+WORKDIR /app
+
+# Zuerst die package.json kopieren, um den Docker-Layer-Cache zu nutzen
+COPY package*.json ./
+
+# Alle Abhängigkeiten installieren, die zum Bauen benötigt werden (inkl. devDependencies)
+RUN npm install
+
+# Den gesamten restlichen Quellcode kopieren
+COPY . .
+
+# Den Build-Befehl ausführen. Das Ergebnis ist ein fertiger 'dist'-Ordner.
+RUN npm run build
+
+
+# =================================================================
+# Stufe 2: "Final"
+# Diese Stufe ist das finale, schlanke Image, das in Azure laufen wird.
+# Es enthält KEINE Build-Werkzeuge mehr, nur die fertige App.
+# =================================================================
 FROM node:20-slim
 
-# Schritt 2: Root-Benutzer für Paketinstallation
+# Root-Benutzer für die Installation von Chrome
 USER root
 
-# Schritt 3: Systemabhängigkeiten für Puppeteer installieren
-# Dies ist der entscheidende Teil, der Chrome und alle Abhängigkeiten installiert.
+# Installiert NUR die System-Abhängigkeiten, die Chrome zum Laufen benötigt
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
     ca-certificates \
-    procps \
-    libxss1 \
+    fonts-liberation \
     libasound2 \
-    libnss3 \
     libatk-bridge2.0-0 \
-    libgtk-3-0 \
-    libgbm-dev \
-    libxshmfence-dev \
-    libxdamage-dev \
-    libxfixes-dev \
-    libxrandr-dev \
-    libxcomposite-dev \
     libatk1.0-0 \
+    libcairo2 \
     libcups2 \
     libdbus-1-3 \
-    libatspi2.0-0 \
-    fonts-liberation \
-    libcairo2 \
     libexpat1 \
     libfontconfig1 \
     libgbm1 \
     libgcc1 \
     libglib2.0-0 \
+    libgtk-3-0 \
     libnspr4 \
+    libnss3 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
     libstdc++6 \
     libx11-6 \
     libx11-xcb1 \
     libxcb1 \
+    libxcomposite1 \
     libxcursor1 \
+    libxdamage1 \
     libxext6 \
+    libxfixes3 \
     libxi6 \
+    libxrandr2 \
     libxrender1 \
+    libxss1 \
     libxtst6 \
     lsb-release \
+    wget \
     xdg-utils \
-    --no-install-recommends
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-# Schritt 4: Google Chrome Signing Key und Repository hinzufügen
+# Installiert Google Chrome selbst
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-
-# Schritt 5: Google Chrome installieren
-RUN apt-get update \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
     && apt-get install -y google-chrome-stable --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Schritt 6: Arbeitsverzeichnis einrichten (Azure Container Apps Standard)
+# Arbeitsverzeichnis für die fertige App
 WORKDIR /app
 
-# Schritt 6.1: Umgebungsvariable für Puppeteer setzen
+# Puppeteer-Umgebungsvariablen für die Laufzeit
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-# Schritt 7: Zuerst alle Abhängigkeiten installieren (inkl. devDependencies für Build)
+# package.json und package-lock.json kopieren
 COPY package*.json ./
-RUN npm ci
 
-# Schritt 8: Quellcode kopieren und Projekt builden
-COPY . .
-RUN npm run build
+# Installiert NUR die Laufzeit-Abhängigkeiten (keine devDependencies)
+RUN npm install --omit=dev
 
-# Schritt 9: Nur Production-Abhängigkeiten installieren
-RUN npm ci --only=production && npm cache clean --force
+# Kopiert den fertigen 'dist'-Ordner aus der "Builder"-Stufe
+COPY --from=builder /app/dist ./dist
+# Kopiert den 'public'-Ordner (falls benötigt von der App)
+COPY --from=builder /app/public ./public
 
-# Schritt 10: Nicht-root-Benutzer für Sicherheit erstellen
-RUN groupadd -g 1001 -r nodejs && \
-    useradd -r -g nodejs -u 1001 nodejs
+# Sicherheitsmaßnahme: Einen nicht-privilegierten Benutzer erstellen
+RUN useradd --system --uid 1001 --gid 0 appuser
+RUN chown -R appuser:0 /app
 
-# Schritt 11: Ordnerrechte setzen
-RUN chown -R nodejs:nodejs /app
-USER nodejs
+# Zum nicht-privilegierten Benutzer wechseln
+USER appuser
 
-# Schritt 12: Port freigeben, auf dem die App lauscht
-# Azure Container Apps leitet den externen Traffic automatisch an diesen Port weiter.
+# Den Port freigeben, auf dem die App lauscht
 EXPOSE 8080
 
-# Schritt 13: Startbefehl definieren
-CMD [ "node", "dist/index.js" ]
+# Der finale Startbefehl für die gebaute Anwendung
+CMD ["node", "dist/index.js"]
