@@ -87,14 +87,14 @@ export async function generatePDFWithPuppeteer(
       ]
     };
 
-    // Versuche verschiedene Browser-Pfade
+    // Versuche verschiedene Browser-Pfade (Docker-Pfade haben Priorität)
     const possiblePaths = [
-      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-      process.env.PUPPETEER_EXECUTABLE_PATH,
+      '/usr/bin/google-chrome-stable', // Docker Standard-Installation
+      '/usr/bin/google-chrome', // Alternative Docker-Installation
+      process.env.PUPPETEER_EXECUTABLE_PATH, // Umgebungsvariable
       '/usr/bin/chromium-browser',
       '/usr/bin/chromium',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome'
+      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
     ].filter(Boolean);
 
     let browserPath = null;

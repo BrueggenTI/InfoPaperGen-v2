@@ -3,6 +3,7 @@ import { storage } from "../storage";
 export async function generatePDFFromSessionId(sessionId: string): Promise<Buffer> {
   try {
     const puppeteer = require('puppeteer');
+    const fs = require('fs');
     
     // Fetch session data
     const session = await storage.getProductInfoSession(sessionId);
@@ -10,7 +11,8 @@ export async function generatePDFFromSessionId(sessionId: string): Promise<Buffe
       throw new Error('Session not found');
     }
 
-    const browser = await puppeteer.launch({
+    // Browser-Konfiguration mit Docker-optimierten Einstellungen
+    const launchOptions: any = {
       headless: true,
       args: [
         '--no-sandbox',
@@ -19,9 +21,40 @@ export async function generatePDFFromSessionId(sessionId: string): Promise<Buffe
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-default-apps',
+        '--disable-web-security'
       ]
-    });
+    };
+
+    // Versuche Browser-Pfade für Docker-Umgebung
+    const possiblePaths = [
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome',
+      process.env.PUPPETEER_EXECUTABLE_PATH,
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium'
+    ].filter(Boolean);
+
+    let browserPath = null;
+    for (const path of possiblePaths) {
+      try {
+        if (path && fs.existsSync(path)) {
+          browserPath = path;
+          break;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+
+    if (browserPath) {
+      console.log(`🔍 PDF-Service verwendet Browser: ${browserPath}`);
+      launchOptions.executablePath = browserPath;
+    }
+
+    const browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     

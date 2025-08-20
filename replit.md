@@ -34,7 +34,7 @@ The application is built as a full-stack JavaScript application following a clea
     - **Conditions & Notes**: Features a dedicated section for product type selection, automatic shelf-life calculation, and generation of storage conditions, allergy advice, and preparation instructions based on product type.
     - **Environment Management**: Robust environment variable management for sensitive data like API keys.
     - **Performance Optimizations**: Implemented useMemo and useCallback hooks, optimized TanStack Query, HTTP caching headers, optimized Express middleware, and reduced Puppeteer wait times. Production build optimized for size and performance.
-    - **Deployment Readiness**: Production-ready Docker containerization with multi-stage build, Puppeteer compatibility, security best practices, and Azure App Service readiness. Comprehensive error handling and robust API validation implemented for production environments.
+    - **Deployment Readiness**: Production-ready Docker containerization with multi-stage build, complete Google Chrome installation for Puppeteer compatibility, security best practices, and Azure App Service readiness. Comprehensive error handling and robust API validation implemented for production environments. Docker configuration fixed for "Could not find Chrome" errors.
 
 ### External Dependencies
 - **OpenAI**: Used for advanced image recognition (nutrition extraction) and sophisticated natural language processing for ingredient translation.
