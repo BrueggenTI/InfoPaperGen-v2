@@ -1,20 +1,72 @@
+# .dockerignore für optimierte Docker Builds
+
+# Node.js
 node_modules
-npm-debug.log
-.git
-.gitignore
-README.md
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment files
 .env
-.nyc_output
-coverage
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.azure.example
+
+# IDE files
 .vscode
 .idea
-*.md
-client/src
-attached_assets/*.png
-attached_assets/*.jpg
-attached_assets/*.pdf
-attached_assets/*.doc
-attached_assets/*.txt
-*.log
+*.swp
+*.swo
+*~
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Development files
+*.md
+!replit.md
+azure-deployment-scripts
+attached_assets
+test-*.pdf
+*.pdf
+
+# Build artifacts (außer dist)
+coverage
+*.tgz
+*.tar.gz
+
+# Logs
+logs
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary folders
+.tmp
+.temp
+
+# Azure-specific ignores
+azure-*.md
+BUILD.md
+DEPLOYMENT-*.md
+deployment-*.md

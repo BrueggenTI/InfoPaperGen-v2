@@ -1,0 +1,50 @@
+# Docker Compose für lokale Azure-Entwicklung und Tests
+# Simuliert Azure Container App Umgebung für lokale Entwicklung
+
+version: '3.8'
+
+services:
+  product-info-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WEBSITES_ENABLE_APP_SERVICE_STORAGE=false
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    volumes:
+      # Azure Container Apps haben ein Read-only Dateisystem, daher keine Volumes für Produktion
+      - /tmp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Ressourcenbegrenzungen ähnlich Azure Container Apps
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+  # Nginx als Reverse Proxy (optional für lokale Tests)
+  nginx-proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - product-info-app
+    profiles:
+      - proxy # Aktivieren mit: docker-compose --profile proxy up
