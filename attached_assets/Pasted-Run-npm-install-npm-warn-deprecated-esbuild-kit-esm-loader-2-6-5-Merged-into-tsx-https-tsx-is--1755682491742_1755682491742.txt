@@ -1,0 +1,70 @@
+Run npm install
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+
+added 605 packages, and audited 606 packages in 21s
+
+70 packages are looking for funding
+  run `npm fund` for details
+
+11 vulnerabilities (3 low, 8 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --bundle --platform=node --outdir=dist --format=esm --external:puppeteer --external:openai
+
+vite v5.4.19 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2105 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                         0.63 kB │ gzip:   0.38 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+../dist/public/assets/Nutri_Score_1_1753880672878-BVoGxOE9.jpg    7.26 kB
+../dist/public/assets/Nutri_Score_5_1753880672882-DSiSfLBb.jpg    7.34 kB
+../dist/public/assets/Nutri_Score_2_1753880672879-BbX9zZu0.jpg    7.61 kB
+../dist/public/assets/Nutri_Score_3_1753880672880-BODj4BCL.jpg    7.61 kB
+../dist/public/assets/Nutri_Score_4_1753880672881-Cc7s1hEC.jpg    7.92 kB
+../dist/public/assets/brueggen-logo-SWqDt89_.png                249.20 kB
+../dist/public/assets/index-BWhK3abd.css                         72.03 kB │ gzip:  12.31 kB
+../dist/public/assets/purify.es-BFmuJLeH.js                      21.93 kB │ gzip:   8.62 kB
+../dist/public/assets/index.es-C9G72PaX.js                      150.53 kB │ gzip:  51.48 kB
+../dist/public/assets/html2canvas.esm-CBrSDip1.js               201.42 kB │ gzip:  48.03 kB
+../dist/public/assets/index-DCYXbt4K.js                         889.29 kB │ gzip: 276.54 kB
+✓ built in 7.79s
+Error: R] Could not resolve "@babel/preset-typescript/package.json"
+
+    node_modules/@babel/core/lib/config/files/module-types.js:151:40:
+      151 │ ...t packageJson = require("@babel/preset-typescript/package.json");
+          ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@babel/preset-typescript/package.json" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle. You can also surround this "require" call with a try/catch block to handle this failure at run-time instead of bundle-time.
+
+Error: R] Could not resolve "../pkg"
+
+    node_modules/lightningcss/node/index.js:17:27:
+      17 │   module.exports = require(`../pkg`);
+         ╵                            ~~~~~~~~
+
+Warning: G] The glob pattern require("../lightningcss.*.node") did not match any files [empty-glob]
+
+    node_modules/lightningcss/node/index.js:22:29:
+      22 │ ...dule.exports = require(`../lightningcss.${parts.join('-')}.node`);
+         ╵                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1 warning and 2 errors
+Error: Process completed with exit code 1.
