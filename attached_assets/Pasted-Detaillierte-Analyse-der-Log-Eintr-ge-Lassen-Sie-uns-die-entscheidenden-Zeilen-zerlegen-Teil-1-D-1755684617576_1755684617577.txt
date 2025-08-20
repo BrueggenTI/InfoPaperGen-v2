@@ -1,0 +1,75 @@
+Detaillierte Analyse der Log-Einträge
+Lassen Sie uns die entscheidenden Zeilen zerlegen:
+Teil 1: Die Plattform-Startphase
+NodeJS Version : v20.19.3: Die korrekte Node.js-Version wird geladen.
+Writing output script to '/opt/startup/startup.sh': Azure erstellt sein eigenes, internes Startskript.
+PATH="$PATH:/home/site/wwwroot" ./startup.sh: Wichtige Erkenntnis: Das System findet Ihr startup.sh-Skript im Hauptverzeichnis (wwwroot) und versucht, es auszuführen. Das ist gut!
+Teil 2: Ihr benutzerdefiniertes Startskript wird ausgeführt
+🚀 Azure App Service Startup Script gestartet...: Ihre echo-Befehle erscheinen! Das bestätigt zu 100%, dass Ihr Skript ausgeführt wird.
+⚠️ KEIN BROWSER GEFUNDEN in Azure App Service!: Ihr Skript sucht nach vorinstallierten Browsern und findet, wie erwartet, keinen.
+🔄 Setze Puppeteer auf Standard-Download-Modus...: Ihr Skript versucht nun, den Browser zur Laufzeit herunterzuladen.
+sh: 1: puppeteer: not found: Erstes Problem (Nebenproblem): Der Versuch, den Browser zur Laufzeit mit dem puppeteer-Befehl herunterzuladen, schlägt fehl. Das liegt daran, dass dieser Befehl in der Azure-Umgebung nicht direkt im PATH verfügbar ist. Selbst wenn es funktionieren würde, wäre es langsam und ineffizient.
+Teil 3: Der Absturz der Node.js-Anwendung
+🚀 Starte Node.js Anwendung...
+✅ Starte: node dist/index.js
+Error: Dynamic require of "path" is not supported: Zweites Problem (Das Hauptproblem): Das ist der eigentliche "Killer-Fehler", der Ihre App zum Absturz bringt.
+Die beiden Kernprobleme und ihre Lösungen
+Problem #1: Der Absturz durch Dynamic require
+Was passiert hier?
+Ihr Build-Prozess mit esbuild (vite build && esbuild server/index.ts ...) ist so konfiguriert, dass er modernen ES-Modul (ESM) Code (--format=esm) erzeugt. Ihre Anwendung verwendet jedoch Abhängigkeiten (der Stacktrace zeigt auf multer und mime-types), die intern noch das ältere CommonJS-Modulsystem (require()) verwenden. Der esbuild-Bundler kann mit bestimmten require-Aufrufen in diesen alten Paketen nicht umgehen und erzeugt Code, der zur Laufzeit abstürzt.
+Die Lösung: Passen Sie das Build-Format an
+Die einfachste und stabilste Lösung besteht darin, esbuild anzuweisen, ein Format zu erstellen, das vollständig mit den älteren require-Anweisungen kompatibel ist.
+Öffnen Sie Ihre package.json-Datei.
+Finden Sie die Zeile für Ihr "build"-Skript.
+Ändern Sie --format=esm zu --format=cjs (CommonJS).
+Vorher:
+code
+JSON
+"build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"
+Nachher:
+code
+JSON
+"build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=dist"
+Dadurch wird esbuild eine index.js-Datei erstellen, die problemlos mit multer und anderen CommonJS-Paketen funktioniert. Dies wird den Absturz beheben.
+Problem #2: Fehlendes Chromium für Puppeteer
+Was passiert hier?
+Ihr Skript versucht, Chromium zur Laufzeit zu installieren, was fehlschlägt. Der richtige Ansatz für eine Code-Bereitstellung ist, den Browser während des Build-Prozesses in GitHub Actions herunterzuladen und ihn zusammen mit Ihrem Code nach Azure zu deployen.
+Die Lösung: Verwenden Sie ein postinstall-Skript
+package.json anpassen: Fügen Sie ein postinstall-Skript hinzu. Dieses Skript wird von npm automatisch nach npm install ausgeführt.
+code
+JSON
+"scripts": {
+  "start": "node dist/index.js",
+  "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=dist",
+  "postinstall": "puppeteer browsers install chrome"
+}
+Wenn jetzt Ihr GitHub-Workflow npm install ausführt, wird Puppeteer automatisch den kompatiblen Chrome-Browser in das node_modules-Verzeichnis herunterladen. Dieser Browser wird dann mit allem anderen in die ZIP-Datei gepackt und nach Azure hochgeladen.
+startup.sh drastisch vereinfachen: Da der Browser nun bereits vorhanden ist, brauchen wir die ganze komplexe Logik in Ihrem Startskript nicht mehr. Das Skript muss nur noch die Anwendung starten.
+Ihre neue, einfache startup.sh:
+code
+Bash
+#!/bin/bash
+echo "--- Starting App Service ---"
+echo "Starting Node.js application..."
+npm start
+Das ist alles! Sauber, einfach und robust.
+Code-Anpassung für Puppeteer: Stellen Sie sicher, dass Ihr Puppeteer-Code keinen executablePath mehr angibt. Wenn Sie diesen Parameter weglassen, findet Puppeteer den von ihm selbst heruntergeladenen Browser automatisch.
+Korrekter Code:
+code
+JavaScript
+const browser = await puppeteer.launch({
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+  // KEIN executablePath hier!
+});
+Ihr vollständiger Aktionsplan
+package.json bearbeiten:
+Ändern Sie im build-Skript --format=esm zu --format=cjs.
+Fügen Sie das "postinstall": "puppeteer browsers install chrome"-Skript hinzu.
+startup.sh ersetzen:
+Ersetzen Sie den Inhalt Ihrer startup.sh mit der oben gezeigten, einfachen Version.
+Ihren Anwendungscode überprüfen:
+Entfernen Sie die Option executablePath aus Ihrem puppeteer.launch()-Aufruf.
+Änderungen committen und pushen:
+git add .
+git commit -m "Fix build format and puppeteer installation"
+git push
