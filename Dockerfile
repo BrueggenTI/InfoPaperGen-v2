@@ -35,8 +35,10 @@ FROM node:20-slim
 # Root-Benutzer für die Installation von Chrome
 USER root
 
-# Installiert ALLE benötigten Tools UND Chrome-Abhängigkeiten
+# Installiert ZUERST die benötigten Tools, dann Chrome-Abhängigkeiten
 RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
     ca-certificates \
     fonts-liberation \
     libasound2 \
@@ -70,8 +72,6 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     lsb-release \
-    wget \
-    gnupg \
     curl \
     xdg-utils \
     --no-install-recommends \
