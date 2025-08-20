@@ -1,217 +1,59 @@
+name: Build and deploy Node.js app to Azure Web App - Product-Information-Generator
 
-# GitHub Actions Workflow für automatisches Azure Container Deployment
-# Optimierte Version für zuverlässige Produktions-Deployments
-
-name: Build and Deploy to Azure Container App
-
-# Trigger: Workflow startet bei Push auf main-Branch oder manuell
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: # Ermöglicht manuelles Triggern
-
-env:
-  # Container Registry Konfiguration
-  REGISTRY_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
-  REGISTRY_USERNAME: ${{ secrets.ACR_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
-
-  # Azure Container App Konfiguration
-  AZURE_CONTAINER_APP_NAME: ${{ secrets.AZURE_CONTAINER_APP_NAME }}
-  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-
-  # Docker Image Konfiguration
-  IMAGE_NAME: product-info-generator
-  NODE_VERSION: '18'
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
-    # 1. Repository Code auschecken
-    - name: 🔄 Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
 
-    # 2. Node.js Setup für lokale Tests
-    - name: 🔧 Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-    # 3. Dependencies installieren und Build testen
-    - name: 📦 Install Dependencies and Test Build
-      run: |
-        npm ci --production=false
-        npm run build
-        echo "✅ Build erfolgreich getestet"
+      - name: npm install, build, and test
+        run: |
+          npm ci
+          npm run build --if-present
 
-    # 4. Docker Buildx für erweiterte Build-Features einrichten
-    - name: 🐳 Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
 
-    # 5. Bei Azure Container Registry anmelden
-    - name: 🔐 Login to Azure Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY_LOGIN_SERVER }}
-        username: ${{ env.REGISTRY_USERNAME }}
-        password: ${{ env.REGISTRY_PASSWORD }}
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: node-app
+          path: release.zip
 
-    # 6. Docker Image mit Cache-Optimierung erstellen und pushen
-    - name: 🚀 Build and Push Docker Image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: |
-          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
-          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:build-${{ github.run_number }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        platforms: linux/amd64
-        build-args: |
-          NODE_ENV=production
-          BUILDKIT_INLINE_CACHE=1
-
-    # 7. Bei Azure anmelden mit Service Principal
-    - name: 🔑 Azure Login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    # 8. Azure Container App mit neuem Image aktualisieren
-    - name: 🚀 Deploy to Azure Container App
-      uses: azure/container-apps-deploy-action@v2
-      with:
-        acrName: ${{ secrets.ACR_NAME }}
-        containerAppName: ${{ env.AZURE_CONTAINER_APP_NAME }}
-        resourceGroup: ${{ env.AZURE_RESOURCE_GROUP }}
-        imageToDeploy: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        targetPort: 8080
-        ingress: external
-        environmentVariables: |
-          NODE_ENV=production
-          PORT=8080
-
-    # 9. Deployment-Verifikation
-    - name: ✅ Verify Deployment
-      run: |
-        echo "🎉 Deployment erfolgreich abgeschlossen!"
-        echo "📦 Image: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-        echo "🚀 Container App: ${{ env.AZURE_CONTAINER_APP_NAME }}"
-        echo "🏷️ Build Number: ${{ github.run_number }}"
-        echo "🔗 Commit SHA: ${{ github.sha }}"
-
-    # 10. Container App URL ausgeben
-    - name: 🌐 Get Application URL
-      run: |
-        APP_URL=$(az containerapp show \
-          --name ${{ env.AZURE_CONTAINER_APP_NAME }} \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-          --query properties.configuration.ingress.fqdn \
-          --output tsv)
-        echo "🌍 Application URL: https://$APP_URL"
-
-    # 11. Health Check (optional)
-    - name: 🏥 Health Check
-      run: |
-        APP_URL=$(az containerapp show \
-          --name ${{ env.AZURE_CONTAINER_APP_NAME }} \
-          --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-          --query properties.configuration.ingress.fqdn \
-          --output tsv)
-        
-        echo "⏳ Warte 60 Sekunden für Container-Startup..."
-        sleep 60
-        
-        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://$APP_URL" || echo "000")
-        
-        if [ "$HTTP_STATUS" -eq 200 ]; then
-          echo "✅ Health Check erfolgreich - App ist erreichbar"
-        else
-          echo "⚠️ Health Check Status: $HTTP_STATUS - App möglicherweise noch nicht bereit"
-        fi
-
-  # Benachrichtigung bei Fehlern (optional)
-  notify-on-failure:
-    needs: build-and-deploy
+  deploy:
     runs-on: ubuntu-latest
-    if: failure()
-    steps:
-    - name: 📢 Deployment Failed Notification
-      run: |
-        echo "❌ Deployment fehlgeschlagen!"
-        echo "🔍 Überprüfen Sie die Logs in den vorherigen Schritten"
-        echo "📋 Mögliche Ursachen:"
-        echo "   - Docker Build Fehler"
-        echo "   - Azure Credentials Problem"
-        echo "   - Container App Konfiguration"
-        echo "   - Chromium/Puppeteer Installation"
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-# ==============================================================================
-# 📋 BENÖTIGTE GITHUB SECRETS
-# ==============================================================================
-# 
-# Die folgenden Secrets müssen in den GitHub Repository-Einstellungen 
-# (Settings → Secrets and variables → Actions) erstellt werden:
-#
-# 🔐 CONTAINER REGISTRY SECRETS:
-# - ACR_LOGIN_SERVER: Login-Server-URL (z.B. myregistry.azurecr.io)
-# - ACR_NAME: Name der Container Registry (ohne .azurecr.io)
-# - ACR_USERNAME: Benutzername für die Container Registry
-# - ACR_PASSWORD: Passwort für die Container Registry
-#
-# 🔑 AZURE DEPLOYMENT SECRETS:
-# - AZURE_CREDENTIALS: JSON mit Service Principal Credentials:
-#   {
-#     "clientId": "<service-principal-client-id>",
-#     "clientSecret": "<service-principal-client-secret>",
-#     "subscriptionId": "<azure-subscription-id>",
-#     "tenantId": "<azure-tenant-id>"
-#   }
-# - AZURE_CONTAINER_APP_NAME: Name der Azure Container App
-# - AZURE_RESOURCE_GROUP: Name der Azure Resource Group
-#
-# 🔧 ANWENDUNGS-SECRETS (in Azure Container App):
-# - OPENAI_API_KEY: OpenAI API-Schlüssel für KI-Funktionen
-#
-# ==============================================================================
-# 🛠️ AZURE SETUP COMMANDS
-# ==============================================================================
-#
-# 1. Service Principal erstellen:
-# az ad sp create-for-rbac \
-#   --name "github-actions-product-info" \
-#   --role "Contributor" \
-#   --scopes "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>" \
-#   --sdk-auth
-#
-# 2. Container Registry erstellen:
-# az acr create \
-#   --resource-group <RESOURCE_GROUP> \
-#   --name <ACR_NAME> \
-#   --sku Basic
-#
-# 3. Container App Environment erstellen:
-# az containerapp env create \
-#   --name <ENV_NAME> \
-#   --resource-group <RESOURCE_GROUP> \
-#   --location <LOCATION>
-#
-# 4. Container App erstellen:
-# az containerapp create \
-#   --name <APP_NAME> \
-#   --resource-group <RESOURCE_GROUP> \
-#   --environment <ENV_NAME> \
-#   --image nginx:latest \
-#   --target-port 8080 \
-#   --ingress external
-#
-# ==============================================================================
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
+
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'Product-Information-Generator'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          package: .
