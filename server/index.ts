@@ -90,12 +90,12 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Azure App Service and Docker compatibility: Default to 8080, fallback to 5000 for Replit
   // this serves both the API and the client.
-  const port = parseInt(process.env.PORT || (process.env.NODE_ENV === 'production' ? '8080' : '5000'), 10);
+  const PORT = process.env.PORT || process.env.WEBSITES_PORT || 8080;
   server.listen({
-    port,
+    port: parseInt(PORT, 10),
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`serving on port ${PORT}`);
   });
 })();

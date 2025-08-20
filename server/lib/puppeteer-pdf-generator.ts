@@ -87,13 +87,15 @@ export async function generatePDFWithPuppeteer(
       ]
     };
 
-    // DEFINITIVE Browser-Pfad-Erkennung für Azure App Service (100% funktionsfähig)
+    // AZURE APP SERVICE Browser-Pfad-Erkennung (Code-Bereitstellung)
     const possiblePaths = [
       process.env.PUPPETEER_EXECUTABLE_PATH, // Environment Variable (höchste Priorität)
-      '/usr/bin/chromium-browser', // Azure App Service Standard-Installation
+      '/usr/bin/chromium-browser', // Azure App Service möglich
       '/usr/bin/chromium', // Alternative Chromium für Azure
-      '/usr/bin/google-chrome-stable', // Docker Standard-Installation
-      '/usr/bin/google-chrome', // Alternative Docker-Installation
+      '/usr/bin/google-chrome-stable', // Standard-Installation
+      '/usr/bin/google-chrome', // Alternative
+      '/opt/google/chrome/chrome', // Alternative Azure-Installation
+      '/snap/bin/chromium', // Snap-basierte Installation
       '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
     ].filter(Boolean);
 
@@ -121,13 +123,15 @@ export async function generatePDFWithPuppeteer(
       console.log(`🚀 Verwende Browser: ${browserPath}`);
       launchOptions.executablePath = browserPath;
     } else {
-      console.log('⚠️ KEIN BROWSER GEFUNDEN! Ausgabe aller möglichen Pfade:');
+      console.log('⚠️ KEIN SYSTEM-BROWSER GEFUNDEN! Ausgabe aller möglichen Pfade:');
       possiblePaths.forEach(path => {
         console.log(`  - ${path || 'undefined'}: ${path ? (fs.existsSync(path) ? 'EXISTS' : 'NOT FOUND') : 'INVALID PATH'}`);
       });
       
-      // Fallback: Versuche Standard-Puppeteer (wird wahrscheinlich fehlschlagen in Azure)
-      console.log('🆘 Versuche Puppeteer-Standard als letzten Ausweg...');
+      console.log('🔄 AZURE APP SERVICE FALLBACK: Verwende Puppeteer-eigenen Browser...');
+      console.log('💡 Puppeteer wird versuchen, den automatisch heruntergeladenen Browser zu verwenden');
+      // Für Azure App Service: Lasse Puppeteer seinen eigenen Browser verwenden
+      // executablePath wird nicht gesetzt, Puppeteer verwendet Standard-Chrome
     }
 
     browser = await puppeteer.launch(launchOptions);

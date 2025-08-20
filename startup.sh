@@ -1,84 +1,52 @@
 #!/bin/bash
 
-# Azure App Service Startup Script
-# Dieses Skript wird beim Start der App Service Instanz ausgeführt
-# und installiert Chromium für Puppeteer, bevor die Node.js App gestartet wird
+# Azure App Service Startup Script - Code Deployment optimiert
+# Für Azure App Service mit Code-Bereitstellung (nicht Container)
 
 echo "🚀 Azure App Service Startup Script gestartet..."
+echo "📋 Environment: Azure App Service mit Code-Bereitstellung"
+echo "📋 Node.js Version: $(node --version)"
+echo "📋 Working Directory: $(pwd)"
 
-# Setze Exit-on-Error Flag für robuste Fehlerbehandlung
-set -e
+# Azure App Service Code-Bereitstellung hat eingeschränkte Rechte
+# Wir können keine System-Pakete installieren, müssen daher Puppeteer umkonfigurieren
 
-# 1. System Update und Paketlisten aktualisieren
-echo "📦 Aktualisiere Paketlisten..."
-apt-get update -qq > /dev/null 2>&1 || {
-    echo "⚠️ apt-get update fehlgeschlagen, versuche fortzufahren..."
-}
+# 1. Überprüfe verfügbare Browser-Pfade in Azure
+echo "🔍 Suche nach verfügbaren Browsern in Azure App Service..."
 
-# 2. Chromium und notwendige Abhängigkeiten installieren
-echo "🌐 Installiere Chromium Browser..."
-apt-get install -y \
-    chromium-browser \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    --no-install-recommends \
-    --quiet > /dev/null 2>&1 || {
-    echo "⚠️ Chromium Installation fehlgeschlagen, versuche alternatives Paket..."
-    apt-get install -y chromium --no-install-recommends --quiet > /dev/null 2>&1 || {
-        echo "❌ Chromium Installation vollständig fehlgeschlagen!"
-        echo "🔍 Verfügbare Browser-Pakete:"
-        apt-cache search chromium || echo "Keine Chromium-Pakete gefunden"
-    }
-}
+# Azure App Service manchmal hat diese Pfade
+POSSIBLE_PATHS=(
+    "/usr/bin/chromium-browser"
+    "/usr/bin/chromium" 
+    "/usr/bin/google-chrome-stable"
+    "/usr/bin/google-chrome"
+    "/opt/google/chrome/chrome"
+    "/snap/bin/chromium"
+)
 
-# 3. Browser-Installation verifizieren
-echo "🔍 Verifiziere Browser-Installation..."
-CHROMIUM_PATH=""
-
-# Suche nach verfügbaren Browser-Pfaden
-for path in /usr/bin/chromium-browser /usr/bin/chromium /usr/bin/google-chrome-stable /usr/bin/google-chrome; do
+BROWSER_FOUND=""
+for path in "${POSSIBLE_PATHS[@]}"; do
     if [ -f "$path" ]; then
         echo "✅ Browser gefunden: $path"
-        CHROMIUM_PATH="$path"
+        BROWSER_FOUND="$path"
+        export PUPPETEER_EXECUTABLE_PATH="$path"
         break
+    else
+        echo "❌ Nicht gefunden: $path"
     fi
 done
 
-if [ -z "$CHROMIUM_PATH" ]; then
-    echo "❌ FEHLER: Kein Browser gefunden!"
-    echo "🔍 Verfügbare Executables in /usr/bin:"
-    ls -la /usr/bin/ | grep -E "(chrom|chrome)" || echo "Keine Chrome/Chromium Executables gefunden"
-    echo "⚠️ PDF-Generierung wird möglicherweise nicht funktionieren!"
+if [ -z "$BROWSER_FOUND" ]; then
+    echo "⚠️ KEIN BROWSER GEFUNDEN in Azure App Service!"
+    echo "🔄 Setze Puppeteer auf Standard-Download-Modus..."
+    export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
+    unset PUPPETEER_EXECUTABLE_PATH
 else
-    echo "🎉 Browser erfolgreich installiert: $CHROMIUM_PATH"
-    # Setze Environment Variable für Puppeteer
-    export PUPPETEER_EXECUTABLE_PATH="$CHROMIUM_PATH"
-    echo "📝 PUPPETEER_EXECUTABLE_PATH gesetzt auf: $PUPPETEER_EXECUTABLE_PATH"
+    echo "🎉 Browser konfiguriert: $BROWSER_FOUND"
+    export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 fi
 
-# 4. Node.js und NPM Versionen anzeigen
-echo "📋 System-Informationen:"
-echo "   Node.js Version: $(node --version)"
-echo "   NPM Version: $(npm --version)"
-echo "   Working Directory: $(pwd)"
-echo "   User: $(whoami)"
-
-# 5. Anwendungsabhängigkeiten prüfen
+# 2. Überprüfe kritische Dateien
 echo "🔍 Prüfe Anwendungsstruktur..."
 if [ -f "package.json" ]; then
     echo "✅ package.json gefunden"
@@ -90,27 +58,58 @@ fi
 
 if [ -d "dist" ]; then
     echo "✅ dist-Verzeichnis gefunden"
-    ls -la dist/
+    ls -la dist/ | head -5
 else
-    echo "⚠️ dist-Verzeichnis nicht gefunden - läuft die App im Entwicklungsmodus?"
+    echo "⚠️ dist-Verzeichnis nicht gefunden!"
+    echo "🔧 Erstelle Build..."
+    npm run build || {
+        echo "❌ Build fehlgeschlagen!"
+        exit 1
+    }
 fi
 
-# 6. Environment Variables für Puppeteer setzen
-export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-export PUPPETEER_EXECUTABLE_PATH="$CHROMIUM_PATH"
+# 3. Azure-spezifische Environment Variables setzen
+echo "🔧 Setze Azure-kompatible Environment Variables..."
+export NODE_ENV=production
+export PORT=${PORT:-8080}
 
-# 7. Debug-Informationen ausgeben
-echo "🔧 Environment Variables:"
-echo "   NODE_ENV=${NODE_ENV:-development}"
+# Puppeteer Configuration für Azure
+if [ -n "$BROWSER_FOUND" ]; then
+    export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    export PUPPETEER_EXECUTABLE_PATH="$BROWSER_FOUND"
+else
+    echo "🔄 Aktiviere Puppeteer Browser-Download für Azure..."
+    export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
+    # Setze Cache-Verzeichnis auf schreibbaren Bereich
+    export PUPPETEER_CACHE_DIR="/tmp/.puppeteer"
+    mkdir -p "$PUPPETEER_CACHE_DIR"
+fi
+
+# 4. Debug-Informationen
+echo "🔧 Final Environment Variables:"
+echo "   NODE_ENV=${NODE_ENV}"
+echo "   PORT=${PORT}"
 echo "   PUPPETEER_EXECUTABLE_PATH=${PUPPETEER_EXECUTABLE_PATH:-nicht gesetzt}"
+echo "   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=${PUPPETEER_SKIP_CHROMIUM_DOWNLOAD}"
 echo "   OPENAI_API_KEY=${OPENAI_API_KEY:+***gefunden***}"
 
-# 8. Final: Node.js Anwendung starten
+# 5. Puppeteer Browser herunterladen falls nötig
+if [ "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" = "false" ]; then
+    echo "📦 Installiere Puppeteer Browser..."
+    npx puppeteer browsers install chrome || {
+        echo "⚠️ Browser-Download fehlgeschlagen, versuche weiter..."
+    }
+fi
+
+# 6. Starte die Anwendung
 echo "🚀 Starte Node.js Anwendung..."
 echo "====================================="
 
-# Verwende den npm start Befehl aus package.json
-exec npm start
-
-# Alternative falls npm start nicht funktioniert:
-# exec node dist/index.js
+# Prüfe ob dist/index.js existiert
+if [ -f "dist/index.js" ]; then
+    echo "✅ Starte: node dist/index.js"
+    exec node dist/index.js
+else
+    echo "⚠️ dist/index.js nicht gefunden, versuche npm start..."
+    exec npm start
+fi
