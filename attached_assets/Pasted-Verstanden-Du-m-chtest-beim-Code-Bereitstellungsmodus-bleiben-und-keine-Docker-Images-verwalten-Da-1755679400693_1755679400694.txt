@@ -1,0 +1,109 @@
+Verstanden. Du möchtest beim Code-Bereitstellungsmodus bleiben und keine Docker-Images verwalten. Das ist absolut möglich. Die Lösung besteht darin, Azure anzuweisen, bei jedem Start deines Containers ein Skript auszuführen, das Chrome installiert, bevor deine Node.js-Anwendung gestartet wird.
+Wir erreichen das mit einem Startupskript.
+Die Logik der Lösung
+Deine GitHub Action baut weiterhin den Code und lädt ein .zip-Archiv hoch.
+Azure entpackt diesen Code in seinem Standard-Node.js-Container.
+Anstatt npm start direkt aufzurufen, weisen wir Azure an, zuerst unser eigenes Skript (startup.sh) auszuführen.
+Dieses Skript übernimmt die Kontrolle, installiert Chrome und seine Abhängigkeiten und ruft am Ende selbst npm start auf, um deine App zu starten.
+Das Ergebnis ist, dass deine App in einem Container startet, der für Puppeteer vorbereitet ist.
+Schritt-für-Schritt-Anleitung
+Schritt 1: Das Startupskript erstellen
+Erstelle im Hauptverzeichnis deines Projekts (auf der gleichen Ebene wie package.json) eine neue Datei namens startup.sh.
+Füge den folgenden Inhalt in die startup.sh-Datei ein:
+code
+Sh
+#!/bin/bash
+
+# Schritt 1: System aktualisieren und Chrome installieren
+# Wir führen dies nur aus, wenn Chrome noch nicht installiert ist, um Neustarts zu beschleunigen.
+if ! command -v google-chrome-stable &> /dev/null
+then
+    echo "--- Google Chrome nicht gefunden. Starte Installation... ---"
+    # Wechsle zum root-Benutzer, um Befehle auszuführen
+    # In Azure App Service Linux-Containern haben wir oft sudo-Rechte
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnss3 \
+    libpango-1.0-0 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    wget \
+    xdg-utils && \
+    wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get install -y /tmp/chrome.deb && \
+    rm /tmp/chrome.deb && \
+    rm -rf /var/lib/apt/lists/*
+    echo "--- Google Chrome Installation abgeschlossen. ---"
+else
+    echo "--- Google Chrome ist bereits installiert. Überspringe Installation. ---"
+fi
+
+# Schritt 2: Deine Node.js Anwendung starten
+# Dies ist der Befehl, den Azure normalerweise ausführen würde.
+echo "--- Starte die Node.js Anwendung (npm start)... ---"
+npm start
+Schritt 2: Dein GitHub Actions Workflow anpassen
+Wir müssen sicherstellen, dass das startup.sh-Skript als ausführbar markiert wird, bevor es in das Artefakt gepackt wird.
+Öffne deine Workflow-Datei (z.B. .github/workflows/main.yml) und füge einen neuen Schritt direkt vor dem npm run build-Schritt hinzu.
+code
+Yaml
+# ... (nach npm install)
+
+      - name: Make startup script executable
+        run: chmod +x ./startup.sh
+
+      - name: Build the app
+        run: npm run build
+
+      # ... (Rest des Workflows)
+Schritt 3: Azure App Service konfigurieren
+Dies ist der wichtigste Schritt. Wir müssen Azure sagen, dass es unser Skript anstelle des Standardbefehls verwenden soll.
+Gehe zum Azure Portal und öffne deinen App Service.
+Gehe im Menü links zu Konfiguration.
+Klicke auf den Tab Allgemeine Einstellungen.
+Scrolle nach unten zum Abschnitt Stackeinstellungen.
+Im Feld Startbefehl gibst du Folgendes ein:
+./startup.sh
+Klicke oben auf Speichern. Azure wird deine Anwendung neu starten und dabei den neuen Startbefehl verwenden.
+Schritt 4: Puppeteer-Code überprüfen (Wichtig!)
+Stelle sicher, dass dein JavaScript/TypeScript-Code Puppeteer immer noch mit den richtigen Argumenten startet. Die Installation von Chrome allein reicht nicht aus; diese Argumente sind in einer Container-Umgebung entscheidend.
+code
+TypeScript
+import puppeteer from 'puppeteer';
+
+// ... in deiner Funktion
+const browser = await puppeteer.launch({
+  executablePath: '/usr/bin/google-chrome-stable', // Sicherstellen, dass er hier sucht
+  headless: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage' // Verhindert Probleme mit dem Speicher in Docker
+  ]
+});
+Zusammenfassung
+Mit diesen Änderungen wird dein Deployment-Prozess wie folgt aussehen:
+GitHub Actions macht das startup.sh Skript ausführbar und packt es zusammen mit deinem gebauten Code in die node-app.zip.
+Azure erhält die Zip-Datei.
+Beim Start des Containers führt Azure den von dir definierten Startbefehl aus: ./startup.sh.
+Das Skript installiert Chrome und startet dann deine App.
+Deine App läuft und Puppeteer findet den Browser und kann PDFs generieren.
+Dieser Ansatz löst das Problem vollständig, ohne dass du auf einen Docker-Build-Prozess umsteigen musst.
