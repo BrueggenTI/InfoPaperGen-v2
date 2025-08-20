@@ -1,0 +1,110 @@
+
+
+# GitHub Actions Workflow für automatisches Azure Container Deployment
+# Dieser Workflow baut und deployed die Node.js-Anwendung automatisch bei jedem Push auf den main-Branch
+
+name: Build and Deploy to Azure Container App
+
+# Trigger: Workflow startet bei Push auf main-Branch
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Ermöglicht manuelles Triggern
+
+env:
+  # Container Registry und Image Konfiguration
+  REGISTRY_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+  REGISTRY_USERNAME: ${{ secrets.ACR_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
+  # Azure Container App Konfiguration
+  AZURE_CONTAINER_APP_NAME: ${{ secrets.AZURE_CONTAINER_APP_NAME }}
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+  # Docker Image Konfiguration
+  IMAGE_NAME: product-info-generator
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Repository Code auschecken
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Docker Buildx für erweiterte Build-Features einrichten
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # 3. Bei Azure Container Registry anmelden
+    - name: Login to Azure Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY_LOGIN_SERVER }}
+        username: ${{ env.REGISTRY_USERNAME }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+
+    # 4. Docker Image mit eindeutigem Tag erstellen und pushen
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.azure-fixed
+        push: true
+        tags: |
+          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+        build-args: |
+          NODE_ENV=production
+
+    # 5. Bei Azure anmelden mit Service Principal
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # 6. Azure Container App mit neuem Image aktualisieren
+    - name: Deploy to Azure Container App
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: ${{ secrets.ACR_NAME }}
+        containerAppName: ${{ env.AZURE_CONTAINER_APP_NAME }}
+        resourceGroup: ${{ env.AZURE_RESOURCE_GROUP }}
+        imageToDeploy: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        targetPort: 8080
+        ingress: external
+
+    # 7. Deployment-Status ausgeben
+    - name: Deployment Status
+      run: |
+        echo "✅ Deployment erfolgreich abgeschlossen!"
+        echo "🔗 Image: ${{ env.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+        echo "🚀 Container App: ${{ env.AZURE_CONTAINER_APP_NAME }}"
+
+# Benötigte GitHub Secrets:
+# =========================
+# Die folgenden Secrets müssen in den GitHub Repository-Einstellungen erstellt werden:
+#
+# CONTAINER REGISTRY SECRETS:
+# - ACR_LOGIN_SERVER: Die Login-Server-URL der Azure Container Registry (z.B. myregistry.azurecr.io)
+# - ACR_NAME: Name der Azure Container Registry (ohne .azurecr.io)
+# - ACR_USERNAME: Benutzername für die Container Registry
+# - ACR_PASSWORD: Passwort für die Container Registry
+#
+# AZURE DEPLOYMENT SECRETS:
+# - AZURE_CREDENTIALS: JSON-String mit Service Principal Anmeldeinformationen im Format:
+#   {
+#     "clientId": "<service-principal-client-id>",
+#     "clientSecret": "<service-principal-client-secret>",
+#     "subscriptionId": "<azure-subscription-id>",
+#     "tenantId": "<azure-tenant-id>"
+#   }
+# - AZURE_CONTAINER_APP_NAME: Name der Azure Container App
+# - AZURE_RESOURCE_GROUP: Name der Azure Resource Group
+#
+# ANWENDUNGS-SECRETS (werden direkt in der Azure Container App gesetzt):
+# - OPENAI_API_KEY: OpenAI API-Schlüssel für KI-Funktionen
