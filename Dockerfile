@@ -35,7 +35,7 @@ FROM node:20-slim
 # Root-Benutzer für die Installation von Chrome
 USER root
 
-# Installiert NUR die System-Abhängigkeiten, die Chrome zum Laufen benötigt
+# Installiert ALLE benötigten Tools UND Chrome-Abhängigkeiten
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     fonts-liberation \
@@ -71,11 +71,13 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     lsb-release \
     wget \
+    gnupg \
+    curl \
     xdg-utils \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Installiert Google Chrome mit moderner GPG-Methode
+# Installiert Google Chrome mit robuster Methode
 RUN wget -q -O /tmp/google-chrome-key.pub https://dl-ssl.google.com/linux/linux_signing_key.pub \
     && gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg /tmp/google-chrome-key.pub \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
