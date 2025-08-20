@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "azure:install-browser": "npx puppeteer browsers install chrome",
     "azure:start": "npm run azure:install-browser && node dist/index.js",
+    "postinstall": "puppeteer browsers install chrome",
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },

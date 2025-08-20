@@ -34,7 +34,13 @@ function getPuppeteerConfig() {
   const isProduction = process.env.NODE_ENV === 'production';
   const isAzure = process.env.WEBSITE_SITE_NAME || process.env.WEBSITES_PORT;
 
-  const config: any = {
+  // The following block is replaced by the new_str in the changes.
+  // This function is intended to be modified to not rely on specific paths.
+  // The goal is to let Puppeteer handle the browser installation and discovery.
+
+  console.log(`🚀 Verwende Browser: Auto-Download (Puppeteer verwaltet)`);
+
+  return {
     headless: true,
     args: [
       '--no-sandbox',
@@ -46,23 +52,12 @@ function getPuppeteerConfig() {
       '--disable-gpu',
       '--disable-background-timer-throttling',
       '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
+      '--disable-renderer-backgrounding',
+      '--memory-pressure-off'
     ],
-    timeout: 30000 // Default timeout for launch
+    // Kein executablePath - Puppeteer findet automatisch den installierten Browser
+    timeout: 20000
   };
-
-  if (isProduction || isAzure) {
-    const browserPath = findAvailableBrowser();
-    if (browserPath) {
-      config.executablePath = browserPath;
-      console.log(`🚀 Verwende Browser: ${browserPath}`);
-    } else {
-      console.log('🔄 Fallback auf Puppeteer Standard-Browser');
-      // Puppeteer lädt automatisch Chromium herunter
-    }
-  }
-
-  return config;
 }
 
 /**
