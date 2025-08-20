@@ -1,0 +1,1000 @@
+2025-08-20T09:23:29.591Z INFO  - Waiting for response to warmup request for container product-information-generator_1_77445f49. Elapsed time = 15.8067442 sec
+2025-08-20T09:23:46.123Z INFO  - Waiting for response to warmup request for container product-information-generator_1_77445f49. Elapsed time = 32.3383511 sec
+2025-08-20T09:24:01.289Z INFO  - Waiting for response to warmup request for container product-information-generator_1_77445f49. Elapsed time = 47.5049105 sec
+2025-08-20T09:24:08.363Z INFO  - Container product-information-generator_1_77445f49 for site product-information-generator initialized successfully and is ready to serve requests.
+2025-08-20T09:38:38.746Z INFO  - Starting container for site
+2025-08-20T09:38:38.749Z INFO  - docker run -d --expose=8080 --name product-information-generator_2_898b5215 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:38:38.749Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:38:39.763Z INFO  - Initiating warmup request to container product-information-generator_2_898b5215 for site product-information-generator
+2025-08-20T09:38:55.209Z ERROR - Container product-information-generator_2_898b5215 for site product-information-generator has exited, failing site start
+2025-08-20T09:38:55.221Z ERROR - Container product-information-generator_2_898b5215 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:39:00.088Z INFO  - Starting container for site
+2025-08-20T09:39:00.089Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_76557cd9 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:39:00.090Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:39:01.955Z INFO  - Initiating warmup request to container product-information-generator_0_76557cd9 for site product-information-generator
+2025-08-20T09:39:17.253Z ERROR - Container product-information-generator_0_76557cd9 for site product-information-generator has exited, failing site start
+2025-08-20T09:39:17.262Z ERROR - Container product-information-generator_0_76557cd9 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:39:17.270Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:39:23.471Z INFO  - Starting container for site
+2025-08-20T09:39:23.472Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_fcbee27f -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:39:23.473Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:39:24.134Z INFO  - Initiating warmup request to container product-information-generator_0_fcbee27f for site product-information-generator
+2025-08-20T09:39:38.803Z ERROR - Container product-information-generator_0_fcbee27f for site product-information-generator has exited, failing site start
+2025-08-20T09:39:38.812Z ERROR - Container product-information-generator_0_fcbee27f didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:39:38.815Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:39:59.506Z INFO  - Starting container for site
+2025-08-20T09:39:59.507Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_90f5b07f -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:39:59.507Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:40:02.698Z INFO  - Initiating warmup request to container product-information-generator_0_90f5b07f for site product-information-generator
+2025-08-20T09:40:14.580Z ERROR - Container product-information-generator_0_90f5b07f for site product-information-generator has exited, failing site start
+2025-08-20T09:40:14.587Z ERROR - Container product-information-generator_0_90f5b07f didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:40:14.591Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:43:09.101Z INFO  - Starting container for site
+2025-08-20T09:43:09.102Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_3e22130c -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:43:09.103Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:43:09.950Z INFO  - Initiating warmup request to container product-information-generator_0_3e22130c for site product-information-generator
+2025-08-20T09:43:24.427Z ERROR - Container product-information-generator_0_3e22130c for site product-information-generator has exited, failing site start
+2025-08-20T09:43:24.434Z ERROR - Container product-information-generator_0_3e22130c didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:43:24.443Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:48:05.935Z INFO  - Starting container for site
+2025-08-20T09:48:05.935Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_8b152337 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:48:05.936Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:48:06.450Z INFO  - Initiating warmup request to container product-information-generator_0_8b152337 for site product-information-generator
+2025-08-20T09:48:21.738Z ERROR - Container product-information-generator_0_8b152337 for site product-information-generator has exited, failing site start
+2025-08-20T09:48:21.746Z ERROR - Container product-information-generator_0_8b152337 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:48:21.753Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:53:06.199Z INFO  - Starting container for site
+2025-08-20T09:53:06.200Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_3a20492b -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:53:06.201Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:53:06.794Z INFO  - Initiating warmup request to container product-information-generator_0_3a20492b for site product-information-generator
+2025-08-20T09:53:21.486Z ERROR - Container product-information-generator_0_3a20492b for site product-information-generator has exited, failing site start
+2025-08-20T09:53:21.496Z ERROR - Container product-information-generator_0_3a20492b didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:53:21.501Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:58:06.555Z INFO  - Starting container for site
+2025-08-20T09:58:06.556Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_1b406bad -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:58:06.557Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:58:07.100Z INFO  - Initiating warmup request to container product-information-generator_0_1b406bad for site product-information-generator
+2025-08-20T09:58:22.134Z ERROR - Container product-information-generator_0_1b406bad for site product-information-generator has exited, failing site start
+2025-08-20T09:58:22.141Z ERROR - Container product-information-generator_0_1b406bad didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:58:22.146Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T10:03:06.879Z INFO  - Starting container for site
+2025-08-20T10:03:06.880Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_d9e559aa -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T10:03:06.881Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T10:03:08.226Z INFO  - Initiating warmup request to container product-information-generator_0_d9e559aa for site product-information-generator
+2025-08-20T10:03:23.227Z ERROR - Container product-information-generator_0_d9e559aa for site product-information-generator has exited, failing site start
+2025-08-20T10:03:23.237Z ERROR - Container product-information-generator_0_d9e559aa didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T10:03:23.246Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T10:06:54.330Z INFO  - Starting container for site
+2025-08-20T10:06:54.332Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_92384d5d -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T10:06:54.332Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T10:06:55.054Z INFO  - Initiating warmup request to container product-information-generator_0_92384d5d for site product-information-generator
+2025-08-20T10:07:10.293Z INFO  - Waiting for response to warmup request for container product-information-generator_0_92384d5d. Elapsed time = 15.2387634 sec
+2025-08-20T10:07:11.890Z ERROR - Container product-information-generator_0_92384d5d for site product-information-generator has exited, failing site start
+2025-08-20T10:07:11.897Z ERROR - Container product-information-generator_0_92384d5d didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T10:07:11.907Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T10:18:57.605Z INFO  - Starting container for site
+2025-08-20T10:18:57.606Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_22973dfa -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T10:18:57.606Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T10:18:58.198Z INFO  - Initiating warmup request to container product-information-generator_0_22973dfa for site product-information-generator
+2025-08-20T07:26:04.0970030Z Container start method called.
+2025-08-20T07:26:04.0982425Z Establishing network.
+2025-08-20T07:26:04.0989039Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T07:26:06.4816615Z Container is starting.
+2025-08-20T07:26:06.4818108Z Establishing user namespace if not established already.
+2025-08-20T07:26:06.4819358Z Establishing network if not established already.
+2025-08-20T07:26:06.4830560Z Mounting volumes.
+2025-08-20T07:26:06.4855415Z Nested mountpoint
+2025-08-20T07:26:06.4971696Z Nested mountpoint volatile/logs
+2025-08-20T07:26:06.5015900Z Nested mountpoint
+2025-08-20T07:26:06.5306335Z Nested mountpoint
+2025-08-20T07:26:06.5350669Z Nested mountpoint
+2025-08-20T07:26:06.5508699Z Nested mountpoint
+2025-08-20T07:26:06.5663558Z Nested mountpoint
+2025-08-20T07:26:06.8921891Z Creating container.
+2025-08-20T07:26:06.9041756Z Creating pipes for streaming container io.
+2025-08-20T07:26:06.9045733Z Creating stdout named pipe at /podr/container/pipe/58c948cf6d83_product-information-generator/stdout_e1286bc6562147cbaf33360a0e26dc40.
+2025-08-20T07:26:06.9114731Z Successfully created stdout named pipe at: /podr/container/pipe/58c948cf6d83_product-information-generator/stdout_e1286bc6562147cbaf33360a0e26dc40.
+2025-08-20T07:26:06.9119995Z Opening named pipe /podr/container/pipe/58c948cf6d83_product-information-generator/stdout_e1286bc6562147cbaf33360a0e26dc40 for reading in non-blocking mode.
+2025-08-20T07:26:06.9127736Z Successfully opened named pipe: /podr/container/pipe/58c948cf6d83_product-information-generator/stdout_e1286bc6562147cbaf33360a0e26dc40.
+2025-08-20T07:26:06.9132583Z Successfully removed non-blocking flag from /podr/container/pipe/58c948cf6d83_product-information-generator/stdout_e1286bc6562147cbaf33360a0e26dc40.
+2025-08-20T07:26:06.9133951Z Creating stderr named pipe at /podr/container/pipe/58c948cf6d83_product-information-generator/stderr_b269e1cd221c48879a63869c9ba620de.
+2025-08-20T07:26:06.9135530Z Successfully created stderr named pipe at: /podr/container/pipe/58c948cf6d83_product-information-generator/stderr_b269e1cd221c48879a63869c9ba620de.
+2025-08-20T07:26:06.9136510Z Opening named pipe /podr/container/pipe/58c948cf6d83_product-information-generator/stderr_b269e1cd221c48879a63869c9ba620de for reading in non-blocking mode.
+2025-08-20T07:26:06.9145792Z Successfully opened named pipe: /podr/container/pipe/58c948cf6d83_product-information-generator/stderr_b269e1cd221c48879a63869c9ba620de.
+2025-08-20T07:26:06.9147272Z Successfully removed non-blocking flag from /podr/container/pipe/58c948cf6d83_product-information-generator/stderr_b269e1cd221c48879a63869c9ba620de.
+2025-08-20T07:26:06.9161004Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T07:26:07.2942499Z Starting container: 58c948cf6d83_product-information-generator.
+2025-08-20T07:26:07.3214078Z Starting watchers and probes.
+2025-08-20T07:26:07.3233474Z Starting metrics collection.
+2025-08-20T07:26:07.3257170Z Container is running.
+2025-08-20T07:26:07.3787521Z Container start method finished after 3281 ms.
+2025-08-20T07:26:22.4476034Z Site startup probe succeeded after 15.0545929 seconds.
+2025-08-20T07:26:22.4771730Z Site is running with deployment version: ec4b270a-fbb1-42a5-923e-10f919c45740
+2025-08-20T07:26:22.4780249Z Site started.
+2025-08-20T07:26:42.5196826Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T07:26:42.5678410Z Stop and delete container. Retry count = 0
+2025-08-20T07:26:42.5679744Z Stopping container: a3bcfc606fc5_product-information-generator.
+2025-08-20T07:26:47.6187985Z Deleting container: a3bcfc606fc5_product-information-generator. Retry count = 0
+2025-08-20T07:26:48.7725352Z Container spec TerminationMessagePolicy  path
+2025-08-20T07:26:48.7788852Z Container is terminated. Total time elapsed: 6254 ms.
+2025-08-20T07:26:48.7794850Z Site: product-information-generator stopped.
+2025-08-20T07:26:49.6469095Z Container start method called.
+2025-08-20T07:26:49.6470662Z Establishing network.
+2025-08-20T07:26:49.6472197Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T07:26:52.2817845Z Container is starting.
+2025-08-20T07:26:52.2819037Z Establishing user namespace if not established already.
+2025-08-20T07:26:52.2820141Z Establishing network if not established already.
+2025-08-20T07:26:52.2821359Z Mounting volumes.
+2025-08-20T07:26:52.2823181Z Nested mountpoint
+2025-08-20T07:26:52.2894728Z Nested mountpoint volatile/logs
+2025-08-20T07:26:52.3010941Z Nested mountpoint
+2025-08-20T07:26:52.3066746Z Nested mountpoint
+2025-08-20T07:26:52.3072069Z Nested mountpoint
+2025-08-20T07:26:52.3078828Z Nested mountpoint
+2025-08-20T07:26:52.3217999Z Nested mountpoint
+2025-08-20T07:26:52.7401102Z Creating container.
+2025-08-20T07:26:52.7412793Z Creating pipes for streaming container io.
+2025-08-20T07:26:52.7418428Z Creating stdout named pipe at /podr/container/pipe/7d399ea681d6_product-information-generator/stdout_7748299eed604fd1a8c3c90305fc0692.
+2025-08-20T07:26:52.7425657Z Successfully created stdout named pipe at: /podr/container/pipe/7d399ea681d6_product-information-generator/stdout_7748299eed604fd1a8c3c90305fc0692.
+2025-08-20T07:26:52.7426867Z Opening named pipe /podr/container/pipe/7d399ea681d6_product-information-generator/stdout_7748299eed604fd1a8c3c90305fc0692 for reading in non-blocking mode.
+2025-08-20T07:26:52.7428183Z Successfully opened named pipe: /podr/container/pipe/7d399ea681d6_product-information-generator/stdout_7748299eed604fd1a8c3c90305fc0692.
+2025-08-20T07:26:52.7429201Z Successfully removed non-blocking flag from /podr/container/pipe/7d399ea681d6_product-information-generator/stdout_7748299eed604fd1a8c3c90305fc0692.
+2025-08-20T07:26:52.7430133Z Creating stderr named pipe at /podr/container/pipe/7d399ea681d6_product-information-generator/stderr_de7614d49216449383e39a31b2490004.
+2025-08-20T07:26:52.7432026Z Successfully created stderr named pipe at: /podr/container/pipe/7d399ea681d6_product-information-generator/stderr_de7614d49216449383e39a31b2490004.
+2025-08-20T07:26:52.7433418Z Opening named pipe /podr/container/pipe/7d399ea681d6_product-information-generator/stderr_de7614d49216449383e39a31b2490004 for reading in non-blocking mode.
+2025-08-20T07:26:52.7434780Z Successfully opened named pipe: /podr/container/pipe/7d399ea681d6_product-information-generator/stderr_de7614d49216449383e39a31b2490004.
+2025-08-20T07:26:52.7436501Z Successfully removed non-blocking flag from /podr/container/pipe/7d399ea681d6_product-information-generator/stderr_de7614d49216449383e39a31b2490004.
+2025-08-20T07:26:52.7437880Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T07:26:52.9389343Z Starting container: 7d399ea681d6_product-information-generator.
+2025-08-20T07:26:52.9520946Z Starting watchers and probes.
+2025-08-20T07:26:52.9528432Z Starting metrics collection.
+2025-08-20T07:26:52.9530365Z Container is running.
+2025-08-20T07:26:52.9813999Z Container start method finished after 3334 ms.
+2025-08-20T07:27:11.0496860Z Site startup probe succeeded after 18.0669246 seconds.
+2025-08-20T07:27:11.0714817Z Site is running with deployment version: ec4b270a-fbb1-42a5-923e-10f919c45740
+2025-08-20T07:27:11.0721121Z Site started.
+2025-08-20T07:27:31.9964144Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T07:27:31.9982905Z Stop and delete container. Retry count = 0
+2025-08-20T07:27:31.9984601Z Stopping container: 58c948cf6d83_product-information-generator.
+2025-08-20T07:27:37.0628583Z Deleting container: 58c948cf6d83_product-information-generator. Retry count = 0
+2025-08-20T07:27:38.6166573Z Container spec TerminationMessagePolicy  path
+2025-08-20T07:27:38.6167986Z Container is terminated. Total time elapsed: 6620 ms.
+2025-08-20T07:27:38.6168254Z Site: product-information-generator stopped.
+2025-08-20T07:40:01.0441555Z Container start method called.
+2025-08-20T07:40:01.0455739Z Establishing network.
+2025-08-20T07:40:01.0457061Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T07:40:03.7848947Z Container is starting.
+2025-08-20T07:40:03.7850384Z Establishing user namespace if not established already.
+2025-08-20T07:40:03.7851640Z Establishing network if not established already.
+2025-08-20T07:40:03.7852735Z Mounting volumes.
+2025-08-20T07:40:03.7862704Z Nested mountpoint
+2025-08-20T07:40:03.7909411Z Nested mountpoint volatile/logs
+2025-08-20T07:40:03.7998478Z Nested mountpoint
+2025-08-20T07:40:03.8075478Z Nested mountpoint
+2025-08-20T07:40:03.8080645Z Nested mountpoint
+2025-08-20T07:40:03.8205034Z Nested mountpoint
+2025-08-20T07:40:03.8298814Z Nested mountpoint
+2025-08-20T07:40:04.2768687Z Creating container.
+2025-08-20T07:40:04.2769813Z Creating pipes for streaming container io.
+2025-08-20T07:40:04.2770716Z Creating stdout named pipe at /podr/container/pipe/d224599dcead_product-information-generator/stdout_6a834e07a59e40129e48a8069dc4eade.
+2025-08-20T07:40:04.2793409Z Successfully created stdout named pipe at: /podr/container/pipe/d224599dcead_product-information-generator/stdout_6a834e07a59e40129e48a8069dc4eade.
+2025-08-20T07:40:04.2794746Z Opening named pipe /podr/container/pipe/d224599dcead_product-information-generator/stdout_6a834e07a59e40129e48a8069dc4eade for reading in non-blocking mode.
+2025-08-20T07:40:04.2796214Z Successfully opened named pipe: /podr/container/pipe/d224599dcead_product-information-generator/stdout_6a834e07a59e40129e48a8069dc4eade.
+2025-08-20T07:40:04.2809616Z Successfully removed non-blocking flag from /podr/container/pipe/d224599dcead_product-information-generator/stdout_6a834e07a59e40129e48a8069dc4eade.
+2025-08-20T07:40:04.2810984Z Creating stderr named pipe at /podr/container/pipe/d224599dcead_product-information-generator/stderr_16a1dfacd94844c39db83de37b489c4d.
+2025-08-20T07:40:04.2812899Z Successfully created stderr named pipe at: /podr/container/pipe/d224599dcead_product-information-generator/stderr_16a1dfacd94844c39db83de37b489c4d.
+2025-08-20T07:40:04.2814218Z Opening named pipe /podr/container/pipe/d224599dcead_product-information-generator/stderr_16a1dfacd94844c39db83de37b489c4d for reading in non-blocking mode.
+2025-08-20T07:40:04.2815826Z Successfully opened named pipe: /podr/container/pipe/d224599dcead_product-information-generator/stderr_16a1dfacd94844c39db83de37b489c4d.
+2025-08-20T07:40:04.2817158Z Successfully removed non-blocking flag from /podr/container/pipe/d224599dcead_product-information-generator/stderr_16a1dfacd94844c39db83de37b489c4d.
+2025-08-20T07:40:04.2824826Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T07:40:04.5076078Z Starting container: d224599dcead_product-information-generator.
+2025-08-20T07:40:04.5217129Z Starting watchers and probes.
+2025-08-20T07:40:04.5248029Z Starting metrics collection.
+2025-08-20T07:40:04.5249736Z Container is running.
+2025-08-20T07:40:04.5595925Z Container start method finished after 3515 ms.
+2025-08-20T07:40:20.6126502Z Site startup probe succeeded after 16.0499132 seconds.
+2025-08-20T07:40:20.6281188Z Site is running with deployment version: 6eebb30e-4548-4be7-b3a4-58800a26d26e
+2025-08-20T07:40:20.6287443Z Site started.
+2025-08-20T07:40:40.6369433Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T07:40:40.6406291Z Stop and delete container. Retry count = 0
+2025-08-20T07:40:40.6407897Z Stopping container: 7d399ea681d6_product-information-generator.
+2025-08-20T07:40:45.7354418Z Deleting container: 7d399ea681d6_product-information-generator. Retry count = 0
+2025-08-20T07:40:46.6726693Z Container spec TerminationMessagePolicy  path
+2025-08-20T07:40:46.6728338Z Container is terminated. Total time elapsed: 6035 ms.
+2025-08-20T07:40:46.6728615Z Site: product-information-generator stopped.
+2025-08-20T07:40:47.3977253Z Container start method called.
+2025-08-20T07:40:47.3978517Z Establishing network.
+2025-08-20T07:40:47.4060383Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T07:40:50.3855738Z Container is starting.
+2025-08-20T07:40:50.3857057Z Establishing user namespace if not established already.
+2025-08-20T07:40:50.3883617Z Establishing network if not established already.
+2025-08-20T07:40:50.3885513Z Mounting volumes.
+2025-08-20T07:40:50.3887781Z Nested mountpoint
+2025-08-20T07:40:50.4173716Z Nested mountpoint volatile/logs
+2025-08-20T07:40:50.4328962Z Nested mountpoint
+2025-08-20T07:40:50.4406433Z Nested mountpoint
+2025-08-20T07:40:50.4411632Z Nested mountpoint
+2025-08-20T07:40:50.4540374Z Nested mountpoint
+2025-08-20T07:40:50.4733535Z Nested mountpoint
+2025-08-20T07:40:51.1554286Z Creating container.
+2025-08-20T07:40:51.1559149Z Creating pipes for streaming container io.
+2025-08-20T07:40:51.1560590Z Creating stdout named pipe at /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stdout_ce4ed55b0eed4441a6bbb9f0d7c9428a.
+2025-08-20T07:40:51.1577147Z Successfully created stdout named pipe at: /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stdout_ce4ed55b0eed4441a6bbb9f0d7c9428a.
+2025-08-20T07:40:51.1587863Z Opening named pipe /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stdout_ce4ed55b0eed4441a6bbb9f0d7c9428a for reading in non-blocking mode.
+2025-08-20T07:40:51.1592250Z Successfully opened named pipe: /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stdout_ce4ed55b0eed4441a6bbb9f0d7c9428a.
+2025-08-20T07:40:51.1593379Z Successfully removed non-blocking flag from /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stdout_ce4ed55b0eed4441a6bbb9f0d7c9428a.
+2025-08-20T07:40:51.1594494Z Creating stderr named pipe at /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stderr_9d1cbe986cde45509d33ab8254686a13.
+2025-08-20T07:40:51.1596118Z Successfully created stderr named pipe at: /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stderr_9d1cbe986cde45509d33ab8254686a13.
+2025-08-20T07:40:51.1597264Z Opening named pipe /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stderr_9d1cbe986cde45509d33ab8254686a13 for reading in non-blocking mode.
+2025-08-20T07:40:51.1598590Z Successfully opened named pipe: /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stderr_9d1cbe986cde45509d33ab8254686a13.
+2025-08-20T07:40:51.1599802Z Successfully removed non-blocking flag from /podr/container/pipe/c9ce21e8ad9b_product-information-generator/stderr_9d1cbe986cde45509d33ab8254686a13.
+2025-08-20T07:40:51.1600927Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T07:40:51.3755184Z Starting container: c9ce21e8ad9b_product-information-generator.
+2025-08-20T07:40:51.4147524Z Starting watchers and probes.
+2025-08-20T07:40:51.4215103Z Starting metrics collection.
+2025-08-20T07:40:51.4217443Z Container is running.
+2025-08-20T07:40:51.4937825Z Container start method finished after 4095 ms.
+2025-08-20T07:41:06.5362927Z Site startup probe succeeded after 15.037942 seconds.
+2025-08-20T07:41:06.5631354Z Site is running with deployment version: 6eebb30e-4548-4be7-b3a4-58800a26d26e
+2025-08-20T07:41:06.5635902Z Site started.
+2025-08-20T07:41:27.7791334Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T07:41:27.7805410Z Stop and delete container. Retry count = 0
+2025-08-20T07:41:27.7806447Z Stopping container: d224599dcead_product-information-generator.
+2025-08-20T07:41:38.8238355Z Deleting container: d224599dcead_product-information-generator. Retry count = 0
+2025-08-20T07:41:39.1299649Z Container spec TerminationMessagePolicy  path
+2025-08-20T07:41:39.1301377Z Container is terminated. Total time elapsed: 11350 ms.
+2025-08-20T07:41:39.1301655Z Site: product-information-generator stopped.
+2025-08-20T07:51:27.8874284Z Container start method called.
+2025-08-20T07:51:27.8877515Z Establishing network.
+2025-08-20T07:51:27.8879207Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T07:51:30.3414839Z Container is starting.
+2025-08-20T07:51:30.3416687Z Establishing user namespace if not established already.
+2025-08-20T07:51:30.3425883Z Establishing network if not established already.
+2025-08-20T07:51:30.3430155Z Mounting volumes.
+2025-08-20T07:51:30.3432187Z Nested mountpoint
+2025-08-20T07:51:30.3513163Z Nested mountpoint volatile/logs
+2025-08-20T07:51:30.3625084Z Nested mountpoint
+2025-08-20T07:51:30.3645385Z Nested mountpoint
+2025-08-20T07:51:30.3747272Z Nested mountpoint
+2025-08-20T07:51:30.3760126Z Nested mountpoint
+2025-08-20T07:51:30.4139990Z Nested mountpoint
+2025-08-20T07:51:30.7760656Z Creating container.
+2025-08-20T07:51:30.7765776Z Creating pipes for streaming container io.
+2025-08-20T07:51:30.7771114Z Creating stdout named pipe at /podr/container/pipe/59770c050096_product-information-generator/stdout_02b25c7778f34c79b812302462c448d2.
+2025-08-20T07:51:30.7832183Z Successfully created stdout named pipe at: /podr/container/pipe/59770c050096_product-information-generator/stdout_02b25c7778f34c79b812302462c448d2.
+2025-08-20T07:51:30.7835725Z Opening named pipe /podr/container/pipe/59770c050096_product-information-generator/stdout_02b25c7778f34c79b812302462c448d2 for reading in non-blocking mode.
+2025-08-20T07:51:30.7845169Z Successfully opened named pipe: /podr/container/pipe/59770c050096_product-information-generator/stdout_02b25c7778f34c79b812302462c448d2.
+2025-08-20T07:51:30.7847598Z Successfully removed non-blocking flag from /podr/container/pipe/59770c050096_product-information-generator/stdout_02b25c7778f34c79b812302462c448d2.
+2025-08-20T07:51:30.7853218Z Creating stderr named pipe at /podr/container/pipe/59770c050096_product-information-generator/stderr_5faa968cb11747cca46a5d4abc187248.
+2025-08-20T07:51:30.7860660Z Successfully created stderr named pipe at: /podr/container/pipe/59770c050096_product-information-generator/stderr_5faa968cb11747cca46a5d4abc187248.
+2025-08-20T07:51:30.7863023Z Opening named pipe /podr/container/pipe/59770c050096_product-information-generator/stderr_5faa968cb11747cca46a5d4abc187248 for reading in non-blocking mode.
+2025-08-20T07:51:30.7864472Z Successfully opened named pipe: /podr/container/pipe/59770c050096_product-information-generator/stderr_5faa968cb11747cca46a5d4abc187248.
+2025-08-20T07:51:30.7865816Z Successfully removed non-blocking flag from /podr/container/pipe/59770c050096_product-information-generator/stderr_5faa968cb11747cca46a5d4abc187248.
+2025-08-20T07:51:30.7867061Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T07:51:30.9855500Z Starting container: 59770c050096_product-information-generator.
+2025-08-20T07:51:30.9977814Z Starting watchers and probes.
+2025-08-20T07:51:30.9987762Z Starting metrics collection.
+2025-08-20T07:51:30.9989684Z Container is running.
+2025-08-20T07:51:31.0169206Z Container start method finished after 3129 ms.
+2025-08-20T07:51:46.0546310Z Site startup probe succeeded after 15.0361375 seconds.
+2025-08-20T07:51:46.0716211Z Site is running with deployment version: fcf8f135-6a07-4d80-b3d6-cca00bdac96a
+2025-08-20T07:51:46.0718115Z Site started.
+2025-08-20T07:52:06.0817098Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T07:52:06.0842219Z Stop and delete container. Retry count = 0
+2025-08-20T07:52:06.0843734Z Stopping container: c9ce21e8ad9b_product-information-generator.
+2025-08-20T07:52:11.1566028Z Deleting container: c9ce21e8ad9b_product-information-generator. Retry count = 0
+2025-08-20T07:52:11.6249335Z Container spec TerminationMessagePolicy  path
+2025-08-20T07:52:11.6253417Z Container is terminated. Total time elapsed: 5543 ms.
+2025-08-20T07:52:11.6253723Z Site: product-information-generator stopped.
+2025-08-20T07:56:43.2738679Z Container start method called.
+2025-08-20T07:56:43.2739816Z Establishing network.
+2025-08-20T07:56:43.2740963Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T07:56:45.9360421Z Container is starting.
+2025-08-20T07:56:45.9367075Z Establishing user namespace if not established already.
+2025-08-20T07:56:45.9373539Z Establishing network if not established already.
+2025-08-20T07:56:45.9375801Z Mounting volumes.
+2025-08-20T07:56:45.9384785Z Nested mountpoint
+2025-08-20T07:56:45.9514498Z Nested mountpoint volatile/logs
+2025-08-20T07:56:45.9708897Z Nested mountpoint
+2025-08-20T07:56:45.9714880Z Nested mountpoint
+2025-08-20T07:56:45.9719261Z Nested mountpoint
+2025-08-20T07:56:45.9829304Z Nested mountpoint
+2025-08-20T07:56:45.9860828Z Nested mountpoint
+2025-08-20T07:56:46.6399450Z Creating container.
+2025-08-20T07:56:46.6414824Z Creating pipes for streaming container io.
+2025-08-20T07:56:46.6420513Z Creating stdout named pipe at /podr/container/pipe/89eae78a5f6b_product-information-generator/stdout_169b7882343842a98c318ea86941c0f5.
+2025-08-20T07:56:46.6426308Z Successfully created stdout named pipe at: /podr/container/pipe/89eae78a5f6b_product-information-generator/stdout_169b7882343842a98c318ea86941c0f5.
+2025-08-20T07:56:46.6427441Z Opening named pipe /podr/container/pipe/89eae78a5f6b_product-information-generator/stdout_169b7882343842a98c318ea86941c0f5 for reading in non-blocking mode.
+2025-08-20T07:56:46.6433073Z Successfully opened named pipe: /podr/container/pipe/89eae78a5f6b_product-information-generator/stdout_169b7882343842a98c318ea86941c0f5.
+2025-08-20T07:56:46.6434748Z Successfully removed non-blocking flag from /podr/container/pipe/89eae78a5f6b_product-information-generator/stdout_169b7882343842a98c318ea86941c0f5.
+2025-08-20T07:56:46.6438200Z Creating stderr named pipe at /podr/container/pipe/89eae78a5f6b_product-information-generator/stderr_108339409dd54c2d8076b3765b4bee04.
+2025-08-20T07:56:46.6440165Z Successfully created stderr named pipe at: /podr/container/pipe/89eae78a5f6b_product-information-generator/stderr_108339409dd54c2d8076b3765b4bee04.
+2025-08-20T07:56:46.6441478Z Opening named pipe /podr/container/pipe/89eae78a5f6b_product-information-generator/stderr_108339409dd54c2d8076b3765b4bee04 for reading in non-blocking mode.
+2025-08-20T07:56:46.6443250Z Successfully opened named pipe: /podr/container/pipe/89eae78a5f6b_product-information-generator/stderr_108339409dd54c2d8076b3765b4bee04.
+2025-08-20T07:56:46.6444508Z Successfully removed non-blocking flag from /podr/container/pipe/89eae78a5f6b_product-information-generator/stderr_108339409dd54c2d8076b3765b4bee04.
+2025-08-20T07:56:46.6445849Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T07:56:47.0377200Z Starting container: 89eae78a5f6b_product-information-generator.
+2025-08-20T07:56:47.0698026Z Starting watchers and probes.
+2025-08-20T07:56:47.0709476Z Starting metrics collection.
+2025-08-20T07:56:47.0711185Z Container is running.
+2025-08-20T07:56:50.6023037Z Container start method finished after 7323 ms.
+2025-08-20T07:57:03.6962780Z Site startup probe succeeded after 13.0927857 seconds.
+2025-08-20T07:57:03.7628734Z Site is running with deployment version: fcf8f135-6a07-4d80-b3d6-cca00bdac96a
+2025-08-20T07:57:03.7630864Z Site started.
+2025-08-20T07:57:23.7678325Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T07:57:23.7728921Z Stop and delete container. Retry count = 0
+2025-08-20T07:57:23.7736728Z Stopping container: 59770c050096_product-information-generator.
+2025-08-20T07:57:33.2512010Z Deleting container: 59770c050096_product-information-generator. Retry count = 0
+2025-08-20T07:57:33.4745742Z Container spec TerminationMessagePolicy  path
+2025-08-20T07:57:33.4756669Z Container is terminated. Total time elapsed: 9707 ms.
+2025-08-20T07:57:33.4756945Z Site: product-information-generator stopped.
+2025-08-20T08:10:03.6997995Z Container start method called.
+2025-08-20T08:10:03.7000749Z Establishing network.
+2025-08-20T08:10:03.7002241Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T08:10:06.1135294Z Container is starting.
+2025-08-20T08:10:06.1144185Z Establishing user namespace if not established already.
+2025-08-20T08:10:06.1146547Z Establishing network if not established already.
+2025-08-20T08:10:06.1149001Z Mounting volumes.
+2025-08-20T08:10:06.1162015Z Nested mountpoint
+2025-08-20T08:10:06.1187276Z Nested mountpoint volatile/logs
+2025-08-20T08:10:06.1200436Z Nested mountpoint
+2025-08-20T08:10:06.1205387Z Nested mountpoint
+2025-08-20T08:10:06.1209852Z Nested mountpoint
+2025-08-20T08:10:06.1216230Z Nested mountpoint
+2025-08-20T08:10:06.1435856Z Nested mountpoint
+2025-08-20T08:10:06.4466420Z Creating container.
+2025-08-20T08:10:06.4467462Z Creating pipes for streaming container io.
+2025-08-20T08:10:06.4468549Z Creating stdout named pipe at /podr/container/pipe/10b9cc239cbb_product-information-generator/stdout_2dfa0c5f2c7a471d91d9ef16e2783bba.
+2025-08-20T08:10:06.4488687Z Successfully created stdout named pipe at: /podr/container/pipe/10b9cc239cbb_product-information-generator/stdout_2dfa0c5f2c7a471d91d9ef16e2783bba.
+2025-08-20T08:10:06.4490379Z Opening named pipe /podr/container/pipe/10b9cc239cbb_product-information-generator/stdout_2dfa0c5f2c7a471d91d9ef16e2783bba for reading in non-blocking mode.
+2025-08-20T08:10:06.4492238Z Successfully opened named pipe: /podr/container/pipe/10b9cc239cbb_product-information-generator/stdout_2dfa0c5f2c7a471d91d9ef16e2783bba.
+2025-08-20T08:10:06.4493847Z Successfully removed non-blocking flag from /podr/container/pipe/10b9cc239cbb_product-information-generator/stdout_2dfa0c5f2c7a471d91d9ef16e2783bba.
+2025-08-20T08:10:06.4495425Z Creating stderr named pipe at /podr/container/pipe/10b9cc239cbb_product-information-generator/stderr_2c4788c6fbe24363ada9e6d088630344.
+2025-08-20T08:10:06.4502411Z Successfully created stderr named pipe at: /podr/container/pipe/10b9cc239cbb_product-information-generator/stderr_2c4788c6fbe24363ada9e6d088630344.
+2025-08-20T08:10:06.4506822Z Opening named pipe /podr/container/pipe/10b9cc239cbb_product-information-generator/stderr_2c4788c6fbe24363ada9e6d088630344 for reading in non-blocking mode.
+2025-08-20T08:10:06.4508767Z Successfully opened named pipe: /podr/container/pipe/10b9cc239cbb_product-information-generator/stderr_2c4788c6fbe24363ada9e6d088630344.
+2025-08-20T08:10:06.4510998Z Successfully removed non-blocking flag from /podr/container/pipe/10b9cc239cbb_product-information-generator/stderr_2c4788c6fbe24363ada9e6d088630344.
+2025-08-20T08:10:06.4512976Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T08:10:06.6313148Z Starting container: 10b9cc239cbb_product-information-generator.
+2025-08-20T08:10:06.6451122Z Starting watchers and probes.
+2025-08-20T08:10:06.6466035Z Starting metrics collection.
+2025-08-20T08:10:06.6480549Z Container is running.
+2025-08-20T08:10:06.6688666Z Container start method finished after 2968 ms.
+2025-08-20T08:10:23.7168581Z Site startup probe succeeded after 17.0431138 seconds.
+2025-08-20T08:10:23.8182468Z Site is running with deployment version: e53b2036-03cf-425c-9bd0-44a93462060c
+2025-08-20T08:10:23.8184752Z Site started.
+2025-08-20T08:10:44.3396596Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T08:10:44.3423253Z Stop and delete container. Retry count = 0
+2025-08-20T08:10:44.3424481Z Stopping container: 89eae78a5f6b_product-information-generator.
+2025-08-20T08:10:50.0363631Z Deleting container: 89eae78a5f6b_product-information-generator. Retry count = 0
+2025-08-20T08:10:50.4391813Z Container spec TerminationMessagePolicy  path
+2025-08-20T08:10:50.4393562Z Container is terminated. Total time elapsed: 6099 ms.
+2025-08-20T08:10:50.4393838Z Site: product-information-generator stopped.
+2025-08-20T08:12:33.3114299Z Container start method called.
+2025-08-20T08:12:33.3116099Z Establishing network.
+2025-08-20T08:12:33.3341496Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T08:12:36.0661399Z Container is starting.
+2025-08-20T08:12:36.0665911Z Establishing user namespace if not established already.
+2025-08-20T08:12:36.0668879Z Establishing network if not established already.
+2025-08-20T08:12:36.0672330Z Mounting volumes.
+2025-08-20T08:12:36.0684727Z Nested mountpoint
+2025-08-20T08:12:36.0753360Z Nested mountpoint volatile/logs
+2025-08-20T08:12:36.0905060Z Nested mountpoint
+2025-08-20T08:12:36.0910873Z Nested mountpoint
+2025-08-20T08:12:36.0915817Z Nested mountpoint
+2025-08-20T08:12:36.0922052Z Nested mountpoint
+2025-08-20T08:12:36.1303537Z Nested mountpoint
+2025-08-20T08:12:36.7262410Z Creating container.
+2025-08-20T08:12:36.7264154Z Creating pipes for streaming container io.
+2025-08-20T08:12:36.7267703Z Creating stdout named pipe at /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stdout_9c49fd576eeb4e228fb781f9f9ec02ab.
+2025-08-20T08:12:36.7270043Z Successfully created stdout named pipe at: /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stdout_9c49fd576eeb4e228fb781f9f9ec02ab.
+2025-08-20T08:12:36.7271270Z Opening named pipe /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stdout_9c49fd576eeb4e228fb781f9f9ec02ab for reading in non-blocking mode.
+2025-08-20T08:12:36.7272544Z Successfully opened named pipe: /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stdout_9c49fd576eeb4e228fb781f9f9ec02ab.
+2025-08-20T08:12:36.7273620Z Successfully removed non-blocking flag from /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stdout_9c49fd576eeb4e228fb781f9f9ec02ab.
+2025-08-20T08:12:36.7274784Z Creating stderr named pipe at /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stderr_875228cf536a4120a444df2a286113fe.
+2025-08-20T08:12:36.7276722Z Successfully created stderr named pipe at: /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stderr_875228cf536a4120a444df2a286113fe.
+2025-08-20T08:12:36.7277820Z Opening named pipe /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stderr_875228cf536a4120a444df2a286113fe for reading in non-blocking mode.
+2025-08-20T08:12:36.7279272Z Successfully opened named pipe: /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stderr_875228cf536a4120a444df2a286113fe.
+2025-08-20T08:12:36.7280350Z Successfully removed non-blocking flag from /podr/container/pipe/e5a0e4ceeb24_product-information-generator/stderr_875228cf536a4120a444df2a286113fe.
+2025-08-20T08:12:36.7281425Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T08:12:37.0523265Z Starting container: e5a0e4ceeb24_product-information-generator.
+2025-08-20T08:12:37.1075869Z Starting watchers and probes.
+2025-08-20T08:12:37.1078014Z Starting metrics collection.
+2025-08-20T08:12:37.1079477Z Container is running.
+2025-08-20T08:12:37.2277434Z Container start method finished after 3912 ms.
+2025-08-20T08:12:52.2741471Z Site startup probe succeeded after 15.0347574 seconds.
+2025-08-20T08:12:52.2928943Z Site is running with deployment version: e53b2036-03cf-425c-9bd0-44a93462060c
+2025-08-20T08:12:52.2933925Z Site started.
+2025-08-20T08:13:12.2968793Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T08:13:12.3000916Z Stop and delete container. Retry count = 0
+2025-08-20T08:13:12.3002005Z Stopping container: 10b9cc239cbb_product-information-generator.
+2025-08-20T08:13:20.5997554Z Deleting container: 10b9cc239cbb_product-information-generator. Retry count = 0
+2025-08-20T08:13:21.2870142Z Container spec TerminationMessagePolicy  path
+2025-08-20T08:13:21.2877218Z Container is terminated. Total time elapsed: 8990 ms.
+2025-08-20T08:13:21.2877535Z Site: product-information-generator stopped.
+2025-08-20T08:28:59.9140939Z Container start method called.
+2025-08-20T08:28:59.9222555Z Establishing network.
+2025-08-20T08:28:59.9264353Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T08:29:04.1595506Z Container is starting.
+2025-08-20T08:29:04.1597119Z Establishing user namespace if not established already.
+2025-08-20T08:29:04.1598478Z Establishing network if not established already.
+2025-08-20T08:29:04.1600014Z Mounting volumes.
+2025-08-20T08:29:04.1601429Z Nested mountpoint
+2025-08-20T08:29:04.1707314Z Nested mountpoint volatile/logs
+2025-08-20T08:29:04.1791860Z Nested mountpoint
+2025-08-20T08:29:04.1908484Z Nested mountpoint
+2025-08-20T08:29:04.1954383Z Nested mountpoint
+2025-08-20T08:29:04.1961644Z Nested mountpoint
+2025-08-20T08:29:04.2148948Z Nested mountpoint
+2025-08-20T08:29:04.6717362Z Creating container.
+2025-08-20T08:29:04.6721145Z Creating pipes for streaming container io.
+2025-08-20T08:29:04.6725154Z Creating stdout named pipe at /podr/container/pipe/024b2d8e70ca_product-information-generator/stdout_d0d92937e2584f1d98b5f2cb73d0b526.
+2025-08-20T08:29:04.6728651Z Successfully created stdout named pipe at: /podr/container/pipe/024b2d8e70ca_product-information-generator/stdout_d0d92937e2584f1d98b5f2cb73d0b526.
+2025-08-20T08:29:04.6732846Z Opening named pipe /podr/container/pipe/024b2d8e70ca_product-information-generator/stdout_d0d92937e2584f1d98b5f2cb73d0b526 for reading in non-blocking mode.
+2025-08-20T08:29:04.6734672Z Successfully opened named pipe: /podr/container/pipe/024b2d8e70ca_product-information-generator/stdout_d0d92937e2584f1d98b5f2cb73d0b526.
+2025-08-20T08:29:04.6738187Z Successfully removed non-blocking flag from /podr/container/pipe/024b2d8e70ca_product-information-generator/stdout_d0d92937e2584f1d98b5f2cb73d0b526.
+2025-08-20T08:29:04.6742681Z Creating stderr named pipe at /podr/container/pipe/024b2d8e70ca_product-information-generator/stderr_081a7f7f6f9a47b1881bb30b1adebf16.
+2025-08-20T08:29:04.6745670Z Successfully created stderr named pipe at: /podr/container/pipe/024b2d8e70ca_product-information-generator/stderr_081a7f7f6f9a47b1881bb30b1adebf16.
+2025-08-20T08:29:04.6749682Z Opening named pipe /podr/container/pipe/024b2d8e70ca_product-information-generator/stderr_081a7f7f6f9a47b1881bb30b1adebf16 for reading in non-blocking mode.
+2025-08-20T08:29:04.6752376Z Successfully opened named pipe: /podr/container/pipe/024b2d8e70ca_product-information-generator/stderr_081a7f7f6f9a47b1881bb30b1adebf16.
+2025-08-20T08:29:04.6756321Z Successfully removed non-blocking flag from /podr/container/pipe/024b2d8e70ca_product-information-generator/stderr_081a7f7f6f9a47b1881bb30b1adebf16.
+2025-08-20T08:29:04.6757750Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T08:29:04.9525755Z Starting container: 024b2d8e70ca_product-information-generator.
+2025-08-20T08:29:04.9846860Z Starting watchers and probes.
+2025-08-20T08:29:04.9873397Z Starting metrics collection.
+2025-08-20T08:29:04.9896627Z Container is running.
+2025-08-20T08:29:05.0669916Z Container start method finished after 5151 ms.
+2025-08-20T08:29:19.3397057Z Site startup probe failed after 14.2703374 seconds.
+2025-08-20T08:29:19.3676305Z Failed to start site. Revert by stopping site.
+2025-08-20T08:29:19.3680453Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T08:29:19.3786888Z Stop and delete container. Retry count = 0
+2025-08-20T08:29:19.3798055Z Stopping container: 024b2d8e70ca_product-information-generator.
+2025-08-20T08:29:24.4440656Z Deleting container: 024b2d8e70ca_product-information-generator. Retry count = 0
+2025-08-20T08:29:25.5729679Z Container spec TerminationMessagePolicy  path
+2025-08-20T08:29:25.5731289Z Container is terminated. Total time elapsed: 6204 ms.
+2025-08-20T08:29:25.5732684Z Site container: product-information-generator terminated during site startup.
+2025-08-20T08:29:25.5733136Z Site: product-information-generator stopped.
+2025-08-20T08:29:46.7350927Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T08:29:46.7369694Z Stop and delete container. Retry count = 0
+2025-08-20T08:29:46.7370846Z Stopping container: e5a0e4ceeb24_product-information-generator.
+2025-08-20T08:29:51.8029790Z Deleting container: e5a0e4ceeb24_product-information-generator. Retry count = 0
+2025-08-20T08:29:52.2756253Z Container spec TerminationMessagePolicy  path
+2025-08-20T08:29:52.2758097Z Container is terminated. Total time elapsed: 5540 ms.
+2025-08-20T08:29:52.2758369Z Site: product-information-generator stopped.
+2025-08-20T08:33:12.4879313Z Container start method called.
+2025-08-20T08:33:12.4881725Z Establishing network.
+2025-08-20T08:33:12.4884236Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T08:33:14.5351618Z Container is starting.
+2025-08-20T08:33:14.5353046Z Establishing user namespace if not established already.
+2025-08-20T08:33:14.5354167Z Establishing network if not established already.
+2025-08-20T08:33:14.5355491Z Mounting volumes.
+2025-08-20T08:33:14.5357174Z Nested mountpoint
+2025-08-20T08:33:14.5378850Z Nested mountpoint volatile/logs
+2025-08-20T08:33:14.5498893Z Nested mountpoint
+2025-08-20T08:33:14.5509281Z Nested mountpoint
+2025-08-20T08:33:14.5523353Z Nested mountpoint
+2025-08-20T08:33:14.5571870Z Nested mountpoint
+2025-08-20T08:33:14.5654363Z Nested mountpoint
+2025-08-20T08:33:14.8760411Z Creating container.
+2025-08-20T08:33:14.8762158Z Creating pipes for streaming container io.
+2025-08-20T08:33:14.8763916Z Creating stdout named pipe at /podr/container/pipe/7e3c5a1704b9_product-information-generator/stdout_ed0da617f58a40f88f4bade64ac2c6b4.
+2025-08-20T08:33:14.8767721Z Successfully created stdout named pipe at: /podr/container/pipe/7e3c5a1704b9_product-information-generator/stdout_ed0da617f58a40f88f4bade64ac2c6b4.
+2025-08-20T08:33:14.8777926Z Opening named pipe /podr/container/pipe/7e3c5a1704b9_product-information-generator/stdout_ed0da617f58a40f88f4bade64ac2c6b4 for reading in non-blocking mode.
+2025-08-20T08:33:14.8785875Z Successfully opened named pipe: /podr/container/pipe/7e3c5a1704b9_product-information-generator/stdout_ed0da617f58a40f88f4bade64ac2c6b4.
+2025-08-20T08:33:14.8791124Z Successfully removed non-blocking flag from /podr/container/pipe/7e3c5a1704b9_product-information-generator/stdout_ed0da617f58a40f88f4bade64ac2c6b4.
+2025-08-20T08:33:14.8792820Z Creating stderr named pipe at /podr/container/pipe/7e3c5a1704b9_product-information-generator/stderr_2cfa0fe625f34b0cbb57b5fc8bff86a1.
+2025-08-20T08:33:14.8794719Z Successfully created stderr named pipe at: /podr/container/pipe/7e3c5a1704b9_product-information-generator/stderr_2cfa0fe625f34b0cbb57b5fc8bff86a1.
+2025-08-20T08:33:14.8796086Z Opening named pipe /podr/container/pipe/7e3c5a1704b9_product-information-generator/stderr_2cfa0fe625f34b0cbb57b5fc8bff86a1 for reading in non-blocking mode.
+2025-08-20T08:33:14.8797752Z Successfully opened named pipe: /podr/container/pipe/7e3c5a1704b9_product-information-generator/stderr_2cfa0fe625f34b0cbb57b5fc8bff86a1.
+2025-08-20T08:33:14.8799086Z Successfully removed non-blocking flag from /podr/container/pipe/7e3c5a1704b9_product-information-generator/stderr_2cfa0fe625f34b0cbb57b5fc8bff86a1.
+2025-08-20T08:33:14.8800563Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T08:33:15.0679105Z Starting container: 7e3c5a1704b9_product-information-generator.
+2025-08-20T08:33:15.0815953Z Starting watchers and probes.
+2025-08-20T08:33:15.0817918Z Starting metrics collection.
+2025-08-20T08:33:15.0819352Z Container is running.
+2025-08-20T08:33:15.1049537Z Container start method finished after 2616 ms.
+2025-08-20T08:33:31.8805676Z Site startup probe succeeded after 16.7730472 seconds.
+2025-08-20T08:33:31.9597873Z Site is running with deployment version: 37db5354-b650-475c-8b0d-9c1b7b4e6515
+2025-08-20T08:33:31.9608410Z Site started.
+2025-08-20T08:33:33.0989119Z Container start method called.
+2025-08-20T08:33:33.1039662Z Establishing network.
+2025-08-20T08:33:33.1084942Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T08:33:36.0951357Z Container is starting.
+2025-08-20T08:33:36.0952844Z Establishing user namespace if not established already.
+2025-08-20T08:33:36.0954039Z Establishing network if not established already.
+2025-08-20T08:33:36.0955148Z Mounting volumes.
+2025-08-20T08:33:36.0956602Z Nested mountpoint
+2025-08-20T08:33:36.1049632Z Nested mountpoint volatile/logs
+2025-08-20T08:33:36.1187245Z Nested mountpoint
+2025-08-20T08:33:36.1194407Z Nested mountpoint
+2025-08-20T08:33:36.1199484Z Nested mountpoint
+2025-08-20T08:33:36.1469992Z Nested mountpoint
+2025-08-20T08:33:36.1589356Z Nested mountpoint
+2025-08-20T08:33:36.8624020Z Creating container.
+2025-08-20T08:33:36.8625261Z Creating pipes for streaming container io.
+2025-08-20T08:33:36.8626459Z Creating stdout named pipe at /podr/container/pipe/8aae0fbcb404_product-information-generator/stdout_4c697bc71ac54b52b9523f4cb3b4829e.
+2025-08-20T08:33:36.8628843Z Successfully created stdout named pipe at: /podr/container/pipe/8aae0fbcb404_product-information-generator/stdout_4c697bc71ac54b52b9523f4cb3b4829e.
+2025-08-20T08:33:36.8654117Z Opening named pipe /podr/container/pipe/8aae0fbcb404_product-information-generator/stdout_4c697bc71ac54b52b9523f4cb3b4829e for reading in non-blocking mode.
+2025-08-20T08:33:36.8655902Z Successfully opened named pipe: /podr/container/pipe/8aae0fbcb404_product-information-generator/stdout_4c697bc71ac54b52b9523f4cb3b4829e.
+2025-08-20T08:33:36.8657053Z Successfully removed non-blocking flag from /podr/container/pipe/8aae0fbcb404_product-information-generator/stdout_4c697bc71ac54b52b9523f4cb3b4829e.
+2025-08-20T08:33:36.8658213Z Creating stderr named pipe at /podr/container/pipe/8aae0fbcb404_product-information-generator/stderr_5b1f259471264412904f1d5761652605.
+2025-08-20T08:33:36.8659918Z Successfully created stderr named pipe at: /podr/container/pipe/8aae0fbcb404_product-information-generator/stderr_5b1f259471264412904f1d5761652605.
+2025-08-20T08:33:36.8661038Z Opening named pipe /podr/container/pipe/8aae0fbcb404_product-information-generator/stderr_5b1f259471264412904f1d5761652605 for reading in non-blocking mode.
+2025-08-20T08:33:36.8663387Z Successfully opened named pipe: /podr/container/pipe/8aae0fbcb404_product-information-generator/stderr_5b1f259471264412904f1d5761652605.
+2025-08-20T08:33:36.8664527Z Successfully removed non-blocking flag from /podr/container/pipe/8aae0fbcb404_product-information-generator/stderr_5b1f259471264412904f1d5761652605.
+2025-08-20T08:33:36.8665577Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T08:33:37.4543969Z Starting container: 8aae0fbcb404_product-information-generator.
+2025-08-20T08:33:37.4860261Z Starting watchers and probes.
+2025-08-20T08:33:37.4964815Z Starting metrics collection.
+2025-08-20T08:33:37.5002912Z Container is running.
+2025-08-20T08:33:37.5864171Z Container start method finished after 4487 ms.
+2025-08-20T08:33:53.9342678Z Site startup probe succeeded after 16.3461582 seconds.
+2025-08-20T08:33:53.9459276Z Site is running with deployment version: 37db5354-b650-475c-8b0d-9c1b7b4e6515
+2025-08-20T08:33:53.9461409Z Site started.
+2025-08-20T08:34:13.9501491Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T08:34:13.9526578Z Stop and delete container. Retry count = 0
+2025-08-20T08:34:13.9527916Z Stopping container: 7e3c5a1704b9_product-information-generator.
+2025-08-20T08:34:18.9818250Z Deleting container: 7e3c5a1704b9_product-information-generator. Retry count = 0
+2025-08-20T08:34:20.9819217Z Container spec TerminationMessagePolicy  path
+2025-08-20T08:34:20.9820652Z Container is terminated. Total time elapsed: 7031 ms.
+2025-08-20T08:34:20.9820920Z Site: product-information-generator stopped.
+2025-08-20T08:54:43.3869183Z Container start method called.
+2025-08-20T08:54:43.3943602Z Establishing network.
+2025-08-20T08:54:43.3953623Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T08:54:45.6306282Z Container is starting.
+2025-08-20T08:54:45.6307906Z Establishing user namespace if not established already.
+2025-08-20T08:54:45.6309038Z Establishing network if not established already.
+2025-08-20T08:54:45.6310325Z Mounting volumes.
+2025-08-20T08:54:45.6311785Z Nested mountpoint
+2025-08-20T08:54:45.6371402Z Nested mountpoint volatile/logs
+2025-08-20T08:54:45.6407138Z Nested mountpoint
+2025-08-20T08:54:45.6413010Z Nested mountpoint
+2025-08-20T08:54:45.6417957Z Nested mountpoint
+2025-08-20T08:54:45.6769239Z Nested mountpoint
+2025-08-20T08:54:45.7001501Z Nested mountpoint
+2025-08-20T08:54:46.0451888Z Creating container.
+2025-08-20T08:54:46.0453270Z Creating pipes for streaming container io.
+2025-08-20T08:54:46.0454464Z Creating stdout named pipe at /podr/container/pipe/3c20f59e9b7c_product-information-generator/stdout_a02e9d79abcc44fb9163c55409c61ba2.
+2025-08-20T08:54:46.0462847Z Successfully created stdout named pipe at: /podr/container/pipe/3c20f59e9b7c_product-information-generator/stdout_a02e9d79abcc44fb9163c55409c61ba2.
+2025-08-20T08:54:46.0464226Z Opening named pipe /podr/container/pipe/3c20f59e9b7c_product-information-generator/stdout_a02e9d79abcc44fb9163c55409c61ba2 for reading in non-blocking mode.
+2025-08-20T08:54:46.0469803Z Successfully opened named pipe: /podr/container/pipe/3c20f59e9b7c_product-information-generator/stdout_a02e9d79abcc44fb9163c55409c61ba2.
+2025-08-20T08:54:46.0471881Z Successfully removed non-blocking flag from /podr/container/pipe/3c20f59e9b7c_product-information-generator/stdout_a02e9d79abcc44fb9163c55409c61ba2.
+2025-08-20T08:54:46.0473775Z Creating stderr named pipe at /podr/container/pipe/3c20f59e9b7c_product-information-generator/stderr_69a030254fbf4ab8b610e939d9d6aae7.
+2025-08-20T08:54:46.0476483Z Successfully created stderr named pipe at: /podr/container/pipe/3c20f59e9b7c_product-information-generator/stderr_69a030254fbf4ab8b610e939d9d6aae7.
+2025-08-20T08:54:46.0478151Z Opening named pipe /podr/container/pipe/3c20f59e9b7c_product-information-generator/stderr_69a030254fbf4ab8b610e939d9d6aae7 for reading in non-blocking mode.
+2025-08-20T08:54:46.0479559Z Successfully opened named pipe: /podr/container/pipe/3c20f59e9b7c_product-information-generator/stderr_69a030254fbf4ab8b610e939d9d6aae7.
+2025-08-20T08:54:46.0481563Z Successfully removed non-blocking flag from /podr/container/pipe/3c20f59e9b7c_product-information-generator/stderr_69a030254fbf4ab8b610e939d9d6aae7.
+2025-08-20T08:54:46.0484196Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T08:54:46.2075697Z Starting container: 3c20f59e9b7c_product-information-generator.
+2025-08-20T08:54:46.2206220Z Starting watchers and probes.
+2025-08-20T08:54:46.2208490Z Starting metrics collection.
+2025-08-20T08:54:46.2210173Z Container is running.
+2025-08-20T08:54:46.2506174Z Container start method finished after 2859 ms.
+2025-08-20T08:55:01.3223486Z Site startup probe succeeded after 15.0690561 seconds.
+2025-08-20T08:55:01.3929284Z Site is running with deployment version: 84244fd4-7f5e-4f38-a7a8-9da09454a94c
+2025-08-20T08:55:01.3931983Z Site started.
+2025-08-20T08:55:21.3975356Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T08:55:21.3996994Z Stop and delete container. Retry count = 0
+2025-08-20T08:55:21.3998130Z Stopping container: 8aae0fbcb404_product-information-generator.
+2025-08-20T08:55:26.4637580Z Deleting container: 8aae0fbcb404_product-information-generator. Retry count = 0
+2025-08-20T08:55:27.5347647Z Container spec TerminationMessagePolicy  path
+2025-08-20T08:55:27.5349373Z Container is terminated. Total time elapsed: 6137 ms.
+2025-08-20T08:55:27.5349732Z Site: product-information-generator stopped.
+2025-08-20T09:09:33.8168323Z Container start method called.
+2025-08-20T09:09:33.8169310Z Establishing network.
+2025-08-20T09:09:33.8170308Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T09:09:36.4580902Z Container is starting.
+2025-08-20T09:09:36.4582569Z Establishing user namespace if not established already.
+2025-08-20T09:09:36.4583714Z Establishing network if not established already.
+2025-08-20T09:09:36.4584866Z Mounting volumes.
+2025-08-20T09:09:36.4586319Z Nested mountpoint
+2025-08-20T09:09:36.4627980Z Nested mountpoint volatile/logs
+2025-08-20T09:09:36.4670947Z Nested mountpoint
+2025-08-20T09:09:36.4758156Z Nested mountpoint
+2025-08-20T09:09:36.4841124Z Nested mountpoint
+2025-08-20T09:09:36.4944424Z Nested mountpoint
+2025-08-20T09:09:36.5029325Z Nested mountpoint
+2025-08-20T09:09:36.8898672Z Creating container.
+2025-08-20T09:09:36.8906383Z Creating pipes for streaming container io.
+2025-08-20T09:09:36.8913750Z Creating stdout named pipe at /podr/container/pipe/c97bc7396d4f_product-information-generator/stdout_9d4289c2466b41e8adde63906e6be65b.
+2025-08-20T09:09:36.8922238Z Successfully created stdout named pipe at: /podr/container/pipe/c97bc7396d4f_product-information-generator/stdout_9d4289c2466b41e8adde63906e6be65b.
+2025-08-20T09:09:36.8923810Z Opening named pipe /podr/container/pipe/c97bc7396d4f_product-information-generator/stdout_9d4289c2466b41e8adde63906e6be65b for reading in non-blocking mode.
+2025-08-20T09:09:36.8928279Z Successfully opened named pipe: /podr/container/pipe/c97bc7396d4f_product-information-generator/stdout_9d4289c2466b41e8adde63906e6be65b.
+2025-08-20T09:09:36.8929482Z Successfully removed non-blocking flag from /podr/container/pipe/c97bc7396d4f_product-information-generator/stdout_9d4289c2466b41e8adde63906e6be65b.
+2025-08-20T09:09:36.8931645Z Creating stderr named pipe at /podr/container/pipe/c97bc7396d4f_product-information-generator/stderr_cef61d5d96ea45169a84736869f3c214.
+2025-08-20T09:09:36.8941110Z Successfully created stderr named pipe at: /podr/container/pipe/c97bc7396d4f_product-information-generator/stderr_cef61d5d96ea45169a84736869f3c214.
+2025-08-20T09:09:36.8948063Z Opening named pipe /podr/container/pipe/c97bc7396d4f_product-information-generator/stderr_cef61d5d96ea45169a84736869f3c214 for reading in non-blocking mode.
+2025-08-20T09:09:36.8953369Z Successfully opened named pipe: /podr/container/pipe/c97bc7396d4f_product-information-generator/stderr_cef61d5d96ea45169a84736869f3c214.
+2025-08-20T09:09:36.8954811Z Successfully removed non-blocking flag from /podr/container/pipe/c97bc7396d4f_product-information-generator/stderr_cef61d5d96ea45169a84736869f3c214.
+2025-08-20T09:09:36.8956069Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T09:09:37.1452276Z Starting container: c97bc7396d4f_product-information-generator.
+2025-08-20T09:09:37.1703690Z Starting watchers and probes.
+2025-08-20T09:09:37.1719905Z Starting metrics collection.
+2025-08-20T09:09:37.1721647Z Container is running.
+2025-08-20T09:09:37.1958766Z Container start method finished after 3378 ms.
+2025-08-20T09:10:01.1685465Z Site startup probe succeeded after 23.9702591 seconds.
+2025-08-20T09:10:01.1802133Z Site is running with deployment version: f01197df-6b26-4d9d-9bdb-1d9041c0e3c4
+2025-08-20T09:10:01.1804388Z Site started.
+2025-08-20T09:10:21.1856856Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T09:10:21.1873027Z Stop and delete container. Retry count = 0
+2025-08-20T09:10:21.1874252Z Stopping container: 3c20f59e9b7c_product-information-generator.
+2025-08-20T09:10:26.2762817Z Deleting container: 3c20f59e9b7c_product-information-generator. Retry count = 0
+2025-08-20T09:10:26.5934134Z Container spec TerminationMessagePolicy  path
+2025-08-20T09:10:26.5944680Z Container is terminated. Total time elapsed: 5407 ms.
+2025-08-20T09:10:26.5945075Z Site: product-information-generator stopped.
+2025-08-20T09:10:44.2133358Z Container start method called.
+2025-08-20T09:10:44.2134717Z Establishing network.
+2025-08-20T09:10:44.2135805Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T09:10:46.3033899Z Container is starting.
+2025-08-20T09:10:46.3040246Z Establishing user namespace if not established already.
+2025-08-20T09:10:46.3043184Z Establishing network if not established already.
+2025-08-20T09:10:46.3044617Z Mounting volumes.
+2025-08-20T09:10:46.3046167Z Nested mountpoint
+2025-08-20T09:10:46.3110262Z Nested mountpoint volatile/logs
+2025-08-20T09:10:46.3208476Z Nested mountpoint
+2025-08-20T09:10:46.3266490Z Nested mountpoint
+2025-08-20T09:10:46.3271554Z Nested mountpoint
+2025-08-20T09:10:46.3278668Z Nested mountpoint
+2025-08-20T09:10:46.3424887Z Nested mountpoint
+2025-08-20T09:10:46.6993306Z Creating container.
+2025-08-20T09:10:46.6994710Z Creating pipes for streaming container io.
+2025-08-20T09:10:46.6995918Z Creating stdout named pipe at /podr/container/pipe/5c30aef04a4b_product-information-generator/stdout_ef2d0a47fb544cb6a708681922f39575.
+2025-08-20T09:10:46.7008733Z Successfully created stdout named pipe at: /podr/container/pipe/5c30aef04a4b_product-information-generator/stdout_ef2d0a47fb544cb6a708681922f39575.
+2025-08-20T09:10:46.7010103Z Opening named pipe /podr/container/pipe/5c30aef04a4b_product-information-generator/stdout_ef2d0a47fb544cb6a708681922f39575 for reading in non-blocking mode.
+2025-08-20T09:10:46.7021034Z Successfully opened named pipe: /podr/container/pipe/5c30aef04a4b_product-information-generator/stdout_ef2d0a47fb544cb6a708681922f39575.
+2025-08-20T09:10:46.7026744Z Successfully removed non-blocking flag from /podr/container/pipe/5c30aef04a4b_product-information-generator/stdout_ef2d0a47fb544cb6a708681922f39575.
+2025-08-20T09:10:46.7030378Z Creating stderr named pipe at /podr/container/pipe/5c30aef04a4b_product-information-generator/stderr_d094c25c4dfe4016952ce472eb1abcd4.
+2025-08-20T09:10:46.7032283Z Successfully created stderr named pipe at: /podr/container/pipe/5c30aef04a4b_product-information-generator/stderr_d094c25c4dfe4016952ce472eb1abcd4.
+2025-08-20T09:10:46.7039518Z Opening named pipe /podr/container/pipe/5c30aef04a4b_product-information-generator/stderr_d094c25c4dfe4016952ce472eb1abcd4 for reading in non-blocking mode.
+2025-08-20T09:10:46.7044332Z Successfully opened named pipe: /podr/container/pipe/5c30aef04a4b_product-information-generator/stderr_d094c25c4dfe4016952ce472eb1abcd4.
+2025-08-20T09:10:46.7048133Z Successfully removed non-blocking flag from /podr/container/pipe/5c30aef04a4b_product-information-generator/stderr_d094c25c4dfe4016952ce472eb1abcd4.
+2025-08-20T09:10:46.7051445Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T09:10:46.8948839Z Starting container: 5c30aef04a4b_product-information-generator.
+2025-08-20T09:10:46.9089024Z Starting watchers and probes.
+2025-08-20T09:10:46.9094122Z Starting metrics collection.
+2025-08-20T09:10:46.9097370Z Container is running.
+2025-08-20T09:10:46.9229075Z Container start method finished after 2709 ms.
+2025-08-20T09:11:00.9632419Z Site startup probe succeeded after 14.0385014 seconds.
+2025-08-20T09:11:00.9738446Z Site is running with deployment version: e5eeacb2-ad86-442c-b0a2-2628c825657e
+2025-08-20T09:11:00.9740532Z Site started.
+2025-08-20T09:11:21.0006866Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T09:11:21.0255369Z Stop and delete container. Retry count = 0
+2025-08-20T09:11:21.0256591Z Stopping container: c97bc7396d4f_product-information-generator.
+2025-08-20T09:11:26.0435259Z Deleting container: c97bc7396d4f_product-information-generator. Retry count = 0
+2025-08-20T09:11:28.8765822Z Container spec TerminationMessagePolicy  path
+2025-08-20T09:11:28.8767608Z Container is terminated. Total time elapsed: 7875 ms.
+2025-08-20T09:11:28.8767854Z Site: product-information-generator stopped.
+2025-08-20T09:11:58.6367599Z Container start method called.
+2025-08-20T09:11:58.6429164Z Establishing network.
+2025-08-20T09:11:58.6431701Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T09:12:03.8921856Z Container is starting.
+2025-08-20T09:12:03.8923208Z Establishing user namespace if not established already.
+2025-08-20T09:12:03.8924545Z Establishing network if not established already.
+2025-08-20T09:12:03.8925891Z Mounting volumes.
+2025-08-20T09:12:03.8927462Z Nested mountpoint
+2025-08-20T09:12:03.8952154Z Nested mountpoint volatile/logs
+2025-08-20T09:12:03.8979262Z Nested mountpoint
+2025-08-20T09:12:03.8992065Z Nested mountpoint
+2025-08-20T09:12:03.8997583Z Nested mountpoint
+2025-08-20T09:12:03.9004590Z Nested mountpoint
+2025-08-20T09:12:03.9052552Z Nested mountpoint
+2025-08-20T09:12:04.4588797Z Creating container.
+2025-08-20T09:12:04.4594244Z Creating pipes for streaming container io.
+2025-08-20T09:12:04.4604381Z Creating stdout named pipe at /podr/container/pipe/5594874e1475_product-information-generator/stdout_1a19374b77da4cbb999531578ad2484a.
+2025-08-20T09:12:04.4606987Z Successfully created stdout named pipe at: /podr/container/pipe/5594874e1475_product-information-generator/stdout_1a19374b77da4cbb999531578ad2484a.
+2025-08-20T09:12:04.4608544Z Opening named pipe /podr/container/pipe/5594874e1475_product-information-generator/stdout_1a19374b77da4cbb999531578ad2484a for reading in non-blocking mode.
+2025-08-20T09:12:04.4610052Z Successfully opened named pipe: /podr/container/pipe/5594874e1475_product-information-generator/stdout_1a19374b77da4cbb999531578ad2484a.
+2025-08-20T09:12:04.4611341Z Successfully removed non-blocking flag from /podr/container/pipe/5594874e1475_product-information-generator/stdout_1a19374b77da4cbb999531578ad2484a.
+2025-08-20T09:12:04.4612738Z Creating stderr named pipe at /podr/container/pipe/5594874e1475_product-information-generator/stderr_9588ea2968934e9ba505b4b3fda012c8.
+2025-08-20T09:12:04.4621638Z Successfully created stderr named pipe at: /podr/container/pipe/5594874e1475_product-information-generator/stderr_9588ea2968934e9ba505b4b3fda012c8.
+2025-08-20T09:12:04.4625959Z Opening named pipe /podr/container/pipe/5594874e1475_product-information-generator/stderr_9588ea2968934e9ba505b4b3fda012c8 for reading in non-blocking mode.
+2025-08-20T09:12:04.4628381Z Successfully opened named pipe: /podr/container/pipe/5594874e1475_product-information-generator/stderr_9588ea2968934e9ba505b4b3fda012c8.
+2025-08-20T09:12:04.4632708Z Successfully removed non-blocking flag from /podr/container/pipe/5594874e1475_product-information-generator/stderr_9588ea2968934e9ba505b4b3fda012c8.
+2025-08-20T09:12:04.4636127Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T09:12:04.7743563Z Starting container: 5594874e1475_product-information-generator.
+2025-08-20T09:12:04.8318963Z Starting watchers and probes.
+2025-08-20T09:12:04.8384682Z Starting metrics collection.
+2025-08-20T09:12:04.8390680Z Container is running.
+2025-08-20T09:12:04.8727393Z Container start method finished after 6235 ms.
+2025-08-20T09:12:24.9070739Z Site startup probe succeeded after 20.0329295 seconds.
+2025-08-20T09:12:24.9253226Z Site is running with deployment version: e5eeacb2-ad86-442c-b0a2-2628c825657e
+2025-08-20T09:12:24.9255108Z Site started.
+2025-08-20T09:12:44.9325347Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T09:12:44.9340228Z Stop and delete container. Retry count = 0
+2025-08-20T09:12:44.9341672Z Stopping container: 5c30aef04a4b_product-information-generator.
+2025-08-20T09:12:49.9637407Z Deleting container: 5c30aef04a4b_product-information-generator. Retry count = 0
+2025-08-20T09:12:50.8034411Z Container spec TerminationMessagePolicy  path
+2025-08-20T09:12:50.8036046Z Container is terminated. Total time elapsed: 5870 ms.
+2025-08-20T09:12:50.8036308Z Site: product-information-generator stopped.
+2025-08-20T09:16:57.8834611Z Container start method called.
+2025-08-20T09:16:57.8836666Z Establishing network.
+2025-08-20T09:16:57.8838831Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T09:17:02.5729388Z Container is starting.
+2025-08-20T09:17:02.5745706Z Establishing user namespace if not established already.
+2025-08-20T09:17:02.5747260Z Establishing network if not established already.
+2025-08-20T09:17:02.5748718Z Mounting volumes.
+2025-08-20T09:17:02.5750588Z Nested mountpoint
+2025-08-20T09:17:02.5834413Z Nested mountpoint volatile/logs
+2025-08-20T09:17:02.6190646Z Nested mountpoint
+2025-08-20T09:17:02.6215254Z Nested mountpoint
+2025-08-20T09:17:02.6272995Z Nested mountpoint
+2025-08-20T09:17:02.6311789Z Nested mountpoint
+2025-08-20T09:17:02.6399188Z Nested mountpoint
+2025-08-20T09:17:03.1601838Z Creating container.
+2025-08-20T09:17:03.1604964Z Creating pipes for streaming container io.
+2025-08-20T09:17:03.1610723Z Creating stdout named pipe at /podr/container/pipe/f5336a0f77af_product-information-generator/stdout_d2aacd7daf8e4dac86cc4a42fe192ffe.
+2025-08-20T09:17:03.1614044Z Successfully created stdout named pipe at: /podr/container/pipe/f5336a0f77af_product-information-generator/stdout_d2aacd7daf8e4dac86cc4a42fe192ffe.
+2025-08-20T09:17:03.1620415Z Opening named pipe /podr/container/pipe/f5336a0f77af_product-information-generator/stdout_d2aacd7daf8e4dac86cc4a42fe192ffe for reading in non-blocking mode.
+2025-08-20T09:17:03.1625244Z Successfully opened named pipe: /podr/container/pipe/f5336a0f77af_product-information-generator/stdout_d2aacd7daf8e4dac86cc4a42fe192ffe.
+2025-08-20T09:17:03.1628764Z Successfully removed non-blocking flag from /podr/container/pipe/f5336a0f77af_product-information-generator/stdout_d2aacd7daf8e4dac86cc4a42fe192ffe.
+2025-08-20T09:17:03.1633407Z Creating stderr named pipe at /podr/container/pipe/f5336a0f77af_product-information-generator/stderr_97f3f6bdd9aa406cb945a03a77074b04.
+2025-08-20T09:17:03.1639508Z Successfully created stderr named pipe at: /podr/container/pipe/f5336a0f77af_product-information-generator/stderr_97f3f6bdd9aa406cb945a03a77074b04.
+2025-08-20T09:17:03.1641974Z Opening named pipe /podr/container/pipe/f5336a0f77af_product-information-generator/stderr_97f3f6bdd9aa406cb945a03a77074b04 for reading in non-blocking mode.
+2025-08-20T09:17:03.1645458Z Successfully opened named pipe: /podr/container/pipe/f5336a0f77af_product-information-generator/stderr_97f3f6bdd9aa406cb945a03a77074b04.
+2025-08-20T09:17:03.1646590Z Successfully removed non-blocking flag from /podr/container/pipe/f5336a0f77af_product-information-generator/stderr_97f3f6bdd9aa406cb945a03a77074b04.
+2025-08-20T09:17:03.1647544Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T09:17:03.4709057Z Starting container: f5336a0f77af_product-information-generator.
+2025-08-20T09:17:03.5057595Z Starting watchers and probes.
+2025-08-20T09:17:03.5073534Z Starting metrics collection.
+2025-08-20T09:17:03.5090275Z Container is running.
+2025-08-20T09:17:03.5474486Z Container start method finished after 5663 ms.
+2025-08-20T09:17:19.6555290Z Container has finished running with exit code: 127.
+2025-08-20T09:17:19.6557024Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T09:17:19.6559981Z Stop and delete container. Retry count = 0
+2025-08-20T09:17:19.6561384Z Stopping container: f5336a0f77af_product-information-generator.
+2025-08-20T09:17:19.6744697Z Deleting container: f5336a0f77af_product-information-generator. Retry count = 0
+2025-08-20T09:17:22.4518670Z Container spec TerminationMessagePolicy  path
+2025-08-20T09:17:22.4520475Z Container is terminated. Total time elapsed: 2796 ms.
+2025-08-20T09:17:22.4521776Z Site container: product-information-generator terminated during site startup.
+2025-08-20T09:17:22.4647800Z Site startup probe failed after 18.9166959 seconds.
+2025-08-20T09:17:22.4875200Z Failed to start site. Revert by stopping site.
+2025-08-20T09:17:22.4877873Z Site: product-information-generator stopped.
+2025-08-20T09:17:43.3556715Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T09:17:43.3571179Z Stop and delete container. Retry count = 0
+2025-08-20T09:17:43.3572719Z Stopping container: 5594874e1475_product-information-generator.
+2025-08-20T09:17:48.4117910Z Deleting container: 5594874e1475_product-information-generator. Retry count = 0
+2025-08-20T09:17:48.7267156Z Container spec TerminationMessagePolicy  path
+2025-08-20T09:17:48.7268898Z Container is terminated. Total time elapsed: 5371 ms.
+2025-08-20T09:17:48.7269183Z Site: product-information-generator stopped.
+2025-08-20T09:18:17.7730220Z Container start method called.
+2025-08-20T09:18:17.7734690Z Establishing network.
+2025-08-20T09:18:17.7743198Z Pulling image: appsvc/node:20-lts_20250724.2.tuxprod.
+2025-08-20T09:18:20.4536479Z Container is starting.
+2025-08-20T09:18:20.4540161Z Establishing user namespace if not established already.
+2025-08-20T09:18:20.4543452Z Establishing network if not established already.
+2025-08-20T09:18:20.4545377Z Mounting volumes.
+2025-08-20T09:18:20.4547627Z Nested mountpoint
+2025-08-20T09:18:20.4564955Z Nested mountpoint volatile/logs
+2025-08-20T09:18:20.4585737Z Nested mountpoint
+2025-08-20T09:18:20.4591876Z Nested mountpoint
+2025-08-20T09:18:20.4596668Z Nested mountpoint
+2025-08-20T09:18:20.4603636Z Nested mountpoint
+2025-08-20T09:18:20.4707310Z Nested mountpoint
+2025-08-20T09:18:20.7956209Z Creating container.
+2025-08-20T09:18:20.7961964Z Creating pipes for streaming container io.
+2025-08-20T09:18:20.7964872Z Creating stdout named pipe at /podr/container/pipe/6317caf2b8c6_product-information-generator/stdout_082292faa9ed4ff9b0c98e1b900edb9d.
+2025-08-20T09:18:20.7973884Z Successfully created stdout named pipe at: /podr/container/pipe/6317caf2b8c6_product-information-generator/stdout_082292faa9ed4ff9b0c98e1b900edb9d.
+2025-08-20T09:18:20.7979427Z Opening named pipe /podr/container/pipe/6317caf2b8c6_product-information-generator/stdout_082292faa9ed4ff9b0c98e1b900edb9d for reading in non-blocking mode.
+2025-08-20T09:18:20.7987176Z Successfully opened named pipe: /podr/container/pipe/6317caf2b8c6_product-information-generator/stdout_082292faa9ed4ff9b0c98e1b900edb9d.
+2025-08-20T09:18:20.7994591Z Successfully removed non-blocking flag from /podr/container/pipe/6317caf2b8c6_product-information-generator/stdout_082292faa9ed4ff9b0c98e1b900edb9d.
+2025-08-20T09:18:20.7999029Z Creating stderr named pipe at /podr/container/pipe/6317caf2b8c6_product-information-generator/stderr_7af3c4052ab3407d8e6b880d39da29b1.
+2025-08-20T09:18:20.8004889Z Successfully created stderr named pipe at: /podr/container/pipe/6317caf2b8c6_product-information-generator/stderr_7af3c4052ab3407d8e6b880d39da29b1.
+2025-08-20T09:18:20.8008356Z Opening named pipe /podr/container/pipe/6317caf2b8c6_product-information-generator/stderr_7af3c4052ab3407d8e6b880d39da29b1 for reading in non-blocking mode.
+2025-08-20T09:18:20.8012139Z Successfully opened named pipe: /podr/container/pipe/6317caf2b8c6_product-information-generator/stderr_7af3c4052ab3407d8e6b880d39da29b1.
+2025-08-20T09:18:20.8014784Z Successfully removed non-blocking flag from /podr/container/pipe/6317caf2b8c6_product-information-generator/stderr_7af3c4052ab3407d8e6b880d39da29b1.
+2025-08-20T09:18:20.8016437Z Creating container with image: appsvc/node:20-lts_20250724.2.tuxprod from registry: mcr.microsoft.com and fully qualified image name: mcr.microsoft.com/appsvc/node:20-lts_20250724.2.tuxprod
+2025-08-20T09:18:20.9545668Z Starting container: 6317caf2b8c6_product-information-generator.
+2025-08-20T09:18:20.9710637Z Starting watchers and probes.
+2025-08-20T09:18:20.9734806Z Starting metrics collection.
+2025-08-20T09:18:20.9743191Z Container is running.
+2025-08-20T09:18:21.8905275Z Container start method finished after 4112 ms.
+2025-08-20T09:18:31.2834458Z Container has finished running with exit code: 127.
+2025-08-20T09:18:31.2838178Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T09:18:31.2843836Z Stop and delete container. Retry count = 0
+2025-08-20T09:18:31.2845678Z Stopping container: 6317caf2b8c6_product-information-generator.
+2025-08-20T09:18:31.2963502Z Deleting container: 6317caf2b8c6_product-information-generator. Retry count = 0
+2025-08-20T09:18:31.9244781Z Container get mounts received unexpected exception.
+2025-08-20T09:18:31.9299914Z Container get processes received unexpected exception.
+2025-08-20T09:18:36.4254385Z Container spec TerminationMessagePolicy  path
+2025-08-20T09:18:36.4256140Z Container is terminated. Total time elapsed: 5141 ms.
+2025-08-20T09:18:36.4257525Z Site container: product-information-generator terminated during site startup.
+2025-08-20T09:18:36.4266014Z Site startup probe failed after 14.5305809 seconds.
+2025-08-20T09:18:36.4296439Z Failed to start site. Revert by stopping site.
+2025-08-20T09:18:36.4298781Z Site: product-information-generator stopped.
+2025-08-20T09:18:38.615Z INFO  - Starting container for site
+2025-08-20T09:18:38.617Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_f6954be0 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:18:38.617Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:18:39.873Z INFO  - Initiating warmup request to container product-information-generator_0_f6954be0 for site product-information-generator
+2025-08-20T09:18:52.614Z ERROR - Container product-information-generator_0_f6954be0 for site product-information-generator has exited, failing site start
+2025-08-20T09:18:52.630Z ERROR - Container product-information-generator_0_f6954be0 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:18:52.658Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:21:47.479Z INFO  - Starting container for site
+2025-08-20T09:21:47.480Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_762685b8 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:21:47.480Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:21:48.994Z INFO  - Initiating warmup request to container product-information-generator_0_762685b8 for site product-information-generator
+2025-08-20T09:22:06.181Z INFO  - Waiting for response to warmup request for container product-information-generator_0_762685b8. Elapsed time = 17.1867992 sec
+2025-08-20T09:22:21.493Z INFO  - Waiting for response to warmup request for container product-information-generator_0_762685b8. Elapsed time = 32.49902 sec
+2025-08-20T09:22:36.858Z INFO  - Waiting for response to warmup request for container product-information-generator_0_762685b8. Elapsed time = 47.8634982 sec
+2025-08-20T09:22:41.917Z INFO  - Container product-information-generator_0_762685b8 for site product-information-generator initialized successfully and is ready to serve requests.
+2025-08-20T09:23:12.714Z INFO  - Starting container for site
+2025-08-20T09:23:12.715Z INFO  - docker run -d --expose=8080 --name product-information-generator_1_77445f49 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:23:12.716Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:23:13.784Z INFO  - Initiating warmup request to container product-information-generator_1_77445f49 for site product-information-generator
+2025-08-20T09:23:29.591Z INFO  - Waiting for response to warmup request for container product-information-generator_1_77445f49. Elapsed time = 15.8067442 sec
+2025-08-20T09:23:46.123Z INFO  - Waiting for response to warmup request for container product-information-generator_1_77445f49. Elapsed time = 32.3383511 sec
+2025-08-20T09:24:01.289Z INFO  - Waiting for response to warmup request for container product-information-generator_1_77445f49. Elapsed time = 47.5049105 sec
+2025-08-20T09:24:08.363Z INFO  - Container product-information-generator_1_77445f49 for site product-information-generator initialized successfully and is ready to serve requests.
+2025-08-20T09:38:38.746Z INFO  - Starting container for site
+2025-08-20T09:38:38.749Z INFO  - docker run -d --expose=8080 --name product-information-generator_2_898b5215 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:38:38.749Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:38:39.763Z INFO  - Initiating warmup request to container product-information-generator_2_898b5215 for site product-information-generator
+2025-08-20T09:38:55.209Z ERROR - Container product-information-generator_2_898b5215 for site product-information-generator has exited, failing site start
+2025-08-20T09:38:55.221Z ERROR - Container product-information-generator_2_898b5215 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:39:00.088Z INFO  - Starting container for site
+2025-08-20T09:39:00.089Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_76557cd9 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:39:00.090Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:39:01.955Z INFO  - Initiating warmup request to container product-information-generator_0_76557cd9 for site product-information-generator
+2025-08-20T09:39:17.253Z ERROR - Container product-information-generator_0_76557cd9 for site product-information-generator has exited, failing site start
+2025-08-20T09:39:17.262Z ERROR - Container product-information-generator_0_76557cd9 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:39:17.270Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:39:23.471Z INFO  - Starting container for site
+2025-08-20T09:39:23.472Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_fcbee27f -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:39:23.473Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:39:24.134Z INFO  - Initiating warmup request to container product-information-generator_0_fcbee27f for site product-information-generator
+2025-08-20T09:39:38.803Z ERROR - Container product-information-generator_0_fcbee27f for site product-information-generator has exited, failing site start
+2025-08-20T09:39:38.812Z ERROR - Container product-information-generator_0_fcbee27f didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:39:38.815Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:39:59.506Z INFO  - Starting container for site
+2025-08-20T09:39:59.507Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_90f5b07f -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:39:59.507Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:40:02.698Z INFO  - Initiating warmup request to container product-information-generator_0_90f5b07f for site product-information-generator
+2025-08-20T09:40:14.580Z ERROR - Container product-information-generator_0_90f5b07f for site product-information-generator has exited, failing site start
+2025-08-20T09:40:14.587Z ERROR - Container product-information-generator_0_90f5b07f didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:40:14.591Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:43:09.101Z INFO  - Starting container for site
+2025-08-20T09:43:09.102Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_3e22130c -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:43:09.103Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:43:09.950Z INFO  - Initiating warmup request to container product-information-generator_0_3e22130c for site product-information-generator
+2025-08-20T09:43:24.427Z ERROR - Container product-information-generator_0_3e22130c for site product-information-generator has exited, failing site start
+2025-08-20T09:43:24.434Z ERROR - Container product-information-generator_0_3e22130c didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:43:24.443Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:48:05.935Z INFO  - Starting container for site
+2025-08-20T09:48:05.935Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_8b152337 -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:48:05.936Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:48:06.450Z INFO  - Initiating warmup request to container product-information-generator_0_8b152337 for site product-information-generator
+2025-08-20T09:48:21.738Z ERROR - Container product-information-generator_0_8b152337 for site product-information-generator has exited, failing site start
+2025-08-20T09:48:21.746Z ERROR - Container product-information-generator_0_8b152337 didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:48:21.753Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:53:06.199Z INFO  - Starting container for site
+2025-08-20T09:53:06.200Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_3a20492b -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:53:06.201Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:53:06.794Z INFO  - Initiating warmup request to container product-information-generator_0_3a20492b for site product-information-generator
+2025-08-20T09:53:21.486Z ERROR - Container product-information-generator_0_3a20492b for site product-information-generator has exited, failing site start
+2025-08-20T09:53:21.496Z ERROR - Container product-information-generator_0_3a20492b didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:53:21.501Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T09:58:06.555Z INFO  - Starting container for site
+2025-08-20T09:58:06.556Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_1b406bad -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T09:58:06.557Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T09:58:07.100Z INFO  - Initiating warmup request to container product-information-generator_0_1b406bad for site product-information-generator
+2025-08-20T09:58:22.134Z ERROR - Container product-information-generator_0_1b406bad for site product-information-generator has exited, failing site start
+2025-08-20T09:58:22.141Z ERROR - Container product-information-generator_0_1b406bad didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T09:58:22.146Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T10:03:06.879Z INFO  - Starting container for site
+2025-08-20T10:03:06.880Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_d9e559aa -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T10:03:06.881Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T10:03:08.226Z INFO  - Initiating warmup request to container product-information-generator_0_d9e559aa for site product-information-generator
+2025-08-20T10:03:23.227Z ERROR - Container product-information-generator_0_d9e559aa for site product-information-generator has exited, failing site start
+2025-08-20T10:03:23.237Z ERROR - Container product-information-generator_0_d9e559aa didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T10:03:23.246Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T10:06:54.330Z INFO  - Starting container for site
+2025-08-20T10:06:54.332Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_92384d5d -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T10:06:54.332Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T10:06:55.054Z INFO  - Initiating warmup request to container product-information-generator_0_92384d5d for site product-information-generator
+2025-08-20T10:07:10.293Z INFO  - Waiting for response to warmup request for container product-information-generator_0_92384d5d. Elapsed time = 15.2387634 sec
+2025-08-20T10:07:11.890Z ERROR - Container product-information-generator_0_92384d5d for site product-information-generator has exited, failing site start
+2025-08-20T10:07:11.897Z ERROR - Container product-information-generator_0_92384d5d didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T10:07:11.907Z INFO  - Stopping site product-information-generator because it failed during startup.
+2025-08-20T10:18:57.605Z INFO  - Starting container for site
+2025-08-20T10:18:57.606Z INFO  - docker run -d --expose=8080 --name product-information-generator_0_22973dfa -e WEBSITE_USE_DIAGNOSTIC_SERVER=true -e WEBSITE_SITE_NAME=Product-Information-Generator -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=product-information-generator-afcgcwcchbfcgbhx.germanywestcentral-01.azurewebsites.net -e WEBSITE_INSTANCE_ID=dba115f57a54e6ae5eac58f75bc5f0104057a5195ab7a5346a9b78be16a2b18c -e NODE_OPTIONS=--require /agents/nodejs/build/src/Loader.js appsvc/node:20-lts_20250724.2.tuxprod REDACTED
+2025-08-20T10:18:57.606Z INFO  - Logging is not enabled for this container.Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-08-20T10:18:58.198Z INFO  - Initiating warmup request to container product-information-generator_0_22973dfa for site product-information-generator
+2025-08-20T10:18:57.982806196Z    _____
+2025-08-20T10:18:57.983006650Z   /  _  \ __________ _________   ____
+2025-08-20T10:18:57.983013673Z  /  /_\  \\___   /  |  \_  __ \_/ __ \
+2025-08-20T10:18:57.983018602Z /    |    \/    /|  |  /|  | \/\  ___/
+2025-08-20T10:18:57.983022600Z \____|__  /_____ \____/ |__|    \___  >
+2025-08-20T10:18:57.983061793Z         \/      \/                  \/
+2025-08-20T10:18:57.983066531Z A P P   S E R V I C E   O N   L I N U X
+2025-08-20T10:18:57.983071030Z
+2025-08-20T10:18:57.983075598Z Documentation: http://aka.ms/webapp-linux
+2025-08-20T10:18:57.983079395Z NodeJS quickstart: https://aka.ms/node-qs
+2025-08-20T10:18:57.983106566Z NodeJS Version : v20.19.3
+2025-08-20T10:18:57.983111676Z Note: Any data outside '/home' is not persisted
+2025-08-20T10:18:57.983252118Z
+2025-08-20T10:18:58.595145975Z Starting OpenBSD Secure Shell server: sshd.
+2025-08-20T10:18:58.599592129Z WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2025-08-20T10:18:58.616136183Z Updating certificates in /etc/ssl/certs...
+2025-08-20T10:19:00.895923462Z rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2025-08-20T10:19:00.903691257Z 4 added, 0 removed; done.
+2025-08-20T10:19:00.904249358Z Running hooks in /etc/ca-certificates/update.d...
+2025-08-20T10:19:00.906073863Z done.
+2025-08-20T10:19:00.911559752Z CA certificates copied and updated successfully.
+2025-08-20T10:19:00.958737664Z Starting periodic command scheduler: cron.
+2025-08-20T10:19:00.976038929Z Found build manifest file at '/home/site/wwwroot/oryx-manifest.toml'. Deserializing it...
+2025-08-20T10:19:00.977460294Z Could not find operation ID in manifest. Generating an operation id...
+2025-08-20T10:19:00.978348128Z Build Operation ID: 2eb0e958-2742-4fc5-8183-65519e4c84d9
+2025-08-20T10:19:01.076540310Z Environment Variables for Application Insight's IPA Codeless Configuration exists..
+2025-08-20T10:19:01.091152287Z Writing output script to '/opt/startup/startup.sh'
+2025-08-20T10:19:01.108692728Z Running #!/bin/sh
+2025-08-20T10:19:01.108936392Z
+2025-08-20T10:19:01.108943686Z # Enter the source directory to make sure the script runs where the user expects
+2025-08-20T10:19:01.108949347Z cd "/home/site/wwwroot"
+2025-08-20T10:19:01.108954637Z
+2025-08-20T10:19:01.108959516Z export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
+2025-08-20T10:19:01.108969605Z if [ -z "$PORT" ]; then
+2025-08-20T10:19:01.108974895Z 		export PORT=8080
+2025-08-20T10:19:01.109206296Z fi
+2025-08-20T10:19:01.109216415Z
+2025-08-20T10:19:01.109221915Z echo Found tar.gz based node_modules.
+2025-08-20T10:19:01.109238707Z extractionCommand="tar -xzf node_modules.tar.gz -C /node_modules"
+2025-08-20T10:19:01.109242804Z echo "Removing existing modules directory from root..."
+2025-08-20T10:19:01.109246662Z rm -fr /node_modules
+2025-08-20T10:19:01.109250378Z mkdir -p /node_modules
+2025-08-20T10:19:01.109575926Z echo Extracting modules...
+2025-08-20T10:19:01.109582398Z $extractionCommand
+2025-08-20T10:19:01.109861749Z export NODE_PATH="/node_modules":$NODE_PATH
+2025-08-20T10:19:01.109868482Z export PATH=/node_modules/.bin:$PATH
+2025-08-20T10:19:01.109872399Z if [ -d node_modules ]; then
+2025-08-20T10:19:01.109875956Z     mv -f node_modules _del_node_modules || true
+2025-08-20T10:19:01.109879653Z fi
+2025-08-20T10:19:01.109883350Z
+2025-08-20T10:19:01.109887057Z if [ -d /node_modules ]; then
+2025-08-20T10:19:01.109890804Z     ln -sfn /node_modules ./node_modules
+2025-08-20T10:19:01.110057605Z fi
+2025-08-20T10:19:01.110061702Z
+2025-08-20T10:19:01.110369757Z echo "Done."
+2025-08-20T10:19:01.110381780Z PATH="$PATH:/home/site/wwwroot" ./startup.sh
+2025-08-20T10:19:01.111730346Z Found tar.gz based node_modules.
+2025-08-20T10:19:01.111888031Z Removing existing modules directory from root...
+2025-08-20T10:19:01.129183492Z Extracting modules...
+2025-08-20T10:19:08.342737129Z Done.
+2025-08-20T10:19:08.348470668Z --- Starting Azure App Service ---
+2025-08-20T10:19:08.435407418Z 📋 Node.js Version: v20.19.3
+2025-08-20T10:19:08.435813766Z 📋 Working Directory: /home/site/wwwroot
+2025-08-20T10:19:08.436388419Z 📋 Environment: Azure App Service with Code Deployment
+2025-08-20T10:19:08.438034220Z 🔍 Überprüfe Puppeteer Browser Installation...
+2025-08-20T10:19:08.438045671Z ⚠️ Puppeteer Browser nicht gefunden - verwende Standard-Download
+2025-08-20T10:19:08.438052494Z 🚀 Starte Node.js Anwendung...
+2025-08-20T10:19:08.438057824Z ✅ Kommando: npm start
+2025-08-20T10:19:09.398825096Z npm info using npm@10.9.2
+2025-08-20T10:19:09.398902220Z npm info using node@v20.19.3
+2025-08-20T10:19:09.780068827Z
+2025-08-20T10:19:09.780161530Z > rest-express@1.0.0 start
+2025-08-20T10:19:09.780172450Z > node dist/index.js
+2025-08-20T10:19:09.780178832Z
+2025-08-20T10:19:10.821225014Z file:///home/site/wwwroot/dist/index.js:11
+2025-08-20T10:19:10.821248358Z   throw Error('Dynamic require of "' + x + '" is not supported');
+2025-08-20T10:19:10.821255040Z         ^
+2025-08-20T10:19:10.821260370Z
+2025-08-20T10:19:10.821265520Z Error: Dynamic require of "path" is not supported
+2025-08-20T10:19:10.821282391Z     at file:///home/site/wwwroot/dist/index.js:11:9
+2025-08-20T10:19:10.821287671Z     at node_modules/mime-types/index.js (file:///home/site/wwwroot/dist/index.js:8701:19)
+2025-08-20T10:19:10.821291659Z     at __require2 (file:///home/site/wwwroot/dist/index.js:17:50)
+2025-08-20T10:19:10.821295315Z     at node_modules/type-is/index.js (file:///home/site/wwwroot/dist/index.js:8791:16)
+2025-08-20T10:19:10.821299133Z     at __require2 (file:///home/site/wwwroot/dist/index.js:17:50)
+2025-08-20T10:19:10.821303200Z     at node_modules/multer/lib/make-middleware.js (file:///home/site/wwwroot/dist/index.js:12999:15)
+2025-08-20T10:19:10.821306897Z     at __require2 (file:///home/site/wwwroot/dist/index.js:17:50)
+2025-08-20T10:19:10.821310484Z     at node_modules/multer/index.js (file:///home/site/wwwroot/dist/index.js:16778:26)
+2025-08-20T10:19:10.821314070Z     at __require2 (file:///home/site/wwwroot/dist/index.js:17:50)
+2025-08-20T10:19:10.821317828Z     at file:///home/site/wwwroot/dist/index.js:72039:29
+2025-08-20T10:19:10.821321514Z
+2025-08-20T10:19:10.821325251Z Node.js v20.19.3
+2025-08-20T10:19:10.833111185Z npm http fetch GET 200 https://registry.npmjs.org/npm 114ms
+2025-08-20T10:19:10.837111760Z npm notice
+2025-08-20T10:19:10.837125175Z npm notice New major version of npm available! 10.9.2 -> 11.5.2
+2025-08-20T10:19:10.837130625Z npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-20T10:19:10.837134833Z npm notice To update run: npm install -g npm@11.5.2
+2025-08-20T10:19:10.837138720Z npm notice
+2025-08-20T10:19:12.584Z ERROR - Container product-information-generator_0_22973dfa for site product-information-generator has exited, failing site start
+2025-08-20T10:19:12.592Z ERROR - Container product-information-generator_0_22973dfa didn't respond to HTTP pings on port: 8080. Failing site start. See container logs for debugging.
+2025-08-20T10:19:12.609Z INFO  - Stopping site product-information-generator because it failed during startup.
