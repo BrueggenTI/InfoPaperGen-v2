@@ -1,0 +1,27 @@
+2025-08-20T07:42:00.9794599Z 📄 Starte direkte PDF-Generierung für Session: e44e364f-3cdb-4c5d-9ad9-5e656d60c9ba
+2025-08-20T07:42:00.9795670Z 📋 Formular-Daten erhalten: {
+2025-08-20T07:42:00.9795711Z   productName: 'Crunchy Granola Bar',
+2025-08-20T07:42:00.9795735Z   hasNutrition: true,
+2025-08-20T07:42:00.9795757Z   ingredientsCount: 1,
+2025-08-20T07:42:00.9795779Z   hasBaseIngredients: 10
+2025-08-20T07:42:00.9795802Z }
+2025-08-20T07:42:00.9796834Z 🔄 Generiere HTML-Template...
+2025-08-20T07:42:00.9931872Z 🔄 Starte Puppeteer PDF-Generierung...
+2025-08-20T07:42:00.9932454Z 🚀 Starte Puppeteer Browser für HTML-Template...
+2025-08-20T07:42:00.9940574Z ❌ Fehler bei der HTML-Template-PDF-Generierung nach 0ms: Error: Could not find Chrome (ver. 138.0.7204.168). This can occur if either
+2025-08-20T07:42:00.9940747Z  1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or
+2025-08-20T07:42:00.9940784Z  2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).
+2025-08-20T07:42:00.9940812Z For (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration.
+2025-08-20T07:42:00.9940842Z     at ChromeLauncher.resolveExecutablePath (file:///node_modules/puppeteer-core/lib/esm/puppeteer/node/BrowserLauncher.js:276:27)
+2025-08-20T07:42:00.9940875Z     at ChromeLauncher.computeLaunchArguments (file:///node_modules/puppeteer-core/lib/esm/puppeteer/node/ChromeLauncher.js:85:24)
+2025-08-20T07:42:00.9940907Z     at async ChromeLauncher.launch (file:///node_modules/puppeteer-core/lib/esm/puppeteer/node/BrowserLauncher.js:48:28)
+2025-08-20T07:42:00.9940936Z     at async generatePDFFromHTML (file:///home/site/wwwroot/dist/index.js:1870:15)
+2025-08-20T07:42:00.9940965Z     at async handleDirectPDFGeneration (file:///home/site/wwwroot/dist/index.js:1775:23)
+2025-08-20T07:42:00.9944122Z ❌ Fehler im direkten PDF-Generierungs-Handler nach 15ms: Error: PDF-Generierung aus HTML fehlgeschlagen: Could not find Chrome (ver. 138.0.7204.168). This can occur if either
+2025-08-20T07:42:00.9944201Z  1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or
+2025-08-20T07:42:00.9944234Z  2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).
+2025-08-20T07:42:00.9944263Z For (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration.
+2025-08-20T07:42:00.9944290Z     at generatePDFFromHTML (file:///home/site/wwwroot/dist/index.js:1913:11)
+2025-08-20T07:42:00.9944317Z     at async handleDirectPDFGeneration (file:///home/site/wwwroot/dist/index.js:1775:23)
+2025-08-20T07:42:00.9953241Z {"timestamp":"2025-08-20T07:42:00.995Z","request":{"method":"POST","url":"/api/generate-pdf","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0","duration":160,"statusCode":500},"performance":{"memoryUsed":12627144,"totalMemory":80130048,"rss":136921088},"custom":{"isApiRequest":true,"isPdfGeneration":false,"sessionId":"e44e364f-3cdb-4c5d-9ad9-5e656d60c9ba"}}
+2025-08-20T07:42:00.9957194Z 7:42:00 AM [express] POST /api/generate-pdf 500 in 16ms :: {"error":"PDF-Generierung fehlgeschlagen"…
