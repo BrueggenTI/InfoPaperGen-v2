@@ -1,48 +1,43 @@
-# DEFINITIVE AZURE CHROME-FIX DOCKERFILE
-# 100% funktionsfähige Chrome-Installation für Azure App Service
+# === STAGE 1: Build-Umgebung ===
+# Hier bauen wir die App. Dev-Dependencies sind hier erlaubt.
+FROM node:18-slim AS builder
+
+WORKDIR /usr/src/app
+
+# Zuerst nur package.json kopieren und alle Abhängigkeiten installieren
+COPY package*.json ./
+RUN npm ci
+
+# Den gesamten Quellcode kopieren
+COPY . .
+
+# Die App bauen (z.B. TypeScript zu JavaScript kompilieren)
+RUN npm run build
+
+
+# === STAGE 2: Finale Laufzeit-Umgebung ===
+# Wir starten mit einem sauberen Image, um die Größe zu minimieren.
 FROM node:18-slim
 
-# Root-Benutzer für Paketinstallation
+# Root-Benutzer für die Installation von Chrome
 USER root
 
-# System aktualisieren und grundlegende Tools installieren
-RUN apt-get update && apt-get upgrade -y
-
-# VOLLSTÄNDIGE Chrome-Abhängigkeiten installieren (alle erforderlichen Pakete)
-RUN apt-get install -y \
-    apt-transport-https \
+# System aktualisieren und die notwendigen Abhängigkeiten für Chrome installieren
+RUN apt-get update && apt-get install -y \
     ca-certificates \
-    curl \
-    gnupg \
-    wget \
-    unzip \
-    procps \
     fonts-liberation \
-    fonts-dejavu-core \
-    fontconfig \
-    hicolor-icon-theme \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libatspi2.0-0 \
-    libc6 \
-    libcairo2 \
     libcups2 \
     libdbus-1-3 \
     libdrm2 \
-    libexpat1 \
-    libfontconfig1 \
     libgbm1 \
-    libgcc1 \
-    libgconf-2-4 \
-    libgdk-pixbuf2.0-0 \
-    libglib2.0-0 \
     libgtk-3-0 \
     libnspr4 \
     libnss3 \
     libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
     libx11-6 \
     libx11-xcb1 \
     libxcb1 \
@@ -56,90 +51,40 @@ RUN apt-get install -y \
     libxrender1 \
     libxss1 \
     libxtst6 \
-    libxshmfence-dev \
-    libgbm-dev \
     lsb-release \
+    wget \
     xdg-utils \
     --no-install-recommends
 
-# METHODE 1: Google Chrome über offizielle Quelle installieren (moderne GPG-Schlüssel Handhabung)
-RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg \
-    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+# Google Chrome Stable installieren
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
-    && apt-get install -y google-chrome-stable
+    && apt-get install -y google-chrome-stable --no-install-recommends
 
-# METHODE 2: Fallback - Direkte .deb Installation (falls Methode 1 fehlschlägt)
-RUN if ! command -v google-chrome-stable &> /dev/null; then \
-        echo "FALLBACK: Installiere Chrome direkt von Google..." && \
-        wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-        apt-get install -y ./chrome.deb && \
-        rm chrome.deb; \
-    fi
+# Cache aufräumen, um das Image klein zu halten
+RUN rm -rf /var/lib/apt/lists/*
 
-# METHODE 3: Ultimate Fallback - Chromium als letzte Chance
-RUN if ! command -v google-chrome-stable &> /dev/null && ! command -v google-chrome &> /dev/null; then \
-        echo "ULTIMATE FALLBACK: Installiere Chromium..." && \
-        apt-get install -y chromium-browser; \
-    fi
-
-# Chrome Installation verifizieren und Debugging-Informationen ausgeben
-RUN echo "=== CHROME INSTALLATION VERIFICATION ===" && \
-    ls -la /usr/bin/google-chrome* 2>/dev/null || echo "Keine google-chrome* gefunden" && \
-    ls -la /usr/bin/chromium* 2>/dev/null || echo "Keine chromium* gefunden" && \
-    which google-chrome-stable 2>/dev/null || echo "google-chrome-stable nicht im PATH" && \
-    which google-chrome 2>/dev/null || echo "google-chrome nicht im PATH" && \
-    which chromium-browser 2>/dev/null || echo "chromium-browser nicht im PATH"
-
-# Chrome Version ausgeben (für Azure Logs)
-RUN if command -v google-chrome-stable &> /dev/null; then \
-        echo "SUCCESS: Google Chrome Stable installiert" && \
-        google-chrome-stable --version; \
-    elif command -v google-chrome &> /dev/null; then \
-        echo "SUCCESS: Google Chrome installiert" && \
-        google-chrome --version; \
-    elif command -v chromium-browser &> /dev/null; then \
-        echo "FALLBACK: Chromium Browser installiert" && \
-        chromium-browser --version; \
-    else \
-        echo "KRITISCHER FEHLER: Kein Browser installiert!" && \
-        exit 1; \
-    fi
-
-# Cache aufräumen
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && apt-get clean
-
-# Arbeitsverzeichnis einrichten
+# Arbeitsverzeichnis für die App
 WORKDIR /usr/src/app
 
-# Zuerst alle Abhängigkeiten installieren (inkl. devDependencies für Build)
-COPY package*.json ./
-RUN npm ci
-
-# Quellcode kopieren und Projekt builden
-COPY . .
-RUN npm run build
-
-# Nur Production-Abhängigkeiten installieren
-RUN npm ci --only=production && npm cache clean --force
-
-# Environment Variables für Puppeteer setzen (KRITISCH für Azure)
+# Wichtige Environment Variables für Puppeteer
+# Sagt Puppeteer, nicht seinen eigenen Browser herunterzuladen
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# Sagt Puppeteer, wo der systemweit installierte Browser zu finden ist
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-# Nicht-root-Benutzer für Sicherheit erstellen
-RUN groupadd -g 1001 -r nodejs && \
-    useradd -r -g nodejs -u 1001 nodejs
+# Kopiere die Abhängigkeiten und den gebauten Code aus der "builder"-Stage
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
 
-# Ordnerrechte setzen
-RUN chown -R nodejs:nodejs /usr/src/app
-USER nodejs
+# Erstelle und wechsle zu einem sicheren, unprivilegierten Benutzer
+RUN useradd --create-home appuser
+USER appuser
 
-# Port freigeben - Azure App Service leitet Traffic automatisch weiter
+# Port freigeben
 EXPOSE 8080
 
-# Health Check für Container-Monitoring
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/api/health || exit 1
-
-# Startbefehl definieren
+# Der Befehl, der die App startet
 CMD [ "npm", "start" ]
