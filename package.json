@@ -5,11 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && esbuild server/index.ts --bundle --platform=node --target=node18 --outdir=dist --format=cjs --external:puppeteer --external:openai --external:@babel/preset-typescript --external:lightningcss --external:@babel/core --external:vite --external:express --external:express-session --external:memorystore --external:multer --external:mime-types --external:type-is --external:path --external:fs --external:os --external:crypto",
-    "start": "node dist/index.js",
-    "azure:install-browser": "npx puppeteer browsers install chrome",
-    "azure:start": "npm run azure:install-browser && node dist/index.js",
-    "postinstall": "puppeteer browsers install chrome",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },

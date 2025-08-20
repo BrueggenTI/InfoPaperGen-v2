@@ -39,26 +39,5 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
-[[workflows.workflow]]
-name = "Azure Build Test"
-author = 44242356
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run build"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Testing built application...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node --check dist/index.js"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"✅ Build test successful\""
-
 [agent]
 integrations = ["javascript_openai==1.0.0"]

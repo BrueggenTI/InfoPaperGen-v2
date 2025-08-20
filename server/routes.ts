@@ -6,17 +6,11 @@ import { extractIngredientsFromImage, extractNutritionFromImage, translateIngred
 import { handlePDFDownload, handleDirectPDFGeneration } from "./lib/puppeteer-pdf-generator";
 import multer from "multer";
 
-// Azure-compatible multer configuration
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  // Azure App Service compatibility
-  fileFilter: (req, file, cb) => {
-    // Ensure proper file handling in Azure environment
-    cb(null, true);
-  }
 });
 
 import { azureHealthCheck } from "./middleware/azure-monitoring";

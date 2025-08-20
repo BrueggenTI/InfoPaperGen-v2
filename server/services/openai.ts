@@ -2,18 +2,8 @@ import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 // Azure-compatible environment variable configuration
-// Versuche verschiedene Environment Variable Namen für maximale Kompatibilität
-const apiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || process.env.AZURE_OPENAI_API_KEY;
-
-if (!apiKey) {
-  console.error("❌ OPENAI API KEY FEHLT! Verfügbare Environment Variables:");
-  console.error("   NODE_ENV:", process.env.NODE_ENV);
-  console.error("   Verfügbare Keys:", Object.keys(process.env).filter(key => key.includes('OPENAI')));
-  throw new Error("OpenAI API Key nicht gefunden. Bitte setzen Sie OPENAI_API_KEY in den Azure App Service Application Settings.");
-}
-
 const openai = new OpenAI({
-  apiKey: apiKey,
+  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR,
   timeout: 60000, // 60 seconds timeout for Azure compatibility
   maxRetries: 3, // Retry logic for robust Azure deployment
 });

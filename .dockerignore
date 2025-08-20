@@ -1,72 +1,20 @@
-# .dockerignore für optimierte Docker Builds
-
-# Node.js
 node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.azure.example
-
-# IDE files
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Git
+npm-debug.log
 .git
 .gitignore
-
-# Docker
-Dockerfile*
-.dockerignore
-docker-compose*.yml
-
-# Development files
-*.md
-!replit.md
-azure-deployment-scripts
-attached_assets
-test-*.pdf
-*.pdf
-
-# Build artifacts (außer dist)
+README.md
+.env
+.nyc_output
 coverage
-*.tgz
-*.tar.gz
-
-# Logs
-logs
+.vscode
+.idea
+*.md
+client/src
+attached_assets/*.png
+attached_assets/*.jpg
+attached_assets/*.pdf
+attached_assets/*.doc
+attached_assets/*.txt
 *.log
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Temporary folders
-.tmp
-.temp
-
-# Azure-specific ignores
-azure-*.md
-BUILD.md
-DEPLOYMENT-*.md
-deployment-*.md
+.DS_Store
+Thumbs.db

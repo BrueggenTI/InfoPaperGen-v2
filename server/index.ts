@@ -3,11 +3,6 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { azurePerformanceMiddleware } from "./middleware/azure-monitoring";
 
-// Azure Node.js 20 compatibility
-if (typeof globalThis.__dirname === 'undefined') {
-  globalThis.__dirname = process.cwd();
-}
-
 const app = express();
 
 // Azure monitoring middleware (should be first)
@@ -95,21 +90,12 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Azure App Service and Docker compatibility: Default to 8080, fallback to 5000 for Replit
   // this serves both the API and the client.
-  const PORT = process.env.PORT || process.env.WEBSITES_PORT || 8080;
-  
-  // Azure-spezifische Umgebungserkennung
-  const isAzure = process.env.WEBSITE_SITE_NAME || process.env.WEBSITES_PORT;
-  if (isAzure) {
-    log(`🔵 Azure App Service erkannt: ${process.env.WEBSITE_SITE_NAME || 'Container App'}`);
-    log(`🔧 Azure Port: ${PORT}`);
-    log(`🔧 Node Version: ${process.version}`);
-    log(`🔧 Memory Limit: ${process.env.WEBSITE_MEMORY_LIMIT_MB || 'Standard'}MB`);
-  }
+  const port = parseInt(process.env.PORT || (process.env.NODE_ENV === 'production' ? '8080' : '5000'), 10);
   server.listen({
-    port: parseInt(PORT, 10),
+    port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${PORT}`);
+    log(`serving on port ${port}`);
   });
 })();
