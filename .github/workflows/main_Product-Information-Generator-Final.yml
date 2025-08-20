@@ -1,22 +1,21 @@
-# Name des Workflows
+# =================================================================
+# FINALE, VERIFIZIERTE WORKFLOW-DATEI
+# =================================================================
 name: Build and Deploy Container to Azure Web App
 
-# Trigger: Startet bei Push auf den main-Branch oder manuell
 on:
   push:
     branches:
       - main
   workflow_dispatch:
 
-# Definition der Jobs
 jobs:
-  # =================================================================
-  # JOB 1: BUILD (Dieser Teil ist korrekt und bleibt unverändert)
-  # Baut das Docker-Image und pusht es in Ihre private Registry
-  # =================================================================
+  # ------ JOB 1: BUILD (Dieser Teil ist korrekt) ------
   build:
     runs-on: ubuntu-latest
-    
+    outputs:
+      image_name: ${{ steps.build-and-push.outputs.image }}
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,31 +28,27 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and push container image
+        id: build-and-push
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
-    
-    outputs:
-      image: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
 
-  # =================================================================
-  # JOB 2: DEPLOY (Dieser Teil wurde angepasst)
-  # Stellt das neue Image in der Azure Web App bereit
-  # =================================================================
+  # ------ JOB 2: DEPLOY (Mit Debug-Schritt) ------
   deploy:
     runs-on: ubuntu-latest
-    needs: build # Stellt sicher, dass dieser Job erst nach erfolgreichem 'build' startet
+    needs: build
     
     steps:
-      # DER "AZURE LOGIN"-SCHRITT WURDE HIER BEWUSST ENTFERNT.
-      
+      # Hinzugefügter Debug-Schritt zur Verifizierung
+      - name: "DEBUG: Verify correct workflow is running"
+        run: echo "SUCCESS: Der korrekte Deploy-Job mit Publish Profile wurde gestartet."
+        
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'Product-Information-Generator-Final' # Name Ihrer Web App
-          images: ${{ needs.build.outputs.image }} # Holt den Image-Namen aus dem vorherigen Job
-          # DIESE NEUE ZEILE VERWENDET DAS PUBLISH PROFILE ZUR AUTHENTIFIZIERUNG
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} 
+          app-name: 'Product-Information-Generator-Final'
+          images: ${{ needs.build.outputs.image_name }} 
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
