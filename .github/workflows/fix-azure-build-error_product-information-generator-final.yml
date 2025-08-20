@@ -25,15 +25,15 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: brueggencontainer.azurecr.io/
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_09AC8C5E0A8844C2A90CE8214616DA24 }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_2129C22CF8624AE5B24A86526B04498F }}
+          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_0FD35EBD5D1242AE8413990488D24124 }}
+          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_2CCEDA6E578940988DBA65164B808217 }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: brueggencontainer.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_09AC8C5E0A8844C2A90CE8214616DA24 }}/PIG-Final:${{ github.sha }}
+          tags: brueggencontainer.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_0FD35EBD5D1242AE8413990488D24124 }}/pipg:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -50,5 +50,5 @@ jobs:
         with:
           app-name: 'Product-Information-Generator-Final'
           slot-name: 'Production'
-          images: 'brueggencontainer.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_09AC8C5E0A8844C2A90CE8214616DA24 }}/PIG-Final:${{ github.sha }}'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ED517BAB5C8249FAABDCC573222F658E }}
+          images: 'brueggencontainer.azurecr.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_0FD35EBD5D1242AE8413990488D24124 }}/pipg:${{ github.sha }}'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CC1B93187E044D3A8477A9F325D198D0 }}
