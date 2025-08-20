@@ -1,7 +1,7 @@
 # =================================================================
-# FINALER, FUNKTIONIERENDER WORKFLOW (SERVICE-PRINCIPAL-METHODE)
+# FINALE, FUNKTIONIERENDE WORKFLOW-DATEI (PUBLISH-PROFILE-METHODE)
 # =================================================================
-name: Build and Deploy Container to Azure
+name: Build and Deploy Container to Azure Web App
 
 on:
   push:
@@ -14,6 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
+      # Gibt den vollständigen Image-Namen an den nächsten Job weiter
       image_name: ${{ steps.build-and-push.outputs.image }}
       
     steps:
@@ -36,21 +37,19 @@ jobs:
           push: true
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
 
-  # ------ JOB 2: Stellt das Image in Azure bereit ------
+  # ------ JOB 2: Stellt das Image in Azure bereit (mit Publish Profile) ------
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Wartet, bis der Build-Job erfolgreich ist
     
     steps:
-      # Schritt 2.1: Anmelden bei Azure mit dem Service Principal
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
-      # Schritt 2.2: Bereitstellen in der Azure Web App
+      # In dieser Methode wird der "Azure Login"-Schritt nicht benötigt.
+      
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'Product-Information-Generator-Final'
+          # Holt den Image-Namen aus dem vorherigen Job
           images: ${{ needs.build.outputs.image_name }}
+          # Verwendet das Publish Profile zur Authentifizierung
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
