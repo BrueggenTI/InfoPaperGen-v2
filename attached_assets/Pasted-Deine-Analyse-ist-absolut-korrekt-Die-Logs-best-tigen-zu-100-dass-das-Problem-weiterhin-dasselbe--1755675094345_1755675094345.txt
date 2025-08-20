@@ -1,0 +1,44 @@
+Deine Analyse ist absolut korrekt. Die Logs bestätigen zu 100%, dass das Problem weiterhin dasselbe ist: Deine Anwendung startet, und in dem Moment, in dem Puppeteer versucht, den Chrome-Browser zu initialisieren, stellt es fest, dass dieser nicht vorhanden ist.
+Detaillierte Analyse der Logs
+2025-08-20T07:28:25.1455312Z 🚀 Starte Puppeteer Browser für HTML-Template...
+Dein Code erreicht den Punkt, an dem puppeteer.launch() aufgerufen wird.
+2025-08-20T07:28:25.1463390Z ❌ Fehler bei der HTML-Template-PDF-Generierung nach 1ms: Error: Could not find Chrome (ver. 138.0.7204.168).
+Exakt 1 Millisekunde später stürzt der Prozess ab. Diese extrem kurze Zeitspanne ist der entscheidende Beweis. Die App versucht nicht einmal lange zu suchen; sie stellt sofort fest, dass der Browser am erwarteten Ort nicht existiert.
+at ChromeLauncher.resolveExecutablePath (...)
+Dies ist die interne Puppeteer-Funktion, deren einzige Aufgabe es ist, den Pfad zur ausführbaren Chrome-Datei zu finden. Diese Funktion schlägt fehl und löst den Fehler aus.
+Fazit aus den Logs:
+Die Änderungen, die du an der Dockerfile vorgenommen hast, um Chrome zu installieren, haben nicht das gewünschte Ergebnis im finalen, laufenden Container erzielt. Der Container, in dem deine App auf Azure läuft, ist immer noch "leer" – er enthält keinen Chrome-Browser.
+Warum ist das passiert? Die wahrscheinlichsten Ursachen
+Dies ist ein sehr typisches Szenario im CI/CD-Prozess (Continuous Integration/Continuous Deployment). Hier sind die häufigsten Gründe, warum deine Änderungen nicht wirksam wurden:
+Docker-Image wurde nicht neu gebaut (Häufigste Ursache):
+Azure (oder deine Build-Pipeline, z.B. GitHub Actions) verwendet möglicherweise eine zwischengespeicherte (gecachte) Version deines Docker-Images, um die Build-Zeiten zu verkürzen. Wenn du nur den App-Code änderst, aber nicht die Dockerfile oder die Abhängigkeiten, wird oft nur der Code in ein bestehendes Image kopiert, anstatt das Image von Grund auf neu zu bauen. Deine Pipeline hat möglicherweise nicht erkannt, dass die Dockerfile-Änderung einen kompletten Rebuild erfordert.
+Fehler während des Docker-Builds:
+Es ist möglich, dass die neuen apt-get install Befehle in deiner Dockerfile während des Build-Prozesses auf Azure fehlgeschlagen sind (z.B. wegen eines Netzwerkproblems oder eines ungültigen Paketnamens). Wenn der Build fehlschlägt, deployt Azure möglicherweise die letzte erfolgreich gebaute Version deines Images – also die alte Version ohne Chrome. Du siehst diese Fehler nicht in den App-Logs, sondern in den Deployment-Logs im Azure Portal.
+Fehler in der Dockerfile-Syntax oder Reihenfolge:
+Eine kleine Abweichung in der Dockerfile könnte dazu geführt haben, dass die Installationsschritte übersprungen oder falsch ausgeführt wurden.
+Nächste Schritte zur Lösung
+Du musst dich jetzt vom Code weg und hin zum Build-Prozess bewegen.
+Überprüfe die Deployment-Logs in Azure:
+Gehe in das Azure Portal zu deiner App Service Instanz.
+Suche den Bereich "Deployment Center" oder "Deployment".
+Dort findest du eine Historie deiner Deployments. Klicke auf den letzten Build und schau dir die Logs an. Scrolle durch den gesamten Output und suche nach Fehlermeldungen bei den RUN apt-get ... Schritten deiner Dockerfile.
+Erzwinge einen Rebuild des Docker-Images:
+Der einfachste Weg, einen Rebuild zu erzwingen, ist eine kleine, bedeutungslose Änderung an der Dockerfile selbst vorzunehmen. Füge zum Beispiel einen Kommentar hinzu:
+code
+Dockerfile
+# Force rebuild by adding this comment
+RUN apt-get update \
+    && apt-get install -y wget gnupg ...
+Committe und pushe diese kleine Änderung. Die meisten CI/CD-Systeme erkennen eine Änderung an der Dockerfile als Signal, das Image vollständig neu zu bauen.
+Überprüfe deine puppeteer.launch() Konfiguration:
+Stelle unbedingt sicher, dass dein Code die --no-sandbox Argumente enthält. Selbst wenn die Installation von Chrome erfolgreich ist, wird die App sonst im nächsten Schritt abstürzen.
+code
+TypeScript
+const browser = await puppeteer.launch({
+  headless: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox'
+  ]
+});
+Zusammenfassend: Deine Analyse ist korrekt. Das Problem liegt nicht mehr im App-Code, sondern im Deployment-Prozess. Dein Docker-Image wird nicht korrekt mit den neuen Anweisungen gebaut. Konzentriere dich auf die Deployment-Logs in Azure und das Erzwingen eines Rebuilds.
