@@ -12,13 +12,17 @@ WORKDIR /app
 COPY package*.json ./
 
 # Alle Abhängigkeiten installieren, die zum Bauen benötigt werden (inkl. devDependencies)
-RUN npm install
+RUN npm ci --include=dev
 
 # Den gesamten restlichen Quellcode kopieren
 COPY . .
 
-# Den Build-Befehl ausführen. Das Ergebnis ist ein fertiger 'dist'-Ordner.
-RUN npm run build
+# Debugging: Zeige verfügbare Scripts und Dependencies
+RUN echo "=== Package.json scripts ===" && npm run
+RUN echo "=== Installed packages ===" && ls node_modules/ | head -20
+
+# Den Build-Befehl mit detaillierteren Logs ausführen
+RUN npm run build --verbose
 
 
 # =================================================================
