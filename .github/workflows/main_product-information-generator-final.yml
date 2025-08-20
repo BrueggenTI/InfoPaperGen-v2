@@ -25,15 +25,15 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: mcr.microsoft.com/
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_3ACEA4753BBE4012ACE106666C530B2B }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_A0922B390212412590CBE92C58A99294 }}
+          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_1320F4638F5242C9BD7D39EFA57C82BC }}
+          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_CBDA7EA5F54D47249E6499BD3566A43D }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v3
         with:
           context: .
           push: true
-          tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_3ACEA4753BBE4012ACE106666C530B2B }}/appsvc/staticsite:${{ github.sha }}
+          tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_1320F4638F5242C9BD7D39EFA57C82BC }}/appsvc/staticsite:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -50,5 +50,5 @@ jobs:
         with:
           app-name: 'Product-Information-Generator-Final'
           slot-name: 'Production'
-          images: 'mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_3ACEA4753BBE4012ACE106666C530B2B }}/appsvc/staticsite:${{ github.sha }}'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2C350D34DEE24CE2BF82BCD02D619FF0 }}
+          images: 'mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_1320F4638F5242C9BD7D39EFA57C82BC }}/appsvc/staticsite:${{ github.sha }}'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E28B533D1E87420D82B7C7B870A03DB2 }}
