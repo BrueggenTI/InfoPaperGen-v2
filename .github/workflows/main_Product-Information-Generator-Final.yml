@@ -1,5 +1,5 @@
 # =================================================================
-# FINALE, FUNKTIONIERENDE WORKFLOW-DATEI (ACR-CREDENTIALS-METHODE)
+# FINALER, FUNKTIONIERENDER WORKFLOW (SERVICE-PRINCIPAL-METHODE)
 # =================================================================
 name: Build and Deploy Container to Azure
 
@@ -14,7 +14,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      # Gibt den vollständigen Image-Namen an den nächsten Job weiter
       image_name: ${{ steps.build-and-push.outputs.image }}
       
     steps:
@@ -37,26 +36,21 @@ jobs:
           push: true
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
 
-  # ------ JOB 2: Stellt das Image in Azure bereit (mit ACR-Anmeldedaten) ------
+  # ------ JOB 2: Stellt das Image in Azure bereit ------
   deploy:
     runs-on: ubuntu-latest
-    needs: build # Wartet, bis der Build-Job erfolgreich ist
+    needs: build
     
     steps:
-      # Dieser Job benötigt KEINEN "Azure Login"-Schritt
-      
-      # Schritt 2.1: Bereitstellen in der Azure Web App
+      # Schritt 2.1: Anmelden bei Azure mit dem Service Principal
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      # Schritt 2.2: Bereitstellen in der Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'Product-Information-Generator-Final'
-          # Holt den Image-Namen aus dem vorherigen Job
           images: ${{ needs.build.outputs.image_name }}
-
-          # Diese drei Zeilen verwenden Ihre vorhandenen ACR-Secrets, um
-          # die Web App zu authentifizieren und ihr den Zugriff auf die
-          # private Registry zu ermöglichen.
-          enable-AzPSSession: true 
-          container-registry-url: https://${{ secrets.ACR_LOGIN_SERVER }}
-          container-registry-username: ${{ secrets.ACR_USERNAME }}
-          container-registry-password: ${{ secrets.ACR_PASSWORD }}
