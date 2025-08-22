@@ -76,12 +76,3 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 })();
-```**Hinweis:** Ich habe `.js` zur Endung der Importe hinzugefügt (`"./production.js"` und `"./vite.js"`). Dies ist eine Best Practice für Node.js ES Modules und stellt sicher, dass der Import nach der Kompilierung von TypeScript zu JavaScript immer funktioniert.
-
-### Nächster Schritt
-
-1.  **Speichern Sie die drei geänderten/neuen Dateien.**
-2.  **Committen und pushen Sie alles** zu GitHub (`git add .`, `git commit -m "Final fix: Isolate Vite dependencies"`, `git push`).
-3.  Der Workflow wird ein Image bauen, das den `ERR_MODULE_NOT_FOUND`-Fehler nicht mehr hat.
-
-Ihre App wird danach starten. Das ist die Lösung.
