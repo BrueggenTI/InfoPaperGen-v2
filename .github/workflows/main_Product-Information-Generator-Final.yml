@@ -31,7 +31,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/pipg:${{ github.sha }}
 
   # ------ JOB 2: Stellt das Image in Azure bereit (mit Publish Profile) ------
   deploy:
@@ -47,6 +47,6 @@ jobs:
           app-name: 'Product-Information-Generator-Final'
           # WICHTIG: Der Image-Name wird hier direkt konstruiert, um das
           # Secret-Masking-Problem von GitHub Actions zu umgehen.
-          images: '${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}'
+          images: '${{ secrets.ACR_LOGIN_SERVER }}/pipg:${{ github.sha }}'
           # Verwendet das Publish Profile zur Authentifizierung
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
