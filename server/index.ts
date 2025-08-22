@@ -72,11 +72,29 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    // Log the full error for debugging purposes
+    console.error("[GLOBAL_ERROR_HANDLER]", {
+      message: err.message,
+      stack: err.stack,
+      status: err.status,
+      statusCode: err.statusCode,
+    });
+    
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // If the response has already been sent, delegate to the default Express error handler.
+    if (res.headersSent) {
+      return _next(err);
+    }
+
+    res.status(status).json({
+      error: {
+        message: message,
+        // Only include stack trace in development for security reasons
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+      },
+    });
   });
 
   // importantly only setup vite in development and after
