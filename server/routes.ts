@@ -26,48 +26,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     registerTestRoutes(app);
   }
   // Create new product info session
-  app.post("/api/product-info/sessions", async (req, res) => {
+  app.post("/api/product-info/sessions", async (req, res, next) => {
     try {
       const validatedData = productInfoSchema.parse(req.body);
       const session = await storage.createProductInfoSession(validatedData);
-      res.json(session);
+      res.status(201).json(session);
     } catch (error) {
-      res.status(400).json({ message: "Invalid product info data", error: (error as Error).message });
+      if (error instanceof Error && error.name === 'ZodError') {
+        (error as any).status = 400;
+      }
+      next(error);
     }
   });
 
   // Get product info session
-  app.get("/api/product-info/sessions/:id", async (req, res) => {
+  app.get("/api/product-info/sessions/:id", async (req, res, next) => {
     try {
       const session = await storage.getProductInfoSession(req.params.id);
       if (!session) {
-        res.status(404).json({ message: "Session not found" });
-        return;
+        const err = new Error("Session not found");
+        (err as any).status = 404;
+        return next(err);
       }
       res.json(session);
     } catch (error) {
-      res.status(400).json({ message: "Error retrieving session", error: (error as Error).message });
+      next(error);
     }
   });
 
   // Update product info session
-  app.put("/api/product-info/sessions/:id", async (req, res) => {
+  app.put("/api/product-info/sessions/:id", async (req, res, next) => {
     try {
       const validatedData = productInfoSchema.parse(req.body);
       const session = await storage.updateProductInfoSession(req.params.id, validatedData);
       res.json(session);
     } catch (error) {
-      res.status(400).json({ message: "Error updating session", error: (error as Error).message });
+      if (error instanceof Error && error.name === 'ZodError') {
+        (error as any).status = 400;
+      }
+      next(error);
     }
   });
 
   // Delete product info session
-  app.delete("/api/product-info/sessions/:id", async (req, res) => {
+  app.delete("/api/product-info/sessions/:id", async (req, res, next) => {
     try {
       await storage.deleteProductInfoSession(req.params.id);
-      res.json({ message: "Session deleted successfully" });
+      res.status(204).send();
     } catch (error) {
-      res.status(400).json({ message: "Error deleting session", error: (error as Error).message });
+      next(error);
     }
   });
 
@@ -170,13 +177,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Extract ingredients from base64 image (for the new ingredients step)
-  app.post("/api/extract-ingredients", async (req, res) => {
+  app.post("/api/extract-ingredients", async (req, res, next) => {
     try {
       const { image, isBaseProduct } = req.body;
 
       if (!image) {
-        res.status(400).json({ message: "No image data provided" });
-        return;
+        const err = new Error("No image data provided");
+        (err as any).status = 400;
+        return next(err);
       }
 
       const extractedIngredients = await extractIngredientsFromImage(image, isBaseProduct);
@@ -186,15 +194,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...extractedIngredients,
         ingredients: extractedIngredients.ingredients.map(ingredient => ({
           ...ingredient,
-          percentage: ingredient.percentage !== null && ingredient.percentage !== undefined 
-            ? Math.round(ingredient.percentage * 10) / 10 
+          percentage: ingredient.percentage !== null && ingredient.percentage !== undefined
+            ? Math.round(ingredient.percentage * 10) / 10
             : ingredient.percentage
         }))
       };
 
       res.json(roundedIngredients);
     } catch (error) {
-      res.status(500).json({ message: "Error extracting ingredients", error: (error as Error).message });
+      next(error);
     }
   });
 
@@ -531,35 +539,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Direct PDF generation from form data
   app.post("/api/generate-pdf", handleDirectPDFGeneration);
 
-  // Debug endpoints for troubleshooting
-  app.get("/api/debug/logs", (req, res) => {
-    const operation = req.query.operation as string;
-    const logs = DebugLogger.getLogs(operation);
-    res.json({
-      logs,
-      totalLogs: logs.length,
-      operations: Array.from(new Set(DebugLogger.getLogs().map(log => log.operation)))
+  // Debug endpoints for troubleshooting, only available in non-production environments
+  if (process.env.NODE_ENV !== 'production') {
+    app.get("/api/debug/logs", (req, res) => {
+      const operation = req.query.operation as string;
+      const logs = DebugLogger.getLogs(operation);
+      res.json({
+        logs,
+        totalLogs: logs.length,
+        operations: Array.from(new Set(DebugLogger.getLogs().map(log => log.operation)))
+      });
     });
-  });
 
-  app.get("/api/debug/status", (req, res) => {
-    res.json({
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      openaiConfigured: !!process.env.OPENAI_API_KEY,
-      recentErrors: DebugLogger.getLogs().filter(log => log.status === 'error').slice(0, 5),
-      systemInfo: {
-        nodeVersion: process.version,
-        platform: process.platform,
-        memory: process.memoryUsage()
-      }
+    app.get("/api/debug/status", (req, res) => {
+      res.json({
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        openaiConfigured: !!process.env.OPENAI_API_KEY,
+        recentErrors: DebugLogger.getLogs().filter(log => log.status === 'error').slice(0, 5),
+        systemInfo: {
+          nodeVersion: process.version,
+          platform: process.platform,
+          memory: process.memoryUsage()
+        }
+      });
     });
-  });
 
-  app.post("/api/debug/clear", (req, res) => {
-    DebugLogger.clearLogs();
-    res.json({ message: "Debug logs cleared", timestamp: new Date().toISOString() });
-  });
+    app.post("/api/debug/clear", (req, res) => {
+      DebugLogger.clearLogs();
+      res.json({ message: "Debug logs cleared", timestamp: new Date().toISOString() });
+    });
+  }
 
   const httpServer = createServer(app);
   return httpServer;
