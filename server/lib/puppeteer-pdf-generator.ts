@@ -47,6 +47,7 @@ export async function generatePDFWithPuppeteer(
     // Optimierte Browser-Konfiguration für maximale Performance
     const launchOptions: any = {
       headless: true,
+      userDataDir: '/tmp',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -315,6 +316,7 @@ export async function checkPuppeteerSetup(): Promise<boolean> {
   try {
     const browser = await puppeteer.launch({
       headless: true,
+      userDataDir: '/tmp',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     await browser.close();
@@ -440,6 +442,7 @@ export async function generatePDFFromHTML(
     // Optimierte Browser-Konfiguration für maximale Performance
     const launchOptions: any = {
       headless: true,
+      userDataDir: '/tmp',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

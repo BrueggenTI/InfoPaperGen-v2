@@ -69,6 +69,8 @@ RUN npm install --omit=dev
 
 # Kopiert den fertigen 'dist'-Ordner aus der "Builder"-Stufe
 COPY --from=builder /app/dist ./dist
+# Kopiert die für die PDF-Generierung benötigten Assets
+COPY --from=builder /app/attached_assets ./attached_assets
 
 # Puppeteer-Umgebungsvariablen für die Laufzeit
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
