@@ -13,10 +13,6 @@ jobs:
   # ------ JOB 1: Baut das Docker-Image und pusht es in Ihre ACR ------
   build:
     runs-on: ubuntu-latest
-    outputs:
-      # Wir definieren hier explizit den vollständigen Image-Namen als Output
-      image_name: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
-      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,12 +25,12 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and push Docker image
+        id: build-and-push
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           push: true
-          # Der Tag muss genau dem entsprechen, was wir oben im Output definieren
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}
 
   # ------ JOB 2: Stellt das Image in Azure bereit (mit Publish Profile) ------
@@ -43,46 +39,14 @@ jobs:
     needs: build # Wartet, bis der Build-Job erfolgreich ist
     
     steps:
+      # In dieser Methode wird der "Azure Login"-Schritt nicht benötigt.
+      
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'Product-Information-Generator-Final'
-          # Holt den exakten Image-Namen aus dem Output des vorherigen Jobs
-          images: ${{ needs.build.outputs.image_name }}
-          # Verwendet das Publish Profile zur Authentifizierung (mit dem korrekten Secret-Namen!)
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}```
-
----
-
-#### Punkt 3: Deine GitHub Secrets (Vollständige Liste)
-
-Überprüfe, ob du die folgenden vier Secrets in deinen GitHub Repository Settings (`Settings` > `Secrets and variables` > `Actions`) korrekt angelegt hast:
-
-1.  **`AZURE_WEBAPP_PUBLISH_PROFILE`**
-    *   **Inhalt:** Der gesamte XML-Inhalt deiner heruntergeladenen `.PublishSettings`-Datei.
-
-2.  **`ACR_LOGIN_SERVER`**
-    *   **Inhalt:** Die Login-Server-URL deiner Azure Container Registry (z. B. `meinerecr.azurecr.io`).
-    *   **Wo zu finden:** Azure-Portal -> Deine Container Registry -> Übersicht -> "Anmeldeserver".
-
-3.  **`ACR_USERNAME`**
-    *   **Inhalt:** Der Benutzername für den Admin-Benutzer deiner ACR.
-    *   **Wo zu finden:** Azure-Portal -> Deine Container Registry -> Zugriffsschlüssel -> Admin-Benutzer aktivieren -> Benutzername.
-
-4.  **`ACR_PASSWORD`**
-    *   **Inhalt:** Eines der beiden Passwörter für den Admin-Benutzer deiner ACR.
-    *   **Wo zu finden:** Azure-Portal -> Deine Container Registry -> Zugriffsschlüssel -> Admin-Benutzer aktivieren -> Passwort.
-
----
-
-#### Punkt 4: Die Azure App Service Konfiguration (Finaler Check)
-
-Dein Workflow ist jetzt so konfiguriert, dass er Azure anweist, ein bestimmtes Image zu verwenden. Stelle sicher, dass dein App Service dies auch erwartet:
-
-1.  Gehe zu deinem `Product-Information-Generator-Final` App Service im Azure-Portal.
-2.  Gehe zu **"Deployment Center"**.
-3.  Stelle sicher, dass bei **"Quelle"** die Option **"Container Registry"** ausgewählt ist.
-4.  Gib die Informationen deiner ACR ein (Login Server, Image-Name etc.). Dieser Schritt ist wichtig, damit Azure beim ersten Mal und bei manuellen Neustarts weiß, wo es suchen muss. Der Workflow wird diese Einstellung dann bei jedem Push überschreiben.
-5.  **WICHTIG:** Stelle sicher, dass der Schalter für **"Continuous Deployment" (CI/CD)** auf **"On"** steht. Dies ist der Webhook, der es der `webapps-deploy`-Aktion ermöglicht, den App Service zu aktualisieren.
-
-Wenn du diese vier Punkte durchgegangen bist – insbesondere die Korrektur des Secret-Namens – ist dein gesamter Prozess korrekt konfiguriert und wird funktionieren.
+          # WICHTIG: Der Image-Name wird hier direkt konstruiert, um das
+          # Secret-Masking-Problem von GitHub Actions zu umgehen.
+          images: '${{ secrets.ACR_LOGIN_SERVER }}/product-information-generator:${{ github.sha }}'
+          # Verwendet das Publish Profile zur Authentifizierung
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
