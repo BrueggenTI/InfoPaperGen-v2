@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --target=node20 --external:nanoid --external:lightningcss --external:@babel/preset-typescript",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --target=node20 --external:nanoid --external:lightningcss --external:@babel/preset-typescript --define:process.env.NODE_ENV=\\\"production\\\" --minify",
     "start": "NODE_ENV=production node --experimental-modules dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
