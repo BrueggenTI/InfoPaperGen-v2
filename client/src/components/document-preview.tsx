@@ -530,32 +530,32 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                     </div>
                   );
 
-                const claimsResult = calculateClaims({
-                  protein: formData.nutrition.protein || 0,
-                  fiber: formData.nutrition.fiber || 0,
-                  salt: formData.nutrition.salt || 0,
-                  sugars: formData.nutrition.sugars || 0,
-                  fat: formData.nutrition.fat || 0,
-                  saturatedFat: formData.nutrition.saturatedFat || 0
-                });
+                const claimsToShow: Array<{ label: string; claim: string }> = [];
 
-                const allPossibleClaims = [
-                  { label: "Source of fibre / High fibre", claim: claimsResult.fiber.bestClaim },
-                  { label: "Source of protein / High protein", claim: claimsResult.protein.bestClaim },
-                  { label: "Low/Free salt", claim: claimsResult.salt.bestClaim },
-                  { label: "Low/Free sugar", claim: claimsResult.sugar.bestClaim },
-                  { label: "Low/Free fat", claim: claimsResult.fat.bestClaim },
-                  { label: "Low saturated fat", claim: claimsResult.saturatedFat.bestClaim }
-                ];
-
-                const claimsToShow = allPossibleClaims.filter(item => item.claim);
-
-                // Add wholegrain and other manual declarations
+                // Add only active automatic claims (threshold-based)
+                if (formData.declarations?.sourceOfProtein) {
+                  claimsToShow.push({ label: "Source of protein", claim: "✓" });
+                }
+                if (formData.declarations?.highInProtein) {
+                  claimsToShow.push({ label: "High protein", claim: "✓" });
+                }
+                if (formData.declarations?.sourceOfFiber) {
+                  claimsToShow.push({ label: "Source of fibre", claim: "✓" });
+                }
+                if (formData.declarations?.highInFiber) {
+                  claimsToShow.push({ label: "High fibre", claim: "✓" });
+                }
                 if (formData.declarations?.wholegrain) {
                   claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
                 }
-                if (formData.declarations?.other) {
-                  claimsToShow.push({ label: "Other", claim: formData.declarations.other });
+
+                // Add active manual claims (user-created)
+                if (formData.declarations?.manualClaims) {
+                  formData.declarations.manualClaims
+                    .filter((claim: any) => claim.isActive)
+                    .forEach((claim: any) => {
+                      claimsToShow.push({ label: claim.text, claim: "✓" });
+                    });
                 }
 
                   if (claimsToShow.length === 0) {
