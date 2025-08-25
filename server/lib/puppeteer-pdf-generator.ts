@@ -44,47 +44,50 @@ export async function generatePDFWithPuppeteer(
   try {
     console.log('🚀 Starte Puppeteer Browser...');
 
-    // Optimierte Browser-Konfiguration für maximale Performance
+    // Optimierte Browser-Konfiguration für maximale Performance und Azure-Kompatibilität
     const launchOptions: any = {
-      headless: true,
-      userDataDir: '/tmp',
+      headless: 'new', // 'new' mode is recommended over true
       args: [
+        // === Core Azure/Docker Compatibility Flags ===
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-dev-shm-usage',      // Avoids issues with limited shared memory in containers
+        '--disable-crash-reporter',     // Prevents crashpad from needing a writable db path
+        '--no-zygote',                  // Often required in sandboxed/containerized environments
+        '--single-process',             // Reduces complexity, can help in resource-constrained environments
+
+        // === Force Data Paths to /tmp (created in server/index.ts) ===
+        '--user-data-dir=/tmp/chrome-data',
+        '--data-path=/tmp/chrome-data',
+        '--disk-cache-dir=/tmp/chrome-data',
+
+        // === Performance & Stability ===
+        '--disable-gpu',                // Essential for headless operation on servers
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
+        '--no-default-browser-check',
         '--disable-extensions',
         '--disable-default-apps',
-        '--disable-features=TranslateUI,VizDisplayCompositor',
-        '--disable-ipc-flooding-protection',
+        '--disable-accelerated-2d-canvas',
+        '--disable-background-networking',
         '--disable-background-timer-throttling',
         '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--run-all-compositor-stages-before-draw',
-        '--memory-pressure-off',
-        // Performance-Optimierungen
-        '--max_old_space_size=4096',
-        '--js-flags="--max-old-space-size=4096"',
-        '--disable-background-networking',
         '--disable-client-side-phishing-detection',
         '--disable-component-update',
         '--disable-hang-monitor',
+        '--disable-ipc-flooding-protection',
         '--disable-popup-blocking',
         '--disable-prompt-on-repost',
+        '--disable-renderer-backgrounding',
         '--disable-sync',
         '--disable-translate',
+        '--disable-web-security',       // May be required by the app, but use with caution
+        '--disable-features=TranslateUI,VizDisplayCompositor',
         '--metrics-recording-only',
-        '--no-default-browser-check',
         '--safebrowsing-disable-auto-update',
         '--enable-automation',
         '--password-store=basic',
-        '--use-mock-keychain'
+        '--use-mock-keychain',
+        '--memory-pressure-off'
       ]
     };
 
@@ -314,12 +317,21 @@ export async function handlePDFDownload(req: Request, res: Response): Promise<vo
  */
 export async function checkPuppeteerSetup(): Promise<boolean> {
   try {
+    console.log('🚀 Starte Puppeteer Setup Check...');
     const browser = await puppeteer.launch({
-      headless: true,
-      userDataDir: '/tmp',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-crash-reporter',
+        '--user-data-dir=/tmp/chrome-data', // Use a specific dir for the check
+        '--no-zygote',
+        '--single-process'
+      ]
     });
     await browser.close();
+    console.log('✅ Puppeteer Setup Check erfolgreich.');
     return true;
   } catch (error) {
     console.error('Puppeteer Setup-Fehler:', error);
@@ -439,37 +451,50 @@ export async function generatePDFFromHTML(
   try {
     console.log('🚀 Starte Puppeteer Browser für HTML-Template...');
 
-    // Optimierte Browser-Konfiguration für maximale Performance
+    // Optimierte Browser-Konfiguration für maximale Performance und Azure-Kompatibilität
     const launchOptions: any = {
-      headless: true,
-      userDataDir: '/tmp',
+      headless: 'new', // 'new' mode is recommended over true
       args: [
+        // === Core Azure/Docker Compatibility Flags ===
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-dev-shm-usage',      // Avoids issues with limited shared memory in containers
+        '--disable-crash-reporter',     // Prevents crashpad from needing a writable db path
+        '--no-zygote',                  // Often required in sandboxed/containerized environments
+        '--single-process',             // Reduces complexity, can help in resource-constrained environments
+
+        // === Force Data Paths to /tmp (created in server/index.ts) ===
+        '--user-data-dir=/tmp/chrome-data',
+        '--data-path=/tmp/chrome-data',
+        '--disk-cache-dir=/tmp/chrome-data',
+
+        // === Performance & Stability ===
+        '--disable-gpu',                // Essential for headless operation on servers
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
+        '--no-default-browser-check',
         '--disable-extensions',
         '--disable-default-apps',
-        '--disable-features=TranslateUI,VizDisplayCompositor',
-        '--disable-web-security',
-        '--enable-automation',
-        '--memory-pressure-off',
-        '--max_old_space_size=4096',
+        '--disable-accelerated-2d-canvas',
         '--disable-background-networking',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
         '--disable-client-side-phishing-detection',
         '--disable-component-update',
         '--disable-hang-monitor',
+        '--disable-ipc-flooding-protection',
         '--disable-popup-blocking',
         '--disable-prompt-on-repost',
+        '--disable-renderer-backgrounding',
         '--disable-sync',
         '--disable-translate',
+        '--disable-web-security',       // May be required by the app, but use with caution
+        '--disable-features=TranslateUI,VizDisplayCompositor',
         '--metrics-recording-only',
-        '--no-default-browser-check',
-        '--safebrowsing-disable-auto-update'
+        '--safebrowsing-disable-auto-update',
+        '--enable-automation',
+        '--password-store=basic',
+        '--use-mock-keychain',
+        '--memory-pressure-off'
       ]
     };
 
