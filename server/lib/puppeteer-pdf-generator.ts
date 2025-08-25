@@ -45,82 +45,23 @@ export async function generatePDFWithPuppeteer(
   try {
     console.log('🚀 Starte Puppeteer Browser...');
 
-    // Optimierte Browser-Konfiguration für maximale Performance und Azure-Kompatibilität
+    // Vereinfachte und erprobte Browser-Konfiguration für Docker/Azure
     const launchOptions: any = {
-      headless: 'new', // 'new' mode is recommended over true
+      headless: 'new',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
       args: [
-        // === Core Azure/Docker Compatibility Flags ===
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',      // Avoids issues with limited shared memory in containers
-        '--disable-crash-reporter',     // Prevents crashpad from needing a writable db path
-        '--no-zygote',                  // Often required in sandboxed/containerized environments
-        '--single-process',             // Reduces complexity, can help in resource-constrained environments
-
-        // === Force Data Paths to /tmp (created in server/index.ts) ===
-        '--user-data-dir=/tmp/chrome-data',
-        '--data-path=/tmp/chrome-data',
-        '--disk-cache-dir=/tmp/chrome-data',
-
-        // === Performance & Stability ===
-        '--disable-gpu',                // Essential for headless operation on servers
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-extensions',
-        '--disable-default-apps',
+        '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
-        '--disable-background-networking',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-client-side-phishing-detection',
-        '--disable-component-update',
-        '--disable-hang-monitor',
-        '--disable-ipc-flooding-protection',
-        '--disable-popup-blocking',
-        '--disable-prompt-on-repost',
-        '--disable-renderer-backgrounding',
-        '--disable-sync',
-        '--disable-translate',
-        '--disable-web-security',       // May be required by the app, but use with caution
-        '--disable-features=TranslateUI,VizDisplayCompositor',
-        '--metrics-recording-only',
-        '--safebrowsing-disable-auto-update',
-        '--enable-automation',
-        '--password-store=basic',
-        '--use-mock-keychain',
-        '--memory-pressure-off'
-      ]
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // essential for some container environments
+        '--disable-gpu'
+      ],
     };
 
-    // Azure Container Apps optimierte Browser-Pfade
-    const possiblePaths = [
-      process.env.PUPPETEER_EXECUTABLE_PATH, // Docker Umgebungsvariable (höchste Priorität)
-      '/usr/bin/google-chrome-stable', // Docker Standard-Installation
-      '/usr/bin/google-chrome', // Alternative Docker-Installation
-      '/usr/bin/chromium-browser', // Fallback Chromium
-      '/usr/bin/chromium',
-      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium' // Replit-spezifisch
-    ].filter(Boolean);
-
-    let browserPath = null;
-    for (const path of possiblePaths) {
-      try {
-        if (path && fs.existsSync(path)) {
-          browserPath = path;
-          break;
-        }
-      } catch (error) {
-        continue;
-      }
-    }
-
-    if (browserPath) {
-      console.log(`🔍 Verwende Browser: ${browserPath}`);
-      launchOptions.executablePath = browserPath;
-    } else {
-      console.log('⚠️ Kein spezifischer Browser-Pfad gefunden, verwende Puppeteer Standard');
-    }
-
+    console.log(`🔍 Verwende Browser von: ${launchOptions.executablePath}`);
     browser = await puppeteer.launch(launchOptions);
 
     console.log('📄 Erstelle neue Seite...');
@@ -452,80 +393,23 @@ export async function generatePDFFromHTML(
   try {
     console.log('🚀 Starte Puppeteer Browser für HTML-Template...');
 
-    // Optimierte Browser-Konfiguration für maximale Performance und Azure-Kompatibilität
+    // Vereinfachte und erprobte Browser-Konfiguration für Docker/Azure
     const launchOptions: any = {
-      headless: 'new', // 'new' mode is recommended over true
+      headless: 'new',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
       args: [
-        // === Core Azure/Docker Compatibility Flags ===
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',      // Avoids issues with limited shared memory in containers
-        '--disable-crash-reporter',     // Prevents crashpad from needing a writable db path
-        '--no-zygote',                  // Often required in sandboxed/containerized environments
-        '--single-process',             // Reduces complexity, can help in resource-constrained environments
-
-        // === Force Data Paths to /tmp (created in server/index.ts) ===
-        '--user-data-dir=/tmp/chrome-data',
-        '--data-path=/tmp/chrome-data',
-        '--disk-cache-dir=/tmp/chrome-data',
-
-        // === Performance & Stability ===
-        '--disable-gpu',                // Essential for headless operation on servers
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-extensions',
-        '--disable-default-apps',
+        '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
-        '--disable-background-networking',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-client-side-phishing-detection',
-        '--disable-component-update',
-        '--disable-hang-monitor',
-        '--disable-ipc-flooding-protection',
-        '--disable-popup-blocking',
-        '--disable-prompt-on-repost',
-        '--disable-renderer-backgrounding',
-        '--disable-sync',
-        '--disable-translate',
-        '--disable-web-security',       // May be required by the app, but use with caution
-        '--disable-features=TranslateUI,VizDisplayCompositor',
-        '--metrics-recording-only',
-        '--safebrowsing-disable-auto-update',
-        '--enable-automation',
-        '--password-store=basic',
-        '--use-mock-keychain',
-        '--memory-pressure-off'
-      ]
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // essential for some container environments
+        '--disable-gpu'
+      ],
     };
 
-    // Versuche verschiedene Browser-Pfade für Replit
-    const possiblePaths = [
-      '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-      process.env.PUPPETEER_EXECUTABLE_PATH,
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome'
-    ].filter(Boolean);
-
-    let browserPath = null;
-    for (const path of possiblePaths) {
-      try {
-        if (path && fs.existsSync(path)) {
-          browserPath = path;
-          break;
-        }
-      } catch (error) {
-        continue;
-      }
-    }
-
-    if (browserPath) {
-      console.log(`🔍 Verwende Browser: ${browserPath}`);
-      launchOptions.executablePath = browserPath;
-    }
-
+    console.log(`🔍 Verwende Browser von: ${launchOptions.executablePath}`);
     browser = await puppeteer.launch(launchOptions);
     console.log(`⏱️ Browser gestartet in ${Date.now() - startTime}ms`);
 
