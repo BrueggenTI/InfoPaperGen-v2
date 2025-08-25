@@ -26,6 +26,7 @@ export interface PuppeteerPDFOptions {
   };
   preferCSSPageSize?: boolean;
   landscape?: boolean;
+  timeout?: number; // Timeout für die PDF-Generierung
 }
 
 /**
@@ -538,9 +539,9 @@ export async function generatePDFFromHTML(
       deviceScaleFactor: 1
     });
 
-    // Optimierte Timeouts
-    await page.setDefaultNavigationTimeout(15000);
-    await page.setDefaultTimeout(10000);
+    // Optimierte Timeouts (erhöht für Azure)
+    await page.setDefaultNavigationTimeout(30000); // 30 Sekunden
+    await page.setDefaultTimeout(30000); // 30 Sekunden
 
     // HTML-Inhalt direkt setzen (kein externes Laden erforderlich)
     console.log('📝 Setze HTML-Template-Inhalt...');
@@ -572,6 +573,7 @@ export async function generatePDFFromHTML(
       },
       preferCSSPageSize: true,
       landscape: false,
+      timeout: 30000, // 30 Sekunden Timeout für die PDF-Generierung selbst
       ...options
     };
 
