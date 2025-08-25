@@ -1,3 +1,28 @@
+import fs from "fs";
+
+// =================================================================
+// Azure App Service /tmp/ Verzeichnis-Fix für Puppeteer
+// Erzwingt, dass Chrome/Puppeteer /tmp/ verwendet, um Berechtigungsfehler zu vermeiden.
+// =================================================================
+process.env.HOME = '/tmp';
+process.env.XDG_CONFIG_HOME = '/tmp/xdg-config';
+process.env.XDG_CACHE_HOME  = '/tmp/xdg-cache';
+process.env.PUPPETEER_CACHE_DIR = '/tmp/puppeteer-cache';
+
+// Stellt sicher, dass die Verzeichnisse existieren.
+const tempDirs = ['/tmp/xdg-config', '/tmp/xdg-cache', '/tmp/chrome-data', '/tmp/puppeteer-cache'];
+tempDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log(`[Azure Fix] Temporäres Verzeichnis erfolgreich erstellt: ${dir}`);
+    } catch (error) {
+      console.error(`[Azure Fix] Fehler beim Erstellen des temporären Verzeichnisses: ${dir}`, error);
+    }
+  }
+});
+// =================================================================
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic, log } from "./production";
