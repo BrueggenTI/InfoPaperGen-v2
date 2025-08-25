@@ -282,6 +282,27 @@ export default function NutritionStep({
   const nutriScore = watchedValues ? calculateNutriScore(watchedValues) : null;
   const claims = watchedValues ? calculateClaims(watchedValues) : [];
   const validClaims = Array.isArray(claims) ? claims.filter((claim: any) => claim.isValid) : [];
+  const nutrition = watchedValues || { protein: 0, fiber: 0 };
+  const currentDeclarations = formData.declarations || {};
+
+  const thresholds = useMemo(() => {
+    if (!nutrition) return { sourceOfProtein: false, highInProtein: false, sourceOfFiber: false, highInFiber: false };
+    const claimsResult = calculateClaims(nutrition);
+    return {
+      sourceOfProtein: claimsResult.protein.source,
+      highInProtein: claimsResult.protein.high,
+      sourceOfFiber: claimsResult.fiber.source,
+      highInFiber: claimsResult.fiber.high,
+    };
+  }, [nutrition]);
+
+  const toggleStandardClaim = (claim: keyof Omit<ProductInfo['declarations'], 'manualClaims'>) => {
+    const newDeclarations = {
+      ...currentDeclarations,
+      [claim]: !currentDeclarations[claim],
+    };
+    onUpdate({ declarations: newDeclarations });
+  };
 
   return (
     <div className="w-full space-y-6" data-testid="nutrition-step">
@@ -534,6 +555,158 @@ export default function NutritionStep({
               </div>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+
+      {/* Declarations Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-teal-600" />
+            Deklarationen (Auslobungen)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <h4 className="font-medium text-sm text-muted-foreground">Standard-Auslobungen</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Source of Protein */}
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                currentDeclarations?.sourceOfProtein
+                  ? 'bg-blue-50 border-blue-300'
+                  : 'bg-white border-gray-200 hover:border-blue-200'
+              }`}
+              onClick={() => toggleStandardClaim('sourceOfProtein')}
+            >
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  checked={Boolean(currentDeclarations?.sourceOfProtein)}
+                  data-testid="checkbox-source-protein"
+                  className="mt-0.5 pointer-events-none"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">Source of protein</div>
+                  <div className="text-xs text-gray-500 mt-1">Requires ≥12g per 100g</div>
+                  <div className="text-xs mt-1">
+                    {thresholds.sourceOfProtein ? (
+                      <span className="text-green-600">✓ Requirements met ({nutrition.protein}g)</span>
+                    ) : (
+                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.protein}g) - Can still be selected</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* High Protein */}
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                currentDeclarations?.highInProtein
+                  ? 'bg-blue-50 border-blue-300'
+                  : 'bg-white border-gray-200 hover:border-blue-200'
+              }`}
+              onClick={() => toggleStandardClaim('highInProtein')}
+            >
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  checked={Boolean(currentDeclarations?.highInProtein)}
+                  data-testid="checkbox-high-protein"
+                  className="mt-0.5 pointer-events-none"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">High protein</div>
+                  <div className="text-xs text-gray-500 mt-1">Requires ≥20g per 100g</div>
+                  <div className="text-xs mt-1">
+                    {thresholds.highInProtein ? (
+                      <span className="text-green-600">✓ Requirements met ({nutrition.protein}g)</span>
+                    ) : (
+                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.protein}g) - Can still be selected</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Source of Fibre */}
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                currentDeclarations?.sourceOfFiber
+                  ? 'bg-green-50 border-green-300'
+                  : 'bg-white border-gray-200 hover:border-green-200'
+              }`}
+              onClick={() => toggleStandardClaim('sourceOfFiber')}
+            >
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  checked={Boolean(currentDeclarations?.sourceOfFiber)}
+                  data-testid="checkbox-source-fiber"
+                  className="mt-0.5 pointer-events-none"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">Source of fibre</div>
+                  <div className="text-xs text-gray-500 mt-1">Requires ≥3g per 100g</div>
+                  <div className="text-xs mt-1">
+                    {thresholds.sourceOfFiber ? (
+                      <span className="text-green-600">✓ Requirements met ({nutrition.fiber}g)</span>
+                    ) : (
+                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.fiber}g) - Can still be selected</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* High Fibre */}
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                currentDeclarations?.highInFiber
+                  ? 'bg-green-50 border-green-300'
+                  : 'bg-white border-gray-200 hover:border-green-200'
+              }`}
+              onClick={() => toggleStandardClaim('highInFiber')}
+            >
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  checked={Boolean(currentDeclarations?.highInFiber)}
+                  data-testid="checkbox-high-fiber"
+                  className="mt-0.5 pointer-events-none"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">High fibre</div>
+                  <div className="text-xs text-gray-500 mt-1">Requires ≥6g per 100g</div>
+                  <div className="text-xs mt-1">
+                    {thresholds.highInFiber ? (
+                      <span className="text-green-600">✓ Requirements met ({nutrition.fiber}g)</span>
+                    ) : (
+                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.fiber}g) - Can still be selected</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content of wholegrain */}
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-sm md:col-span-2 ${
+                currentDeclarations?.wholegrain
+                  ? 'bg-amber-50 border-amber-300'
+                  : 'bg-white border-gray-200 hover:border-amber-200'
+              }`}
+              onClick={() => toggleStandardClaim('wholegrain')}
+            >
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  checked={Boolean(currentDeclarations?.wholegrain)}
+                  data-testid="checkbox-wholegrain"
+                  className="mt-0.5 pointer-events-none"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">Content of wholegrain</div>
+                  <div className="text-xs text-gray-500 mt-1">Manual selection. Check if the product contains wholegrain.</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

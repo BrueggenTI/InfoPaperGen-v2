@@ -77,10 +77,19 @@ export const productInfoSchema = z.object({
   shelfLifeMonths: z.number().optional(),
   preparationType: z.string().optional(),
   declarations: z.object({
-    highFiber: z.boolean().optional().default(false),
-    highProtein: z.boolean().optional().default(false),
+    // Automatic claims (threshold-based)
+    sourceOfProtein: z.boolean().optional().default(false),
+    highInProtein: z.boolean().optional().default(false),
+    sourceOfFiber: z.boolean().optional().default(false),
+    highInFiber: z.boolean().optional().default(false),
     wholegrain: z.boolean().optional().default(false),
-    other: z.string().optional(),
+    // Manual claims (user-created)
+    manualClaims: z.array(z.object({
+      id: z.string(),
+      text: z.string(),
+      isActive: z.boolean().default(true),
+      createdAt: z.string().optional(),
+    })).optional().default([]),
   }).optional(),
 });
 
