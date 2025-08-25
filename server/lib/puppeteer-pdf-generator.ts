@@ -61,123 +61,96 @@ export async function generatePDFWithPuppeteer(
       ],
     };
 
-    console.log(`🔍 Verwende Browser von: ${launchOptions.executablePath}`);
+    console.log('[PUPPETEER_DEBUG] Schritt 1: Launch-Optionen vorbereitet.', launchOptions);
     browser = await puppeteer.launch(launchOptions);
+    console.log('[PUPPETEER_DEBUG] Schritt 2: Browser erfolgreich gestartet.');
 
-    console.log('📄 Erstelle neue Seite...');
+    // Detailliertes Prozess-Logging
+    const browserProcess = browser.process();
+    if (browserProcess) {
+      console.log(`[PUPPETEER_DEBUG] Browser-Prozess-ID: ${browserProcess.pid}`);
+      browserProcess.stderr.on('data', data => console.error(`[PUPPETEER STDERR] ${data}`));
+      browserProcess.stdout.on('data', data => console.log(`[PUPPETEER STDOUT] ${data}`));
+      browserProcess.on('close', code => console.log(`[PUPPETEER_DEBUG] Browser-Prozess geschlossen mit Code: ${code}`));
+    } else {
+      console.log('[PUPPETEER_DEBUG] Kein direkter Zugriff auf Browser-Prozess möglich.');
+    }
+
+    browser.on('disconnected', () => console.error('[PUPPETEER_DEBUG] BROWSER DISCONNECTED! Der Browser wurde geschlossen oder ist abgestürzt.'));
+
+    console.log('[PUPPETEER_DEBUG] Schritt 3: Erstelle neue Seite...');
     const page = await browser.newPage();
+    console.log('[PUPPETEER_DEBUG] Schritt 4: Neue Seite erfolgreich erstellt.');
 
     // Optimiertes Viewport für bessere Performance
+    console.log('[PUPPETEER_DEBUG] Schritt 5: Setze Viewport...');
     await page.setViewport({
       width: 1200,
       height: 1600,
-      deviceScaleFactor: 1 // Reduziert für bessere Performance
+      deviceScaleFactor: 1
     });
+    console.log('[PUPPETEER_DEBUG] Schritt 6: Viewport erfolgreich gesetzt.');
 
     // Performance-Optimierungen für die Seite
     await page.setDefaultNavigationTimeout(60000);
     await page.setDefaultTimeout(30000);
+    console.log('[PUPPETEER_DEBUG] Schritt 7: Timeouts erfolgreich gesetzt.');
 
-    // Erlaube ALLE Ressourcen für vollständigen Inhalt
+    // Request-Interception für Performance
+    console.log('[PUPPETEER_DEBUG] Schritt 8: Setze Request-Interception...');
     await page.setRequestInterception(true);
     page.on('request', (req) => {
       const resourceType = req.resourceType();
-      // Erlaube alle wichtigen Ressourcen für vollständige PDF-Darstellung
       if (['document', 'stylesheet', 'font', 'image', 'script', 'xhr', 'fetch'].includes(resourceType)) {
-        req.continue(); // Alle wichtigen Ressourcen erlauben
-      } else if (['media', 'websocket'].includes(resourceType)) {
-        req.abort(); // Nur unwichtige Ressourcen blockieren
+        req.continue();
       } else {
-        req.continue(); // Standardverhalten für andere Ressourcen
+        req.abort();
       }
     });
+    console.log('[PUPPETEER_DEBUG] Schritt 9: Request-Interception erfolgreich gesetzt.');
 
-    // User-Agent setzen (hilft bei einigen CORS-Problemen)
+    // User-Agent setzen
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    console.log('[PUPPETEER_DEBUG] Schritt 10: User-Agent erfolgreich gesetzt.');
 
-    console.log(`🌐 Besuche URL: ${url}`);
-
-    // Seite laden mit optimierten Optionen für schnellere Ladezeit
+    console.log(`[PUPPETEER_DEBUG] Schritt 11: Besuche URL: ${url}`);
     await page.goto(url, {
-      waitUntil: ['networkidle2', 'domcontentloaded'], // networkidle2 statt networkidle0 für bessere Performance
-      timeout: 60000 // Verdoppeltes Timeout für komplexe Seiten
+      waitUntil: ['networkidle2', 'domcontentloaded'],
+      timeout: 60000
     });
+    console.log('[PUPPETEER_DEBUG] Schritt 12: URL erfolgreich geladen.');
 
-    console.log('⏳ Warte auf vollständiges Laden der Seite...');
-
-    // Mehrstufige Wartestrategie für vollständige Datenladung
+    console.log('[PUPPETEER_DEBUG] Schritt 13: Warte auf Content...');
     try {
-      // 1. Warte auf Live Preview Container
       await page.waitForSelector('#document-preview-content', { timeout: 15000 });
-      console.log('✅ Live Preview Container gefunden');
-
-      // 2. Performance: Optimierte Session-Daten-Ladung (reduziertes Polling)
-      await page.waitForFunction(() => {
-        // Prüfe ob Produktname und andere Daten geladen sind
-        const productNameElements = document.querySelectorAll('[data-testid*="product"], h1, h2, h3');
-        const hasProductData = Array.from(productNameElements).some(el => 
-          el.textContent && el.textContent.trim().length > 10 && 
-          !el.textContent.includes('will appear') && 
-          !el.textContent.includes('Live Preview')
-        );
-
-        // Prüfe auf Tabellen mit echten Daten
-        const tables = document.querySelectorAll('table');
-        const hasTableData = Array.from(tables).some(table => {
-          const rows = table.querySelectorAll('tr');
-          return rows.length > 1; // Mehr als nur Header-Zeile
-        });
-
-        console.log(`Content check: hasProductData=${hasProductData}, hasTableData=${hasTableData}, tables=${tables.length}`);
-        return hasProductData || hasTableData;
-      }, { timeout: 8000, polling: 500 }); // Performance: Reduzierte Polling-Zeit von 1000ms auf 500ms
-
-      console.log('✅ Daten-Content erfolgreich geladen');
-
-      // 3. Performance: Reduzierte finale Rendering-Zeit
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Performance: 2000ms → 1000ms
-      console.log('✅ Finale Rendering-Zeit abgewartet');
-
+      console.log('[PUPPETEER_DEBUG] Schritt 14: Content-Selektor gefunden.');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('[PUPPETEER_DEBUG] Schritt 15: Finale Rendering-Zeit abgewartet.');
     } catch (error) {
-      console.log('⚠️ Content-Load-Timeout - verwende verfügbare Inhalte');
-      // Performance: Reduzierte Fallback-Zeit
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Performance: 3000ms → 1500ms
+      console.log('[PUPPETEER_DEBUG] WARNUNG: Content-Selektor nicht gefunden, fahre trotzdem fort.');
     }
 
-    // Performance: Reduzierte zusätzliche Wartezeit
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Performance: 2000ms → 1000ms
-
-    console.log('📋 Generiere PDF...');
-
-    // Standard PDF-Optionen
+    console.log('[PUPPETEER_DEBUG] Schritt 16: Generiere PDF...');
     const defaultOptions: PuppeteerPDFOptions = {
       format: 'A4',
       printBackground: true,
       displayHeaderFooter: false,
-      margin: {
-          top: '3mm',
-          bottom: '3mm',
-          left: '3mm',
-          right: '3mm'
-        },
-      preferCSSPageSize: false,
-      landscape: false,
+      margin: { top: '3mm', bottom: '3mm', left: '3mm', right: '3mm' },
       ...options
     };
-
-    // PDF generieren
     const pdfBuffer = Buffer.from(await page.pdf(defaultOptions));
+    console.log('[PUPPETEER_DEBUG] Schritt 17: PDF-Buffer erfolgreich erstellt.');
 
-    console.log('✅ PDF erfolgreich generiert!');
     return pdfBuffer;
 
   } catch (error) {
-    console.error('❌ Fehler bei der PDF-Generierung:', error);
+    console.error('❌ [PUPPETEER_DEBUG] FEHLER in generatePDFWithPuppeteer:', error);
     throw new Error(`PDF-Generierung fehlgeschlagen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
   } finally {
     if (browser) {
-      console.log('🔒 Schließe Browser...');
+      console.log('[PUPPETEER_DEBUG] Schritt 18: Schließe Browser...');
       await browser.close();
+      console.log('[PUPPETEER_DEBUG] Schritt 19: Browser erfolgreich geschlossen.');
     }
   }
 }
@@ -409,40 +382,54 @@ export async function generatePDFFromHTML(
       ],
     };
 
-    console.log(`🔍 Verwende Browser von: ${launchOptions.executablePath}`);
+    console.log('[PUPPETEER_DEBUG] Schritt 1: Launch-Optionen vorbereitet.', launchOptions);
     browser = await puppeteer.launch(launchOptions);
-    console.log(`⏱️ Browser gestartet in ${Date.now() - startTime}ms`);
+    console.log('[PUPPETEER_DEBUG] Schritt 2: Browser erfolgreich gestartet.');
 
-    console.log('📄 Erstelle neue Seite für HTML-Template...');
+    // Detailliertes Prozess-Logging
+    const browserProcess = browser.process();
+    if (browserProcess) {
+      console.log(`[PUPPETEER_DEBUG] Browser-Prozess-ID: ${browserProcess.pid}`);
+      browserProcess.stderr.on('data', data => console.error(`[PUPPETEER STDERR] ${data}`));
+      browserProcess.stdout.on('data', data => console.log(`[PUPPETEER STDOUT] ${data}`));
+      browserProcess.on('close', code => console.log(`[PUPPETEER_DEBUG] Browser-Prozess geschlossen mit Code: ${code}`));
+    } else {
+      console.log('[PUPPETEER_DEBUG] Kein direkter Zugriff auf Browser-Prozess möglich.');
+    }
+
+    browser.on('disconnected', () => console.error('[PUPPETEER_DEBUG] BROWSER DISCONNECTED! Der Browser wurde geschlossen oder ist abgestürzt.'));
+
+    console.log('[PUPPETEER_DEBUG] Schritt 3: Erstelle neue Seite...');
     const page = await browser.newPage();
+    console.log('[PUPPETEER_DEBUG] Schritt 4: Neue Seite erfolgreich erstellt.');
 
     // Viewport für konsistente Darstellung
+    console.log('[PUPPETEER_DEBUG] Schritt 5: Setze Viewport...');
     await page.setViewport({
       width: 1200,
       height: 1600,
       deviceScaleFactor: 1
     });
+    console.log('[PUPPETEER_DEBUG] Schritt 6: Viewport erfolgreich gesetzt.');
 
     // Optimierte Timeouts (erhöht für Azure)
     await page.setDefaultNavigationTimeout(30000); // 30 Sekunden
     await page.setDefaultTimeout(30000); // 30 Sekunden
+    console.log('[PUPPETEER_DEBUG] Schritt 7: Timeouts erfolgreich gesetzt.');
 
     // HTML-Inhalt direkt setzen (kein externes Laden erforderlich)
-    console.log('📝 Setze HTML-Template-Inhalt...');
-    const contentStartTime = Date.now();
-
+    console.log('[PUPPETEER_DEBUG] Schritt 8: Setze HTML-Template-Inhalt...');
     await page.setContent(htmlContent, {
       waitUntil: ['domcontentloaded'], // Nur DOM laden, nicht alle Ressourcen
       timeout: 15000
     });
-
-    console.log(`⏱️ Content gesetzt in ${Date.now() - contentStartTime}ms`);
+    console.log('[PUPPETEER_DEBUG] Schritt 9: HTML-Content erfolgreich gesetzt.');
 
     // Minimale Wartezeit für finales Rendering
     await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('[PUPPETEER_DEBUG] Schritt 10: Finale Rendering-Wartezeit abgeschlossen.');
 
-    console.log('📋 Generiere PDF aus HTML-Template...');
-    const pdfStartTime = Date.now();
+    console.log('[PUPPETEER_DEBUG] Schritt 11: Generiere PDF aus HTML-Template...');
 
     // Standard PDF-Optionen
     const defaultOptions: PuppeteerPDFOptions = {
@@ -463,22 +450,21 @@ export async function generatePDFFromHTML(
 
     // PDF generieren
     const pdfBuffer = Buffer.from(await page.pdf(defaultOptions));
+    console.log('[PUPPETEER_DEBUG] Schritt 12: PDF-Buffer erfolgreich erstellt.');
 
-    console.log(`⏱️ PDF generiert in ${Date.now() - pdfStartTime}ms`);
-    console.log(`✅ PDF aus HTML-Template erfolgreich generiert! Gesamt: ${Date.now() - startTime}ms`);
+    console.log(`✅ PDF aus HTML-Template erfolgreich generiert!`);
     console.log(`📊 PDF-Größe: ${(pdfBuffer.length / 1024).toFixed(1)} KB`);
 
     return pdfBuffer;
 
   } catch (error) {
-    console.error(`❌ Fehler bei der HTML-Template-PDF-Generierung nach ${Date.now() - startTime}ms:`, error);
+    console.error('❌ [PUPPETEER_DEBUG] FEHLER in generatePDFFromHTML:', error);
     throw new Error(`PDF-Generierung aus HTML fehlgeschlagen: ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
   } finally {
     if (browser) {
-      const closeStartTime = Date.now();
-      console.log('🔒 Schließe Browser...');
+      console.log('[PUPPETEER_DEBUG] Schritt 13: Schließe Browser...');
       await browser.close();
-      console.log(`⏱️ Browser geschlossen in ${Date.now() - closeStartTime}ms`);
+      console.log('[PUPPETEER_DEBUG] Schritt 14: Browser erfolgreich geschlossen.');
     }
   }
 }
