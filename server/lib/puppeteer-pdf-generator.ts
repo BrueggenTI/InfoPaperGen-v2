@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import { Request, Response } from 'express';
 import { generatePDFTemplate } from './pdf-template-generator';
 import { ProductInfo } from '@shared/schema';
