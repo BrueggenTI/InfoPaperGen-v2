@@ -278,23 +278,32 @@ export default function NutritionStep({
     return () => subscription.unsubscribe();
   }, [form, onUpdate]);
 
-  // Calculate Nutri-Score and claims for display
-  const nutriScore = watchedValues ? calculateNutriScore(watchedValues) : null;
-  const claims = watchedValues ? calculateClaims(watchedValues) : [];
-  const validClaims = Array.isArray(claims) ? claims.filter((claim: any) => claim.isValid) : [];
-  const nutrition = watchedValues || { protein: 0, fiber: 0 };
+  // --- Safe Calculation Logic ---
+  // Create a safe, default nutrition object to prevent crashes on first render
+  const defaultNutrition = {
+    energy: { kj: 0, kcal: 0 }, fat: 0, saturatedFat: 0, carbohydrates: 0,
+    sugars: 0, fiber: 0, protein: 0, salt: 0, fruitVegLegumeContent: 0,
+  };
+
+  // Use watchedValues from the form if available, otherwise fall back to the safe default
+  const nutrition = watchedValues && Object.keys(watchedValues).length > 1 ? watchedValues : defaultNutrition;
+
+  // Calculate Nutri-Score and claims for display, always using a valid nutrition object
+  const nutriScore = calculateNutriScore(nutrition);
+  const claimsResult = calculateClaims(nutrition);
+  const validClaims = getValidClaims(nutrition);
+
   const currentDeclarations = formData.declarations || {};
 
+  // Memoize threshold calculations based on the safe nutrition object
   const thresholds = useMemo(() => {
-    if (!nutrition) return { sourceOfProtein: false, highInProtein: false, sourceOfFiber: false, highInFiber: false };
-    const claimsResult = calculateClaims(nutrition);
     return {
-      sourceOfProtein: claimsResult.protein.source,
-      highInProtein: claimsResult.protein.high,
-      sourceOfFiber: claimsResult.fiber.source,
-      highInFiber: claimsResult.fiber.high,
+      sourceOfProtein: claimsResult.protein.canClaimSource,
+      highInProtein: claimsResult.protein.canClaimHigh,
+      sourceOfFiber: claimsResult.fiber.canClaimSource,
+      highInFiber: claimsResult.fiber.canClaimHigh,
     };
-  }, [nutrition]);
+  }, [claimsResult]);
 
   const toggleStandardClaim = (claim: keyof Omit<ProductInfo['declarations'], 'manualClaims'>) => {
     const newDeclarations = {
