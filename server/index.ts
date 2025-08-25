@@ -1,6 +1,25 @@
 import fs from "fs";
 
 // =================================================================
+// Globale Fehlerüberwachung für Absturzsicherheit
+// =================================================================
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('!!! UNHANDLED REJECTION !!!');
+  console.error('Ein schwerwiegender Fehler ist aufgetreten, der nicht behandelt wurde.');
+  console.error('Grund:', reason);
+  console.error('Promise:', promise);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('!!! UNCAUGHT EXCEPTION !!!');
+  console.error('Ein kritischer, nicht abgefangener Fehler ist aufgetreten. Der Prozess könnte instabil sein.');
+  console.error('Fehler:', error);
+  // In einer echten Produktionsumgebung sollte hier ein Neustart des Prozesses in Betracht gezogen werden.
+  // process.exit(1);
+});
+// =================================================================
+
+// =================================================================
 // Azure App Service /tmp/ Verzeichnis-Fix für Puppeteer
 // Erzwingt, dass Chrome/Puppeteer /tmp/ verwendet, um Berechtigungsfehler zu vermeiden.
 // =================================================================
