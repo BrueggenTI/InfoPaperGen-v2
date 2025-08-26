@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
 import { calculateClaims, NutritionValues, getValidClaims } from "@/lib/claims-calculator";
+import CustomClaims from "@/components/steps/custom-claims";
 
 type DeclarationKeys = keyof Omit<NonNullable<ProductInfo['declarations']>, 'manualClaims'>;
 
@@ -297,7 +298,14 @@ export default function NutritionStep({
   // Calculate Nutri-Score and claims for display, always using a valid nutrition object
   const nutriScore = calculateNutriScore(nutrition);
   const claimsResult = calculateClaims(nutrition);
-  const validClaims = getValidClaims(nutrition);
+  const validClaims = getValidClaims(formData.declarations || {
+    sourceOfProtein: false,
+    highInProtein: false,
+    sourceOfFiber: false,
+    highInFiber: false,
+    wholegrain: false,
+    manualClaims: [],
+  });
 
   const currentDeclarations = formData.declarations || {
     sourceOfProtein: false,
@@ -732,6 +740,10 @@ export default function NutritionStep({
               </div>
             </div>
           </div>
+          <CustomClaims
+            declarations={currentDeclarations}
+            onUpdate={onUpdate}
+          />
         </CardContent>
       </Card>
 
