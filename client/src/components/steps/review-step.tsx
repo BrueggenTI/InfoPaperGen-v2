@@ -28,12 +28,17 @@ export default function ReviewStep({
   };
 
   const handleDeclarationChange = (field: string, checked: boolean) => {
+    const currentDeclarations = formData.declarations || {
+      sourceOfProtein: false,
+      highInProtein: false,
+      sourceOfFiber: false,
+      highInFiber: false,
+      wholegrain: false,
+      manualClaims: [],
+    };
     onUpdate({
       declarations: {
-        highFiber: false,
-        highProtein: false,
-        wholegrain: false,
-        ...formData.declarations,
+        ...currentDeclarations,
         [field]: checked,
       },
     });
@@ -67,21 +72,21 @@ export default function ReviewStep({
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="highFiber"
-                checked={formData.declarations?.highFiber || false}
-                onCheckedChange={(checked) => handleDeclarationChange("highFiber", checked as boolean)}
+                id="highInFiber"
+                checked={formData.declarations?.highInFiber || false}
+                onCheckedChange={(checked) => handleDeclarationChange("highInFiber", checked as boolean)}
               />
-              <label htmlFor="highFiber" className="text-sm text-slate-700">
+              <label htmlFor="highInFiber" className="text-sm text-slate-700">
                 Source of fibre / High fibre
               </label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="highProtein"
-                checked={formData.declarations?.highProtein || false}
-                onCheckedChange={(checked) => handleDeclarationChange("highProtein", checked as boolean)}
+                id="highInProtein"
+                checked={formData.declarations?.highInProtein || false}
+                onCheckedChange={(checked) => handleDeclarationChange("highInProtein", checked as boolean)}
               />
-              <label htmlFor="highProtein" className="text-sm text-slate-700">
+              <label htmlFor="highInProtein" className="text-sm text-slate-700">
                 Source of protein / High protein
               </label>
             </div>
@@ -97,16 +102,29 @@ export default function ReviewStep({
             </div>
             <div>
               <Input
-                value={formData.declarations?.other || ""}
-                onChange={(e) => onUpdate({ 
-                  declarations: { 
-                    highFiber: false,
-                    highProtein: false,
+                value={formData.declarations?.manualClaims?.[0]?.text || ""}
+                onChange={(e) => {
+                  const currentDeclarations = formData.declarations || {
+                    sourceOfProtein: false,
+                    highInProtein: false,
+                    sourceOfFiber: false,
+                    highInFiber: false,
                     wholegrain: false,
-                    ...formData.declarations, 
-                    other: e.target.value 
-                  } 
-                })}
+                    manualClaims: [],
+                  };
+                  const manualClaims = [...(currentDeclarations.manualClaims || [])];
+                  if (manualClaims.length > 0) {
+                    manualClaims[0].text = e.target.value;
+                  } else {
+                    manualClaims.push({ id: "manual-1", text: e.target.value, isActive: true });
+                  }
+                  onUpdate({
+                    declarations: {
+                      ...currentDeclarations,
+                      manualClaims,
+                    },
+                  });
+                }}
                 placeholder="Other declarations..."
                 disabled={isLoading}
               />

@@ -14,7 +14,7 @@ interface Ingredient {
   name: string;
   originalName?: string;
   translatedName?: string;
-  percentage?: number;
+  percentage?: number | null;
   origin?: string;
   isMarkedAsBase?: boolean;
   language?: 'original' | 'english';

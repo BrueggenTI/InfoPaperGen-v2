@@ -153,18 +153,18 @@ export function calculateClaims(nutrition: NutritionValues): ClaimsResult {
 }
 
 /**
- * Get all valid claims as a simple array of strings
+ * Get all valid claims as a simple array of objects with a text property.
  */
-export function getValidClaims(nutrition: NutritionValues): string[] {
+export function getValidClaims(nutrition: NutritionValues): { text: string }[] {
   const claims = calculateClaims(nutrition);
-  const validClaims: string[] = [];
+  const validClaims: { text: string }[] = [];
 
-  if (claims.protein.bestClaim) validClaims.push(claims.protein.bestClaim);
-  if (claims.fiber.bestClaim) validClaims.push(claims.fiber.bestClaim);
-  if (claims.salt.bestClaim) validClaims.push(claims.salt.bestClaim);
-  if (claims.sugar.bestClaim) validClaims.push(claims.sugar.bestClaim);
-  if (claims.fat.bestClaim) validClaims.push(claims.fat.bestClaim);
-  if (claims.saturatedFat.bestClaim) validClaims.push(claims.saturatedFat.bestClaim);
+  if (claims.protein.bestClaim) validClaims.push({ text: claims.protein.bestClaim });
+  if (claims.fiber.bestClaim) validClaims.push({ text: claims.fiber.bestClaim });
+  if (claims.salt.bestClaim) validClaims.push({ text: claims.salt.bestClaim });
+  if (claims.sugar.bestClaim) validClaims.push({ text: claims.sugar.bestClaim });
+  if (claims.fat.bestClaim) validClaims.push({ text: claims.fat.bestClaim });
+  if (claims.saturatedFat.bestClaim) validClaims.push({ text: claims.saturatedFat.bestClaim });
 
   return validClaims;
 }

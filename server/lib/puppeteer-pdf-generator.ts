@@ -47,7 +47,7 @@ export async function generatePDFWithPuppeteer(
 
     // Vereinfachte und erprobte Browser-Konfiguration für Docker/Azure
     const launchOptions: any = {
-      headless: 'new',
+      headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
       args: [
         '--no-sandbox',
@@ -67,7 +67,7 @@ export async function generatePDFWithPuppeteer(
 
     // Detailliertes Prozess-Logging
     const browserProcess = browser.process();
-    if (browserProcess) {
+    if (browserProcess && browserProcess.stderr && browserProcess.stdout) {
       console.log(`[PUPPETEER_DEBUG] Browser-Prozess-ID: ${browserProcess.pid}`);
       browserProcess.stderr.on('data', data => console.error(`[PUPPETEER STDERR] ${data}`));
       browserProcess.stdout.on('data', data => console.log(`[PUPPETEER STDOUT] ${data}`));
@@ -234,7 +234,7 @@ export async function checkPuppeteerSetup(): Promise<boolean> {
   try {
     console.log('🚀 Starte Puppeteer Setup Check...');
     const browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -368,7 +368,7 @@ export async function generatePDFFromHTML(
 
     // Vereinfachte und erprobte Browser-Konfiguration für Docker/Azure
     const launchOptions: any = {
-      headless: 'new',
+      headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
       args: [
         '--no-sandbox',
@@ -388,7 +388,7 @@ export async function generatePDFFromHTML(
 
     // Detailliertes Prozess-Logging
     const browserProcess = browser.process();
-    if (browserProcess) {
+    if (browserProcess && browserProcess.stderr && browserProcess.stdout) {
       console.log(`[PUPPETEER_DEBUG] Browser-Prozess-ID: ${browserProcess.pid}`);
       browserProcess.stderr.on('data', data => console.error(`[PUPPETEER STDERR] ${data}`));
       browserProcess.stdout.on('data', data => console.log(`[PUPPETEER STDOUT] ${data}`));
