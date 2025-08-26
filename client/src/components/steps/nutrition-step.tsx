@@ -18,20 +18,20 @@ import { calculateClaims, NutritionValues, getValidClaims } from "@/lib/claims-c
 
 type DeclarationKeys = keyof Omit<NonNullable<ProductInfo['declarations']>, 'manualClaims'>;
 
-// Enhanced nutrition schema with German validation messages
+// Enhanced nutrition schema with English validation messages
 const nutritionSchema = z.object({
   energy: z.object({
-    kj: z.number().min(0, "Energie (kJ) muss positiv sein").max(10000, "Wert zu hoch"),
-    kcal: z.number().min(0, "Energie (kcal) muss positiv sein").max(2500, "Wert zu hoch"),
+    kj: z.number().min(0, "Energy (kJ) must be positive").max(10000, "Value too high"),
+    kcal: z.number().min(0, "Energy (kcal) must be positive").max(2500, "Value too high"),
   }),
-  fat: z.number().min(0, "Fett muss positiv sein").max(100, "Wert zu hoch"),
-  saturatedFat: z.number().min(0, "Gesättigte Fettsäuren müssen positiv sein").max(100, "Wert zu hoch"),
-  carbohydrates: z.number().min(0, "Kohlenhydrate müssen positiv sein").max(100, "Wert zu hoch"),
-  sugars: z.number().min(0, "Zucker muss positiv sein").max(100, "Wert zu hoch"),
-  fiber: z.number().min(0, "Ballaststoffe müssen positiv sein").max(50, "Wert zu hoch"),
-  protein: z.number().min(0, "Protein muss positiv sein").max(100, "Wert zu hoch"),
-  salt: z.number().min(0, "Salz muss positiv sein").max(20, "Wert zu hoch"),
-  fruitVegLegumeContent: z.number().min(0, "Obst-/Gemüse-/Hülsenfrucht-Anteil muss positiv sein").max(100, "Prozent darf 100% nicht überschreiten"),
+  fat: z.number().min(0, "Fat must be positive").max(100, "Value too high"),
+  saturatedFat: z.number().min(0, "Saturated fat must be positive").max(100, "Value too high"),
+  carbohydrates: z.number().min(0, "Carbohydrates must be positive").max(100, "Value too high"),
+  sugars: z.number().min(0, "Sugars must be positive").max(100, "Value too high"),
+  fiber: z.number().min(0, "Fiber must be positive").max(50, "Value too high"),
+  protein: z.number().min(0, "Protein must be positive").max(100, "Value too high"),
+  salt: z.number().min(0, "Salt must be positive").max(20, "Value too high"),
+  fruitVegLegumeContent: z.number().min(0, "Fruit/Vegetable/Legume content must be positive").max(100, "Percentage cannot exceed 100%"),
 });
 
 interface NutritionStepProps {
@@ -60,8 +60,8 @@ const AIExtractionStatus = ({
       <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
         <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
         <div className="text-blue-800 dark:text-blue-200">
-          <div className="font-medium">KI analysiert Nährwerttabelle...</div>
-          <div className="text-sm opacity-80">Dies kann einige Sekunden dauern</div>
+          <div className="font-medium">AI is analyzing the nutrition table...</div>
+          <div className="text-sm opacity-80">This may take a few seconds</div>
         </div>
       </div>
     );
@@ -73,12 +73,12 @@ const AIExtractionStatus = ({
         <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
           <AlertCircle className="w-5 h-5" />
           <div>
-            <div className="font-medium">Extraktion fehlgeschlagen</div>
+            <div className="font-medium">Extraction failed</div>
             <div className="text-sm opacity-80">{error}</div>
           </div>
         </div>
         <Button size="sm" variant="outline" onClick={onRetry} className="shrink-0">
-          Erneut versuchen
+          Retry
         </Button>
       </div>
     );
@@ -94,6 +94,7 @@ const NutritionField = ({
   value,
   onChange,
   servingValue,
+  servingSize,
   error
 }: {
   label: string;
@@ -101,6 +102,7 @@ const NutritionField = ({
   value: number;
   onChange: (value: number) => void;
   servingValue?: string;
+  servingSize: number;
   error?: string;
 }) => (
   <div className="grid grid-cols-12 gap-4 items-center py-2">
@@ -127,7 +129,7 @@ const NutritionField = ({
       {servingValue || '0'}
     </div>
     <div className="col-span-3 text-xs text-muted-foreground">
-      je Portion ({parseFloat('40')}g)
+      per serving ({servingSize}g)
     </div>
   </div>
 );
@@ -176,9 +178,9 @@ export default function NutritionStep({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({
-          message: 'Netzwerkfehler aufgetreten'
+          message: 'Network error occurred'
         }));
-        throw new Error(errorData.userFriendlyMessage || errorData.message || 'API-Fehler');
+        throw new Error(errorData.userFriendlyMessage || errorData.message || 'API error');
       }
 
       return response.json();
@@ -204,18 +206,18 @@ export default function NutritionStep({
         setExtractionError(null);
 
         toast({
-          title: "Erfolgreich extrahiert",
-          description: "Nährwerte wurden aus dem Bild erkannt und eingetragen",
+          title: "Successfully extracted",
+          description: "Nutrition values were recognized from the image and entered",
         });
       } else {
-        throw new Error('Keine Nährwerte im Bild erkannt');
+        throw new Error('No nutrition values detected in the image');
       }
     },
     onError: (error: any) => {
-      const errorMessage = error?.message || 'Extraktion fehlgeschlagen';
+      const errorMessage = error?.message || 'Extraction failed';
       setExtractionError(errorMessage);
       toast({
-        title: "Extraktion fehlgeschlagen",
+        title: "Extraction failed",
         description: errorMessage,
         variant: "destructive",
       });
@@ -229,8 +231,8 @@ export default function NutritionStep({
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "Datei zu groß",
-        description: "Bitte wählen Sie eine Datei unter 10MB",
+        title: "File too large",
+        description: "Please select a file under 10MB",
         variant: "destructive",
       });
       return;
@@ -328,9 +330,9 @@ export default function NutritionStep({
     <div className="w-full space-y-6" data-testid="nutrition-step">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-foreground">Nährwertangaben</h2>
+          <h2 className="text-2xl font-semibold text-foreground">Nutrition Values</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Laden Sie ein Bild der Nährwerttabelle hoch oder geben Sie die Werte manuell ein
+            Upload an image of the nutrition table or enter the values manually
           </p>
         </div>
         {nutriScore && (
@@ -350,7 +352,7 @@ export default function NutritionStep({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-blue-600" />
-            KI-gestützte Nährwert-Extraktion
+            AI-Powered Nutrition Extraction
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -369,7 +371,7 @@ export default function NutritionStep({
               ) : (
                 <Upload className="w-4 h-4" />
               )}
-              Nährwerttabelle hochladen
+              Upload Nutrition Table
             </Button>
             
             <input
@@ -384,7 +386,7 @@ export default function NutritionStep({
             {validClaims.length > 0 && (
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle className="w-4 h-4" />
-                <span className="text-sm">{validClaims.length} gültige Auslobung(en)</span>
+                <span className="text-sm">{validClaims.length} valid claim(s)</span>
               </div>
             )}
           </div>
@@ -393,7 +395,7 @@ export default function NutritionStep({
             <div className="relative inline-block">
               <img 
                 src={uploadedImage} 
-                alt="Hochgeladene Nährwerttabelle" 
+                alt="Uploaded nutrition table"
                 className="max-w-xs max-h-48 object-contain border rounded-lg"
               />
               <Button
@@ -422,7 +424,7 @@ export default function NutritionStep({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="w-5 h-5 text-green-600" />
-            Nährwerte (pro 100g)
+            Nutrition Values (per 100g)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -430,9 +432,9 @@ export default function NutritionStep({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Table Headers */}
               <div className="grid grid-cols-12 gap-4 pb-2 border-b font-medium text-sm">
-                <div className="col-span-4">Nährwert</div>
-                <div className="col-span-3 text-center">pro 100g</div>
-                <div className="col-span-2 text-center">pro Portion</div>
+                <div className="col-span-4">Nutrient</div>
+                <div className="col-span-3 text-center">per 100g</div>
+                <div className="col-span-2 text-center">per serving</div>
                 <div className="col-span-3"></div>
               </div>
 
@@ -444,11 +446,12 @@ export default function NutritionStep({
                   render={({ field }) => (
                     <FormItem>
                       <NutritionField
-                        label="Energie"
+                        label="Energy"
                         unit="kJ"
                         value={field.value}
                         onChange={field.onChange}
                         servingValue={calculatePerServing(field.value)}
+                        servingSize={servingSize}
                         error={form.formState.errors.energy?.kj?.message}
                       />
                       <FormMessage />
@@ -467,6 +470,7 @@ export default function NutritionStep({
                         value={field.value}
                         onChange={field.onChange}
                         servingValue={calculatePerServing(field.value)}
+                        servingSize={servingSize}
                         error={form.formState.errors.energy?.kcal?.message}
                       />
                       <FormMessage />
@@ -479,13 +483,13 @@ export default function NutritionStep({
 
               {/* Other Nutrition Fields */}
               {[
-                { name: 'fat' as const, label: 'Fett', unit: 'g' },
-                { name: 'saturatedFat' as const, label: '  davon gesättigte Fettsäuren', unit: 'g' },
-                { name: 'carbohydrates' as const, label: 'Kohlenhydrate', unit: 'g' },
-                { name: 'sugars' as const, label: '  davon Zucker', unit: 'g' },
-                { name: 'fiber' as const, label: 'Ballaststoffe', unit: 'g' },
-                { name: 'protein' as const, label: 'Eiweiß', unit: 'g' },
-                { name: 'salt' as const, label: 'Salz', unit: 'g' },
+                { name: 'fat' as const, label: 'Fat', unit: 'g' },
+                { name: 'saturatedFat' as const, label: '  of which saturates', unit: 'g' },
+                { name: 'carbohydrates' as const, label: 'Carbohydrates', unit: 'g' },
+                { name: 'sugars' as const, label: '  of which sugars', unit: 'g' },
+                { name: 'fiber' as const, label: 'Fiber', unit: 'g' },
+                { name: 'protein' as const, label: 'Protein', unit: 'g' },
+                { name: 'salt' as const, label: 'Salt', unit: 'g' },
               ].map(({ name, label, unit }) => (
                 <FormField
                   key={name}
@@ -499,6 +503,7 @@ export default function NutritionStep({
                         value={field.value}
                         onChange={field.onChange}
                         servingValue={calculatePerServing(field.value)}
+                        servingSize={servingSize}
                         error={form.formState.errors[name]?.message}
                       />
                       <FormMessage />
@@ -518,7 +523,7 @@ export default function NutritionStep({
                     <div className="grid grid-cols-12 gap-4 items-center py-2">
                       <div className="col-span-4">
                         <FormLabel className="text-sm font-medium">
-                          Obst-/Gemüse-/Hülsenfrucht-Anteil
+                          Fruit/Veg/Legume Content
                         </FormLabel>
                       </div>
                       <div className="col-span-3">
@@ -541,7 +546,7 @@ export default function NutritionStep({
                         </FormControl>
                       </div>
                       <div className="col-span-5 text-xs text-muted-foreground">
-                        Für Nutri-Score Berechnung (optional)
+                        For Nutri-Score calculation (optional)
                       </div>
                     </div>
                     <FormMessage />
@@ -560,7 +565,7 @@ export default function NutritionStep({
                   data-testid="button-previous"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  Zurück
+                  Back
                 </Button>
                 
                 <Button
@@ -569,7 +574,7 @@ export default function NutritionStep({
                   className="flex items-center gap-2"
                   data-testid="button-next"
                 >
-                  Weiter
+                  Next
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -583,11 +588,11 @@ export default function NutritionStep({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-teal-600" />
-            Deklarationen (Auslobungen)
+            Declarations (Claims)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <h4 className="font-medium text-sm text-muted-foreground">Standard-Auslobungen</h4>
+          <h4 className="font-medium text-sm text-muted-foreground">Standard Claims</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Source of Protein */}
             <div
@@ -736,7 +741,7 @@ export default function NutritionStep({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="w-5 h-5 text-purple-600" />
-              Zusammenfassung
+              Summary
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -752,20 +757,20 @@ export default function NutritionStep({
                 <div className="text-2xl font-bold text-foreground">
                   {validClaims.length}
                 </div>
-                <div className="text-sm text-muted-foreground">Gültige Auslobungen</div>
+                <div className="text-sm text-muted-foreground">Valid Claims</div>
               </div>
               
               <div className="text-center p-4 bg-secondary/20 rounded-lg">
                 <div className="text-2xl font-bold text-foreground">
                   {watchedValues.energy.kcal}
                 </div>
-                <div className="text-sm text-muted-foreground">kcal pro 100g</div>
+                <div className="text-sm text-muted-foreground">kcal per 100g</div>
               </div>
             </div>
 
             {validClaims.length > 0 && (
               <div className="mt-4">
-                <h4 className="font-medium mb-2">Mögliche Auslobungen:</h4>
+                <h4 className="font-medium mb-2">Possible Claims:</h4>
                 <div className="flex flex-wrap gap-2">
                   {validClaims.map((claim: any, index: number) => (
                     <Badge key={index} variant="secondary" className="bg-green-100 text-green-800">
