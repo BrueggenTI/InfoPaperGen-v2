@@ -567,30 +567,6 @@ export default function NutritionStep({
                 )}
               />
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onPrev}
-                  disabled={isLoading}
-                  className="flex items-center gap-2"
-                  data-testid="button-previous"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Back
-                </Button>
-                
-                <Button
-                  type="submit"
-                  disabled={isLoading || !form.formState.isValid}
-                  className="flex items-center gap-2"
-                  data-testid="button-next"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
             </form>
           </Form>
         </CardContent>
@@ -836,6 +812,31 @@ export default function NutritionStep({
           </CardContent>
         </Card>
       )}
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between pt-6">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onPrev}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+          data-testid="button-previous"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </Button>
+
+        <Button
+          onClick={() => form.handleSubmit(onSubmit)()}
+          disabled={isLoading || !form.formState.isValid}
+          className="flex items-center gap-2"
+          data-testid="button-next"
+        >
+          Next
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 }
