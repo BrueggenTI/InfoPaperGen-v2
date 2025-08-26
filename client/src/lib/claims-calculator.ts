@@ -36,14 +36,14 @@ export interface ClaimsResult {
 
 // Protein claim thresholds (g/100g)
 const PROTEIN_THRESHOLDS = {
-  SOURCE: 2.8,
-  HIGH: 5.6
+  SOURCE: 12,
+  HIGH: 20
 } as const;
 
 // Fiber claim thresholds (g/100g)
 const FIBER_THRESHOLDS = {
-  SOURCE: 1.75,
-  HIGH: 3.5
+  SOURCE: 3,
+  HIGH: 6
 } as const;
 
 // Salt claim thresholds (g/100g)

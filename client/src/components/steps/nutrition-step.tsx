@@ -624,7 +624,7 @@ export default function NutritionStep({
                     {thresholds.sourceOfProtein ? (
                       <span className="text-green-600">✓ Requirements met ({nutrition.protein}g)</span>
                     ) : (
-                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.protein}g) - Can still be selected</span>
+                      <span className="text-orange-500">⚠ Requirement not met ({nutrition.protein}g)</span>
                     )}
                   </div>
                 </div>
@@ -653,7 +653,7 @@ export default function NutritionStep({
                     {thresholds.highInProtein ? (
                       <span className="text-green-600">✓ Requirements met ({nutrition.protein}g)</span>
                     ) : (
-                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.protein}g) - Can still be selected</span>
+                      <span className="text-orange-500">⚠ Requirement not met ({nutrition.protein}g)</span>
                     )}
                   </div>
                 </div>
@@ -682,7 +682,7 @@ export default function NutritionStep({
                     {thresholds.sourceOfFiber ? (
                       <span className="text-green-600">✓ Requirements met ({nutrition.fiber}g)</span>
                     ) : (
-                      <span className="text-orange-500">⚠ Requirements not met ({nutrition.fiber}g) - Can still be selected</span>
+                      <span className="text-orange-500">⚠ Requirement not met ({nutrition.fiber}g)</span>
                     )}
                   </div>
                 </div>
@@ -721,40 +721,57 @@ export default function NutritionStep({
             {/* Content of wholegrain */}
             <div
               className={`p-4 border-2 rounded-lg transition-all md:col-span-2 ${
-                (currentDeclarations?.wholegrainPercentage ?? 0) > 0
+                currentDeclarations?.wholegrain
                   ? 'bg-amber-50 border-amber-300'
                   : 'bg-white border-gray-200'
               }`}
             >
-              <div className="flex items-center space-x-3">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  checked={Boolean(currentDeclarations?.wholegrain)}
+                  onCheckedChange={(checked) => {
+                    const isChecked = !!checked;
+                    const newDeclarations = {
+                      ...currentDeclarations,
+                      wholegrain: isChecked,
+                      // Clear percentage if unchecked
+                      wholegrainPercentage: isChecked ? currentDeclarations?.wholegrainPercentage : undefined,
+                    };
+                    onUpdate({ declarations: newDeclarations });
+                  }}
+                  data-testid="checkbox-wholegrain"
+                  className="mt-0.5"
+                />
                 <div className="flex-1 space-y-2">
-                  <div className="font-medium text-sm">Content of wholegrain</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Auto-calculated from ingredients. You can manually override the value.
+                  <label htmlFor="checkbox-wholegrain" className="font-medium text-sm cursor-pointer">Content of wholegrain</label>
+                  <div className="text-xs text-gray-500">
+                    Auto-calculated from ingredients. Check to activate and manually override the value if needed.
                   </div>
-                </div>
-                <div className="relative w-24">
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    placeholder="e.g. 45.5"
-                    value={currentDeclarations?.wholegrainPercentage || ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      onUpdate({
-                        declarations: {
-                          ...currentDeclarations,
-                          wholegrainPercentage: value === '' ? undefined : parseFloat(value),
-                        },
-                      });
-                    }}
-                    className="text-center pr-8"
-                    data-testid="input-wholegrain-percentage"
-                  />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                    %
-                  </span>
+                  {currentDeclarations?.wholegrain && (
+                    <div className="relative w-24">
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        placeholder="e.g. 45.5"
+                        value={currentDeclarations?.wholegrainPercentage || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          onUpdate({
+                            declarations: {
+                              ...currentDeclarations,
+                              wholegrainPercentage: value === '' ? undefined : parseFloat(value),
+                            },
+                          });
+                        }}
+                        className="text-center pr-8"
+                        data-testid="input-wholegrain-percentage"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                        %
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

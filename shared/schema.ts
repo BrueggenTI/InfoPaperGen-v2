@@ -84,6 +84,7 @@ export const productInfoSchema = z.object({
     highInProtein: z.boolean().optional().default(false),
     sourceOfFiber: z.boolean().optional().default(false),
     highInFiber: z.boolean().optional().default(false),
+    wholegrain: z.boolean().optional().default(false),
     wholegrainPercentage: z.number().optional(),
     // Manual claims (user-created)
     manualClaims: z.array(z.object({
