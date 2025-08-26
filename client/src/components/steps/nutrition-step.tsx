@@ -190,16 +190,21 @@ export default function NutritionStep({
       const nutritionData = data.nutrition || data;
       
       if (nutritionData && (nutritionData.energy || nutritionData.fat || nutritionData.protein)) {
+        const roundToOneDecimal = (value: any) => Math.round(Number(value || 0) * 10) / 10;
+
         const processedData: NutritionData = {
-          energy: nutritionData.energy || { kj: 0, kcal: 0 },
-          fat: Number(nutritionData.fat) || 0,
-          saturatedFat: Number(nutritionData.saturatedFat) || 0,
-          carbohydrates: Number(nutritionData.carbohydrates) || 0,
-          sugars: Number(nutritionData.sugars) || 0,
-          fiber: Number(nutritionData.fiber) || 0,
-          protein: Number(nutritionData.protein) || 0,
-          salt: Number(nutritionData.salt) || 0,
-          fruitVegLegumeContent: Number(nutritionData.fruitVegLegumeContent) || 0,
+          energy: {
+            kj: roundToOneDecimal(nutritionData.energy?.kj),
+            kcal: roundToOneDecimal(nutritionData.energy?.kcal),
+          },
+          fat: roundToOneDecimal(nutritionData.fat),
+          saturatedFat: roundToOneDecimal(nutritionData.saturatedFat),
+          carbohydrates: roundToOneDecimal(nutritionData.carbohydrates),
+          sugars: roundToOneDecimal(nutritionData.sugars),
+          fiber: roundToOneDecimal(nutritionData.fiber),
+          protein: roundToOneDecimal(nutritionData.protein),
+          salt: roundToOneDecimal(nutritionData.salt),
+          fruitVegLegumeContent: roundToOneDecimal(nutritionData.fruitVegLegumeContent),
         };
 
         form.reset(processedData);
