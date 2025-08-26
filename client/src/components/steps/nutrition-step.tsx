@@ -720,22 +720,41 @@ export default function NutritionStep({
 
             {/* Content of wholegrain */}
             <div
-              className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-sm md:col-span-2 ${
-                currentDeclarations?.wholegrain
+              className={`p-4 border-2 rounded-lg transition-all md:col-span-2 ${
+                (currentDeclarations?.wholegrainPercentage ?? 0) > 0
                   ? 'bg-amber-50 border-amber-300'
-                  : 'bg-white border-gray-200 hover:border-amber-200'
+                  : 'bg-white border-gray-200'
               }`}
-              onClick={() => toggleStandardClaim('wholegrain')}
             >
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  checked={Boolean(currentDeclarations?.wholegrain)}
-                  data-testid="checkbox-wholegrain"
-                  className="mt-0.5 pointer-events-none"
-                />
-                <div className="flex-1">
+              <div className="flex items-center space-x-3">
+                <div className="flex-1 space-y-2">
                   <div className="font-medium text-sm">Content of wholegrain</div>
-                  <div className="text-xs text-gray-500 mt-1">Manual selection. Check if the product contains wholegrain.</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Auto-calculated from ingredients. You can manually override the value.
+                  </div>
+                </div>
+                <div className="relative w-24">
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder="e.g. 45.5"
+                    value={currentDeclarations?.wholegrainPercentage || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      onUpdate({
+                        declarations: {
+                          ...currentDeclarations,
+                          wholegrainPercentage: value === '' ? undefined : parseFloat(value),
+                        },
+                      });
+                    }}
+                    className="text-center pr-8"
+                    data-testid="input-wholegrain-percentage"
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                    %
+                  </span>
                 </div>
               </div>
             </div>

@@ -545,8 +545,8 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                 if (formData.declarations?.highInFiber) {
                   claimsToShow.push({ label: "High fibre", claim: "✓" });
                 }
-                if (formData.declarations?.wholegrain) {
-                  claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
+                if (formData.declarations?.wholegrainPercentage && formData.declarations.wholegrainPercentage > 0) {
+                  claimsToShow.push({ label: "Content of wholegrain", claim: `${formData.declarations.wholegrainPercentage}%` });
                 }
 
                 // Add active manual claims (user-created)

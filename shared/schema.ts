@@ -41,6 +41,7 @@ export const productInfoSchema = z.object({
     percentage: z.number().nullable().optional(),
     origin: z.string().optional(),
     isMarkedAsBase: z.boolean().optional().default(false),
+    isWholegrain: z.boolean().optional().default(false),
     language: z.enum(['original', 'english']).optional().default('original'),
   })).optional(),
   baseProductIngredients: z.array(z.object({
@@ -49,6 +50,7 @@ export const productInfoSchema = z.object({
     translatedName: z.string().optional(),
     percentage: z.number().nullable().optional(),
     origin: z.string().optional(),
+    isWholegrain: z.boolean().optional().default(false),
     language: z.enum(['original', 'english']).optional().default('original'),
   })).optional(),
   
@@ -82,7 +84,7 @@ export const productInfoSchema = z.object({
     highInProtein: z.boolean().optional().default(false),
     sourceOfFiber: z.boolean().optional().default(false),
     highInFiber: z.boolean().optional().default(false),
-    wholegrain: z.boolean().optional().default(false),
+    wholegrainPercentage: z.number().optional(),
     // Manual claims (user-created)
     manualClaims: z.array(z.object({
       id: z.string(),
