@@ -2,11 +2,23 @@ import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 // Azure-compatible environment variable configuration
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR,
-  timeout: 60000, // 60 seconds timeout for Azure compatibility
-  maxRetries: 3, // Retry logic for robust Azure deployment
-});
+let openai: OpenAI | null = null;
+
+// Initialize OpenAI only if API key is available
+try {
+  if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      timeout: 60000, // 60 seconds timeout for Azure compatibility
+      maxRetries: 3, // Retry logic for robust Azure deployment
+    });
+    console.log("[OPENAI SERVICE] OpenAI client initialized successfully");
+  } else {
+    console.warn("[OPENAI SERVICE] OpenAI API key not found - AI features will be disabled");
+  }
+} catch (error) {
+  console.error("[OPENAI SERVICE] Failed to initialize OpenAI client:", error);
+}
 
 export interface ExtractedIngredients {
   ingredients: Array<{
@@ -32,7 +44,7 @@ export interface ExtractedNutrition {
 export async function extractIngredientsFromImage(base64Image: string, isBaseProduct: boolean = false): Promise<ExtractedIngredients> {
   try {
     // Azure Environment Check - Verify OpenAI API Key availability
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.OPENAI_API_KEY || !openai) {
       console.error("[OPENAI INGREDIENTS] OpenAI API key not available in environment");
       throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
     }
@@ -163,6 +175,11 @@ interface TranslationResponse {
 
 export async function translateIngredients(request: TranslationRequest): Promise<TranslationResponse> {
   try {
+    if (!process.env.OPENAI_API_KEY || !openai) {
+      console.error("[OPENAI TRANSLATION] OpenAI API key not available in environment");
+      throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
+    }
+    
     const ingredientNames = request.ingredients.map(ing => ing.name);
 
     const prompt = `Translate the following food ingredient names from ${request.sourceLanguage || 'the original language'} to ${request.targetLanguage}.
@@ -206,7 +223,7 @@ Important guidelines:
 export async function extractNutritionFromImage(base64Image: string): Promise<ExtractedNutrition> {
   try {
     // Azure Environment Check - Verify OpenAI API Key availability
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.OPENAI_API_KEY || !openai) {
       console.error("[OPENAI NUTRITION] OpenAI API key not available in environment");
       throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
     }
