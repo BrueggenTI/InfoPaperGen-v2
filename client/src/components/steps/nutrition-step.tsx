@@ -13,7 +13,7 @@ import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2, Zap, Calculator,
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
-import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
+import { calculateClaims, NutritionValues } from "@/lib/claims-calculator";
 
 // Enhanced nutrition schema with German validation messages
 const nutritionSchema = z.object({
@@ -41,8 +41,26 @@ interface NutritionStepProps {
 
 type NutritionData = z.infer<typeof nutritionSchema>;
 
+/**
+ * Get all valid claims as a simple array of objects with a text property.
+ * This is a workaround for a potential build issue where importing this function fails.
+ */
+function getValidClaims(nutrition: NutritionValues): { text: string }[] {
+  const claims = calculateClaims(nutrition);
+  const validClaims: { text: string }[] = [];
+
+  if (claims.protein.bestClaim) validClaims.push({ text: claims.protein.bestClaim });
+  if (claims.fiber.bestClaim) validClaims.push({ text: claims.fiber.bestClaim });
+  if (claims.salt.bestClaim) validClaims.push({ text: claims.salt.bestClaim });
+  if (claims.sugar.bestClaim) validClaims.push({ text: claims.sugar.bestClaim });
+  if (claims.fat.bestClaim) validClaims.push({ text: claims.fat.bestClaim });
+  if (claims.saturatedFat.bestClaim) validClaims.push({ text: claims.saturatedFat.bestClaim });
+
+  return validClaims;
+}
+
 // AI Status Component
-const AIExtractionStatus = ({ 
+const AIExtractionStatus = ({
   isExtracting, 
   error, 
   onRetry 
