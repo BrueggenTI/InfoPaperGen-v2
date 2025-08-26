@@ -8,12 +8,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ProductInfo } from "@shared/schema";
 import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2, Zap, Calculator, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
-import { calculateClaims, NutritionValues } from "@/lib/claims-calculator";
+import { calculateClaims, NutritionValues, getValidClaims } from "@/lib/claims-calculator";
+
+type DeclarationKeys = keyof Omit<NonNullable<ProductInfo['declarations']>, 'manualClaims'>;
 
 // Enhanced nutrition schema with German validation messages
 const nutritionSchema = z.object({
@@ -41,23 +44,6 @@ interface NutritionStepProps {
 
 type NutritionData = z.infer<typeof nutritionSchema>;
 
-/**
- * Get all valid claims as a simple array of objects with a text property.
- * This is a workaround for a potential build issue where importing this function fails.
- */
-function getValidClaims(nutrition: NutritionValues): { text: string }[] {
-  const claims = calculateClaims(nutrition);
-  const validClaims: { text: string }[] = [];
-
-  if (claims.protein.bestClaim) validClaims.push({ text: claims.protein.bestClaim });
-  if (claims.fiber.bestClaim) validClaims.push({ text: claims.fiber.bestClaim });
-  if (claims.salt.bestClaim) validClaims.push({ text: claims.salt.bestClaim });
-  if (claims.sugar.bestClaim) validClaims.push({ text: claims.sugar.bestClaim });
-  if (claims.fat.bestClaim) validClaims.push({ text: claims.fat.bestClaim });
-  if (claims.saturatedFat.bestClaim) validClaims.push({ text: claims.saturatedFat.bestClaim });
-
-  return validClaims;
-}
 
 // AI Status Component
 const AIExtractionStatus = ({
@@ -311,7 +297,14 @@ export default function NutritionStep({
   const claimsResult = calculateClaims(nutrition);
   const validClaims = getValidClaims(nutrition);
 
-  const currentDeclarations = formData.declarations || {};
+  const currentDeclarations = formData.declarations || {
+    sourceOfProtein: false,
+    highInProtein: false,
+    sourceOfFiber: false,
+    highInFiber: false,
+    wholegrain: false,
+    manualClaims: [],
+  };
 
   // Memoize threshold calculations based on the safe nutrition object
   const thresholds = useMemo(() => {
@@ -323,7 +316,7 @@ export default function NutritionStep({
     };
   }, [claimsResult]);
 
-  const toggleStandardClaim = (claim: keyof Omit<ProductInfo['declarations'], 'manualClaims'>) => {
+  const toggleStandardClaim = (claim: DeclarationKeys) => {
     const newDeclarations = {
       ...currentDeclarations,
       [claim]: !currentDeclarations[claim],

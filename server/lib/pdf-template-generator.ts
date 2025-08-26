@@ -203,8 +203,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     if (formData.declarations?.wholegrain) {
       claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
     }
-    if (formData.declarations?.other) {
-      claimsToShow.push({ label: "Other", claim: formData.declarations.other });
+    if (formData.declarations?.manualClaims?.[0]?.text) {
+      claimsToShow.push({ label: "Other", claim: formData.declarations.manualClaims[0].text });
     }
 
     if (claimsToShow.length > 0) {

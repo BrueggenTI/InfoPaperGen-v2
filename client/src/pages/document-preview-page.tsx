@@ -268,13 +268,13 @@ export default function DocumentPreviewPage({ sessionId }: DocumentPreviewPagePr
                   </td>
                   <td className="border border-black p-1 w-2/3">Source of fibre / High fibre</td>
                   <td className="border border-black p-1 text-center w-1/3">
-                    {formData.declarations?.highFiber ? "✓" : "No declaration"}
+                    {formData.declarations?.highInFiber ? "✓" : "No declaration"}
                   </td>
                 </tr>
                 <tr>
                   <td className="border border-black p-1">Source of protein / High protein</td>
                   <td className="border border-black p-1 text-center">
-                    {formData.declarations?.highProtein ? "✓" : "No declaration"}
+                    {formData.declarations?.highInProtein ? "✓" : "No declaration"}
                   </td>
                 </tr>
                 <tr>
@@ -286,7 +286,7 @@ export default function DocumentPreviewPage({ sessionId }: DocumentPreviewPagePr
                 <tr>
                   <td className="border border-black p-1">Other</td>
                   <td className="border border-black p-1 text-center">
-                    {formData.declarations?.other || "No declaration"}
+                    {formData.declarations?.manualClaims?.[0]?.text || "No declaration"}
                   </td>
                 </tr>
                 <tr>
