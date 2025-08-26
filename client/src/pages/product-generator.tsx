@@ -100,6 +100,58 @@ export default function ProductGenerator() {
     }
   }, [sessionData]);
 
+  // Auto-calculate wholegrain content
+  useEffect(() => {
+    const ingredients = formData.ingredients || [];
+    const baseIngredients = formData.baseProductIngredients || [];
+
+    const markedIngredient = ingredients.find(ing => ing.isMarkedAsBase);
+    const markedIngredientPercentage = markedIngredient?.percentage || 0;
+
+    let totalWholegrainPercentage = 0;
+
+    // Calculate from final ingredients
+    ingredients.forEach(ing => {
+      if (ing.isWholegrain && ing.percentage) {
+        // if it's the base for other ingredients, don't add it directly
+        if (!ing.isMarkedAsBase) {
+          totalWholegrainPercentage += ing.percentage;
+        }
+      }
+    });
+
+    // Calculate from base ingredients if a base is marked
+    if (markedIngredientPercentage > 0) {
+      baseIngredients.forEach(ing => {
+        if (ing.isWholegrain && ing.percentage) {
+          totalWholegrainPercentage += (ing.percentage * markedIngredientPercentage) / 100;
+        }
+      });
+    }
+
+    const roundedPercentage = Math.round(totalWholegrainPercentage * 10) / 10;
+
+    const currentDeclarations = formData.declarations || {
+      sourceOfProtein: false,
+      highInProtein: false,
+      sourceOfFiber: false,
+      highInFiber: false,
+      wholegrain: false,
+      manualClaims: [],
+    };
+
+    // Only update if the value has changed to prevent loops
+    if (currentDeclarations.wholegrainPercentage !== roundedPercentage) {
+      updateFormData({
+        declarations: {
+          ...currentDeclarations,
+          wholegrainPercentage: roundedPercentage,
+        }
+      });
+    }
+  }, [formData.ingredients, formData.baseProductIngredients]);
+
+
   const updateFormData = (updates: Partial<ProductInfo>) => {
     const newData = { ...formData, ...updates };
     setFormData(newData);

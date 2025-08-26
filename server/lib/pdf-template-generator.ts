@@ -190,21 +190,32 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
     const claimsToShow = [];
 
-    // Nur positive/grüne Claims anzeigen (Fiber und Protein)
-    if (claimsResult.fiber.bestClaim) {
-      claimsToShow.push({ label: "Source of fibre / High fibre", claim: claimsResult.fiber.bestClaim });
+    // Add only active automatic claims based on user selection
+    if (formData.declarations?.sourceOfProtein) {
+        claimsToShow.push({ label: "Source of protein", claim: "✓" });
     }
-    if (claimsResult.protein.bestClaim) {
-      claimsToShow.push({ label: "Source of protein / High protein", claim: claimsResult.protein.bestClaim });
+    if (formData.declarations?.highInProtein) {
+        claimsToShow.push({ label: "High protein", claim: "✓" });
     }
-    // Negative Claims (Salt, Sugar, Fat, Saturated Fat) werden nicht mehr angezeigt
+    if (formData.declarations?.sourceOfFiber) {
+        claimsToShow.push({ label: "Source of fibre", claim: "✓" });
+    }
+    if (formData.declarations?.highInFiber) {
+        claimsToShow.push({ label: "High fibre", claim: "✓" });
+    }
 
-    // Nur ausgewählte Declarations hinzufügen
-    if (formData.declarations?.wholegrain) {
-      claimsToShow.push({ label: "Content of wholegrain", claim: "✓" });
+    // Wholegrain Declaration
+    if (formData.declarations?.wholegrainPercentage && formData.declarations.wholegrainPercentage > 0) {
+      claimsToShow.push({ label: "Content of wholegrain", claim: `${formData.declarations.wholegrainPercentage}%` });
     }
-    if (formData.declarations?.manualClaims?.[0]?.text) {
-      claimsToShow.push({ label: "Other", claim: formData.declarations.manualClaims[0].text });
+
+    // Add active manual claims
+    if (formData.declarations?.manualClaims) {
+      formData.declarations.manualClaims
+        .filter(claim => claim.isActive && claim.text.trim() !== "")
+        .forEach(claim => {
+          claimsToShow.push({ label: claim.text, claim: "✓" });
+        });
     }
 
     if (claimsToShow.length > 0) {

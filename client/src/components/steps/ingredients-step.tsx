@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ProductInfo } from "@shared/schema";
 import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag, Languages, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ interface Ingredient {
   percentage?: number | null;
   origin?: string;
   isMarkedAsBase?: boolean;
+  isWholegrain?: boolean;
   language?: 'original' | 'english';
 }
 
@@ -59,6 +61,17 @@ export default function IngredientsStep({
   
   const { toast } = useToast();
 
+  const ensureIngredientDefaults = (ing: Partial<Ingredient>): Ingredient => ({
+    name: ing.name || '',
+    originalName: ing.originalName,
+    translatedName: ing.translatedName,
+    percentage: ing.percentage,
+    origin: ing.origin,
+    isMarkedAsBase: ing.isMarkedAsBase ?? false,
+    isWholegrain: ing.isWholegrain ?? false,
+    language: ing.language ?? 'original',
+  });
+
   // Calculate percentage from base product to whole product using the new formula
   const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
     // Formula: (basePercentage / 100) * 100 * (markedIngredientPercentage / 100)
@@ -86,10 +99,11 @@ export default function IngredientsStep({
         ...ing,
         originalName: ing.name,
         isMarkedAsBase: false,
+        isWholegrain: ing.isWholegrain || false,
         language: 'original' as const
       }));
       setFinalProductIngredients(ingredientsWithMarking);
-      onUpdate({ ingredients: ingredientsWithMarking });
+      onUpdate({ ingredients: ingredientsWithMarking.map(ensureIngredientDefaults) });
       // Update text representation with percentages in parentheses (rounded to 1 decimal)
       const text = ingredientsWithMarking.map((ing: Ingredient) => 
         `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`
@@ -144,10 +158,11 @@ export default function IngredientsStep({
       const ingredientsWithMarking = (data.ingredients || []).map((ing: any) => ({
         ...ing,
         originalName: ing.name,
+        isWholegrain: ing.isWholegrain || false,
         language: 'original' as const
       }));
       setBaseProductIngredients(ingredientsWithMarking);
-      onUpdate({ baseProductIngredients: ingredientsWithMarking });
+      onUpdate({ baseProductIngredients: ingredientsWithMarking.map(ensureIngredientDefaults) });
       // Update text representation with percentages in parentheses (rounded to 1 decimal)
       const text = ingredientsWithMarking.map((ing: Ingredient) => 
         `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`
@@ -210,25 +225,28 @@ export default function IngredientsStep({
             originalName: ing.originalName || ing.name,
             translatedName: translation.translatedName,
             language: 'english' as const,
-            isMarkedAsBase: ing.isMarkedAsBase ?? false
+            isMarkedAsBase: ing.isMarkedAsBase ?? false,
+            isWholegrain: ing.isWholegrain ?? false
           };
         } else if (variables.targetLanguage === 'original' && ing.originalName) {
           return {
             ...ing,
             name: ing.originalName,
             language: 'original' as const,
-            isMarkedAsBase: ing.isMarkedAsBase ?? false
+            isMarkedAsBase: ing.isMarkedAsBase ?? false,
+            isWholegrain: ing.isWholegrain ?? false
           };
         }
         return {
           ...ing,
           language: ing.language ?? 'original' as const,
-          isMarkedAsBase: ing.isMarkedAsBase ?? false
+          isMarkedAsBase: ing.isMarkedAsBase ?? false,
+          isWholegrain: ing.isWholegrain ?? false
         };
       });
       
       setFinalProductIngredients(translatedIngredients);
-      onUpdate({ ingredients: translatedIngredients });
+      onUpdate({ ingredients: translatedIngredients.map(ensureIngredientDefaults) });
       
       // Update text representation
       const text = translatedIngredients.map((ing: Ingredient) => 
@@ -268,23 +286,26 @@ export default function IngredientsStep({
             name: translation.translatedName,
             originalName: ing.originalName || ing.name,
             translatedName: translation.translatedName,
-            language: 'english' as const
+            language: 'english' as const,
+            isWholegrain: ing.isWholegrain ?? false
           };
         } else if (variables.targetLanguage === 'original' && ing.originalName) {
           return {
             ...ing,
             name: ing.originalName,
-            language: 'original' as const
+            language: 'original' as const,
+            isWholegrain: ing.isWholegrain ?? false
           };
         }
         return {
           ...ing,
-          language: ing.language ?? 'original' as const
+          language: ing.language ?? 'original' as const,
+          isWholegrain: ing.isWholegrain ?? false
         };
       });
       
       setBaseProductIngredients(translatedIngredients);
-      onUpdate({ baseProductIngredients: translatedIngredients });
+      onUpdate({ baseProductIngredients: translatedIngredients.map(ensureIngredientDefaults) });
       
       // Update text representation
       const text = translatedIngredients.map((ing: Ingredient) => 
@@ -332,7 +353,7 @@ export default function IngredientsStep({
   const handleRemoveFinalImage = () => {
     setFinalRecipeFile(null);
     setFinalRecipeText("");
-    setFinalProductIngredients([{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false, language: 'original' }]);
+    setFinalProductIngredients([{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false, isWholegrain: false, language: 'original' }]);
     onUpdate({ ingredients: [] });
     if (finalRecipeInputRef.current) {
       finalRecipeInputRef.current.value = "";
@@ -369,7 +390,7 @@ export default function IngredientsStep({
   const handleRemoveBaseImage = () => {
     setBaseRecipeFile(null);
     setBaseRecipeText("");
-    setBaseProductIngredients([{ name: "", percentage: undefined, origin: "", language: 'original' }]);
+    setBaseProductIngredients([{ name: "", percentage: undefined, origin: "", isWholegrain: false, language: 'original' }]);
     onUpdate({ baseProductIngredients: [] });
     if (baseRecipeInputRef.current) {
       baseRecipeInputRef.current.value = "";
@@ -394,12 +415,13 @@ export default function IngredientsStep({
         percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
         origin: "",
         isMarkedAsBase: false,
+        isWholegrain: false,
         language: 'original' as const
       };
     }).filter(ing => ing.name);
     
     setFinalProductIngredients(ingredients);
-    onUpdate({ ingredients });
+    onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
   };
 
   const handleBaseRecipeTextChange = (text: string) => {
@@ -415,12 +437,13 @@ export default function IngredientsStep({
         originalName: name,
         percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
         origin: "",
+        isWholegrain: false,
         language: 'original' as const
       };
     }).filter(ing => ing.name);
     
     setBaseProductIngredients(ingredients);
-    onUpdate({ baseProductIngredients: ingredients });
+    onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
   };
 
   const formatCombinedIngredients = () => {
@@ -450,9 +473,9 @@ export default function IngredientsStep({
     return finalFormatted;
   };
 
-  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
+  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean}> => {
     const markedIngredientPercentage = getMarkedIngredientPercentage();
-    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
+    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean}> = [];
 
     // Add final product ingredients in the same order as they appear
     finalProductIngredients
@@ -464,7 +487,8 @@ export default function IngredientsStep({
             name: ing.name,
             percentage: ing.percentage || 0,
             origin: ing.origin || "",
-            isFinalProduct: true
+            isFinalProduct: true,
+            isWholegrain: ing.isWholegrain || false,
           });
           
           // Then add base product ingredients with recalculated percentages
@@ -478,7 +502,8 @@ export default function IngredientsStep({
                 name: baseIng.name,
                 percentage: wholeProductPercentage,
                 origin: baseIng.origin || "",
-                isFinalProduct: false
+                isFinalProduct: false,
+                isWholegrain: baseIng.isWholegrain || false,
               });
             });
         } else {
@@ -487,7 +512,8 @@ export default function IngredientsStep({
             name: ing.name,
             percentage: ing.percentage || 0,
             origin: ing.origin || "",
-            isFinalProduct: true
+            isFinalProduct: true,
+            isWholegrain: ing.isWholegrain || false,
           });
         }
       });
@@ -505,6 +531,7 @@ export default function IngredientsStep({
         return { 
           ...ing, 
           isMarkedAsBase: isMarked,
+          isWholegrain: ing.isWholegrain ?? false,
           language: ing.language ?? 'original' as const
         };
       }
@@ -512,30 +539,20 @@ export default function IngredientsStep({
       return { 
         ...ing, 
         isMarkedAsBase: false,
+        isWholegrain: ing.isWholegrain ?? false,
         language: ing.language ?? 'original' as const
       };
     });
     
     setFinalProductIngredients(updatedIngredients);
-    onUpdate({ ingredients: updatedIngredients });
+    onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
   };
 
   const handleNext = () => {
     // Ensure all ingredients have the required properties set
-    const processedIngredients = finalProductIngredients.map(ing => ({
-      ...ing,
-      isMarkedAsBase: ing.isMarkedAsBase ?? false,
-      language: ing.language ?? 'original' as const
-    }));
-    
-    const processedBaseIngredients = baseProductIngredients.map(ing => ({
-      ...ing,
-      language: ing.language ?? 'original' as const
-    }));
-    
     onUpdate({
-      ingredients: processedIngredients,
-      baseProductIngredients: processedBaseIngredients,
+      ingredients: finalProductIngredients.map(ensureIngredientDefaults),
+      baseProductIngredients: baseProductIngredients.map(ensureIngredientDefaults),
     });
     onNext();
   };
@@ -869,6 +886,7 @@ export default function IngredientsStep({
                     <th className="border border-slate-300 p-2 text-left">Ingredients</th>
                     <th className="border border-slate-300 p-2 text-left">Percentage content per whole product</th>
                     <th className="border border-slate-300 p-2 text-left">Country of Origin</th>
+                    <th className="border border-slate-300 p-2 text-center">Is Wholegrain?</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -893,29 +911,39 @@ export default function IngredientsStep({
                                 ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
                               );
                               setFinalProductIngredients(updatedFinalIngredients);
-                              // Ensure all ingredients have the required properties set
-                              const processedIngredients = updatedFinalIngredients.map(ing => ({
-                                ...ing,
-                                isMarkedAsBase: ing.isMarkedAsBase ?? false,
-                                language: ing.language ?? 'original' as const
-                              }));
-                              onUpdate({ ingredients: processedIngredients });
+                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
                             } else {
                               // Update origin in base product ingredients
                               const updatedBaseIngredients = baseProductIngredients.map(ing => 
                                 ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing
                               );
                               setBaseProductIngredients(updatedBaseIngredients);
-                              // Ensure all base ingredients have the required properties set
-                              const processedBaseIngredients = updatedBaseIngredients.map(ing => ({
-                                ...ing,
-                                language: ing.language ?? 'original' as const
-                              }));
-                              onUpdate({ baseProductIngredients: processedBaseIngredients });
+                              onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
                             }
                           }}
                           placeholder="Enter country"
                           className="border-0 p-0 h-auto"
+                        />
+                      </td>
+                      <td className="border border-slate-300 p-2 text-center">
+                        <Checkbox
+                          checked={ingredient.isWholegrain}
+                          onCheckedChange={(checked) => {
+                            const isChecked = !!checked;
+                            if (ingredient.isFinalProduct) {
+                              const updatedFinalIngredients = finalProductIngredients.map(ing =>
+                                ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing
+                              );
+                              setFinalProductIngredients(updatedFinalIngredients);
+                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                            } else {
+                              const updatedBaseIngredients = baseProductIngredients.map(ing =>
+                                ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing
+                              );
+                              setBaseProductIngredients(updatedBaseIngredients);
+                              onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
+                            }
+                          }}
                         />
                       </td>
                     </tr>
