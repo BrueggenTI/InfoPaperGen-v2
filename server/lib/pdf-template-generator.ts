@@ -205,7 +205,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     }
 
     // Wholegrain Declaration
-    if (formData.declarations?.wholegrainPercentage && formData.declarations.wholegrainPercentage > 0) {
+    if (formData.declarations?.wholegrain && formData.declarations.wholegrainPercentage && formData.declarations.wholegrainPercentage > 0) {
       claimsToShow.push({ label: "Content of wholegrain", claim: `${formData.declarations.wholegrainPercentage}%` });
     }
 
