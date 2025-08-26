@@ -1,4 +1,5 @@
 // Claims calculation utility based on EU nutrition thresholds
+import { ProductInfo } from "@shared/schema";
 
 export interface ClaimsResult {
   protein: {
@@ -152,21 +153,35 @@ export function calculateClaims(nutrition: NutritionValues): ClaimsResult {
   };
 }
 
+// Define the type for the declarations object
+type Declarations = NonNullable<ProductInfo['declarations']>;
+
 /**
- * Get all valid claims as a simple array of objects with a text property.
+ * Get all *selected* claims as a simple array of objects with a text property.
+ * This includes standard claims and active manual claims.
  */
-export function getValidClaims(nutrition: NutritionValues): { text: string }[] {
-  const claims = calculateClaims(nutrition);
-  const validClaims: { text: string }[] = [];
+export function getValidClaims(declarations: Declarations): { text: string }[] {
+  const selectedClaims: { text: string }[] = [];
 
-  if (claims.protein.bestClaim) validClaims.push({ text: claims.protein.bestClaim });
-  if (claims.fiber.bestClaim) validClaims.push({ text: claims.fiber.bestClaim });
-  if (claims.salt.bestClaim) validClaims.push({ text: claims.salt.bestClaim });
-  if (claims.sugar.bestClaim) validClaims.push({ text: claims.sugar.bestClaim });
-  if (claims.fat.bestClaim) validClaims.push({ text: claims.fat.bestClaim });
-  if (claims.saturatedFat.bestClaim) validClaims.push({ text: claims.saturatedFat.bestClaim });
+  if (!declarations) {
+    return [];
+  }
 
-  return validClaims;
+  // Standard claims that are selected
+  if (declarations.sourceOfProtein) selectedClaims.push({ text: "Source of protein" });
+  if (declarations.highInProtein) selectedClaims.push({ text: "High protein" });
+  if (declarations.sourceOfFiber) selectedClaims.push({ text: "Source of fibre" });
+  if (declarations.highInFiber) selectedClaims.push({ text: "High fibre" });
+  if (declarations.wholegrain) selectedClaims.push({ text: "Content of wholegrain" });
+
+  // Add active manual claims
+  if (declarations.manualClaims) {
+    declarations.manualClaims
+      .filter(claim => claim.isActive)
+      .forEach(claim => selectedClaims.push({ text: claim.text }));
+  }
+
+  return selectedClaims;
 }
 
 /**
