@@ -13,7 +13,7 @@ import { ChevronLeft, ChevronRight, Upload, Camera, X, Loader2, Zap, Calculator,
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
-import { calculateClaims } from "@/lib/claims-calculator";
+import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
 
 // Enhanced nutrition schema with German validation messages
 const nutritionSchema = z.object({
