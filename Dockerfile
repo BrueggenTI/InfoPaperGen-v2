@@ -65,7 +65,7 @@ RUN wget -q -O /tmp/google-chrome-key.pub https://dl-ssl.google.com/linux/linux_
 # package.json und package-lock.json kopieren
 COPY package*.json ./
 # Installiert NUR die Laufzeit-Abhängigkeiten (keine devDependencies)
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Kopiert den fertigen 'dist'-Ordner aus der "Builder"-Stufe
 COPY --from=builder /app/dist ./dist
