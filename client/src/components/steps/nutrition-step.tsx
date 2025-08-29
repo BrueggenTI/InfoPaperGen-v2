@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -435,10 +436,28 @@ export default function NutritionStep({
       {/* Manual Input Form */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-green-600" />
-            Nutrition Values (per 100g)
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="w-5 h-5 text-green-600" />
+              Nutrition Values
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Serving Size:</span>
+              <Select
+                value={formData.servingSize || '40g'}
+                onValueChange={(value) => onUpdate({ servingSize: value })}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Serving size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50, 60, 70, 80, 90].map(size => (
+                    <SelectItem key={size} value={`${size}g`}>{size}g</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
