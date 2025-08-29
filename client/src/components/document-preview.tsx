@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Download, Loader2, Eye, EyeOff } from "lucide-react";
 import { downloadPDFFromServer } from "@/lib/server-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
-import { calculateNutriScore, getNutriScoreImage } from "@/lib/nutri-score";
+import { getNutriScoreImage, calculateNutriScore } from "@/lib/nutri-score";
 import { useState, useMemo, useCallback } from "react";
 import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
+import "@/styles/pdf-preview.css";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -19,63 +20,19 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showCountryOfOrigin, setShowCountryOfOrigin] = useState(true);
 
-  // Performance: Memoize parsed serving size
-  const servingSize = useMemo(() => 
-    parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), 
-    [formData.servingSize]
-  );
-
-  // Performance: Memoize calculation function 
-  const calculatePerServing = useCallback((per100g: number) => {
-    return (per100g * servingSize / 100).toFixed(1);
-  }, [servingSize]);
-
-  // Performance: Memoize ingredients formatting
-  const formattedIngredients = useMemo(() => {
-    return formatCombinedIngredients(formData).replace('<strong>Ingredients:</strong>', '');
-  }, [formData.ingredients, formData.baseProductIngredients]);
-
-  // Performance: Memoize Nutri-Score calculation
-  const nutriScore = useMemo(() => {
-    if (!formData.nutrition) return null;
-    return calculateNutriScore({
-      energy: formData.nutrition.energy || { kj: 0, kcal: 0 },
-      fat: formData.nutrition.fat || 0,
-      saturatedFat: formData.nutrition.saturatedFat || 0,
-      carbohydrates: formData.nutrition.carbohydrates || 0,
-      sugars: formData.nutrition.sugars || 0,
-      fiber: formData.nutrition.fiber || 0,
-      protein: formData.nutrition.protein || 0,
-      salt: formData.nutrition.salt || 0,
-      fruitVegLegumeContent: formData.nutrition.fruitVegLegumeContent || 0
-    });
-  }, [formData.nutrition]);
-
-
   const handleDownloadPDF = async () => {
     if (!sessionId) {
       alert('A session ID is not available. Please reload the page.');
       return;
     }
-
     if (!formData) {
       alert('Form data is not available. Please fill out the form.');
       return;
     }
-
     setIsGeneratingPDF(true);
-
     try {
-      // Add the current state of the checkbox to the data sent to the server
-      const pdfFormData = {
-        ...formData,
-        showCountryOfOriginInPDF: showCountryOfOrigin,
-      };
-
-      await downloadPDFFromServer({
-        formData: pdfFormData,
-        sessionId: sessionId
-      });
+      const pdfFormData = { ...formData, showCountryOfOriginInPDF: showCountryOfOrigin };
+      await downloadPDFFromServer({ formData: pdfFormData, sessionId: sessionId });
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(error instanceof Error ? error.message : 'An error occurred while creating the PDF. Please try again.');
@@ -84,531 +41,168 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     }
   };
 
-  // Page Break Indicator Component - CSS für PDF-Seitenumbruch
-  const PageBreakIndicator = ({ pageNumber }: { pageNumber: number }) => (
-    <div className={`${isPDFMode ? 'page-break-before' : 'my-8 flex items-center justify-center'}`}>
-      {!isPDFMode && (
-        <>
-          <div className="flex-1 h-px bg-red-300 mx-4"></div>
-          <div className="bg-red-100 border border-red-300 px-4 py-2 rounded-lg">
-            <span className="text-red-700 text-sm font-medium">
-              📄 Page Break - Page {pageNumber} begins here
-            </span>
-          </div>
-          <div className="flex-1 h-px bg-red-300 mx-4"></div>
-        </>
-      )}
-    </div>
-  );
+  const { claimsToShow, nutriScoreData } = useMemo(() => {
+    if (!formData.nutrition) return { claimsToShow: [], nutriScoreData: null };
 
-  // Header Component for new pages
-  const DocumentHeader = ({ pageNumber }: { pageNumber: number }) => (
-    <div className={`relative ${isPDFMode ? 'bg-white p-4 border-b-2 border-slate-300 avoid-break' : 'bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200'}`}>
-      {/* Logo */}
-      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-        <img 
-          src={brueggenLogo} 
-          alt="Brüggen Logo" 
-          className="h-10 w-auto drop-shadow-sm"
-        />
-      </div>
+    const nutriScore = calculateNutriScore(formData.nutrition);
 
-      {/* Centered Content */}
-      <div className="text-center">
-        <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
-          Product Information
-        </h1>
-        <div className="text-slate-800 font-semibold text-base">
-          {formData.productNumber || "Recipe Number"}
-        </div>
-      </div>
+    const claims: Array<{ label: string; claim: string }> = [];
+    if (formData.declarations?.sourceOfProtein) claims.push({ label: "Source of protein", claim: "✓" });
+    if (formData.declarations?.highInProtein) claims.push({ label: "High protein", claim: "✓" });
+    if (formData.declarations?.sourceOfFiber) claims.push({ label: "Source of fibre", claim: "✓" });
+    if (formData.declarations?.highInFiber) claims.push({ label: "High fibre", claim: "✓" });
+    if (formData.declarations?.wholegrainPercentage && formData.declarations.wholegrainPercentage > 0) {
+      claims.push({ label: "Content of wholegrain", claim: `${formData.declarations.wholegrainPercentage}%` });
+    }
+    if (formData.declarations?.manualClaims) {
+      formData.declarations.manualClaims
+        .filter(claim => claim.isActive)
+        .forEach(claim => claims.push({ label: claim.text, claim: "✓" }));
+    }
+    return { claimsToShow: claims, nutriScoreData: nutriScore };
+  }, [formData.nutrition, formData.declarations]);
 
-      {/* Page Number */}
-      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-        <div className={`${isPDFMode ? 'bg-transparent' : 'bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200'}`}>
-          <p className="text-xs font-medium text-slate-700">Page {pageNumber}</p>
-        </div>
-      </div>
-    </div>
-  );
+  const servingSize = useMemo(() => parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), [formData.servingSize]);
+  const calculatePerServing = useCallback((per100g: number) => (per100g * servingSize / 100).toFixed(1), [servingSize]);
+
+  const formattedIngredients = useMemo(() => {
+    return formatCombinedIngredients(formData).replace('<strong>Ingredients:</strong>', '');
+  }, [formData.ingredients, formData.baseProductIngredients]);
 
   return (
-    <div className={`${isPDFMode ? 'p-4 bg-white' : 'p-6 bg-gradient-to-br from-slate-50 to-slate-100'} min-h-screen`}>
-      {!isPDFMode && (
-        <div className="flex justify-end mb-6">
-          <Button
-            onClick={handleDownloadPDF}
-            disabled={isGeneratingPDF}
-            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl flex items-center space-x-2"
-            data-testid="button-download-pdf"
-          >
-            {isGeneratingPDF ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>PDF wird erstellt...</span>
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                <span>Download PDF</span>
-              </>
-            )}
-          </Button>
+    <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-2 bg-white p-2 rounded-lg shadow-sm border">
+          <Checkbox id="show-origin" checked={showCountryOfOrigin} onCheckedChange={() => setShowCountryOfOrigin(!showCountryOfOrigin)} />
+          <Label htmlFor="show-origin" className="text-sm font-medium cursor-pointer flex items-center gap-2">
+            {showCountryOfOrigin ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            Show Country of Origin
+          </Label>
         </div>
-      )}
+        <Button onClick={handleDownloadPDF} disabled={isGeneratingPDF} className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-medium px-6 py-2.5 rounded-lg shadow-lg">
+          {isGeneratingPDF ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Generating...</> : <><Download className="w-4 h-4 mr-2" />Download PDF</>}
+        </Button>
+      </div>
 
-      {/* Document Preview */}
-      <div id="document-preview-content" className={`bg-white ${isPDFMode ? '' : 'rounded-xl shadow-2xl border border-slate-200'} overflow-hidden`}>
-        <div className={isPDFMode ? 'p-0' : 'p-3'}>
-          <div className={isPDFMode ? 'space-y-4' : 'space-y-2'}>
-            {/* Modern Header */}
-            <div className={`relative ${isPDFMode ? 'bg-white p-4 border-b-2 border-slate-300' : 'bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200'}`}>
-              {/* Logo */}
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                <img 
-                  src={brueggenLogo} 
-                  alt="Brüggen Logo" 
-                  className="h-10 w-auto drop-shadow-sm"
-                />
-              </div>
+      <div id="document-preview-content" className="pdf-preview-container bg-white rounded-xl shadow-2xl border border-slate-200">
+        <div className="header">
+          <img src={brueggenLogo} alt="Logo" style={{ height: '35px', width: 'auto', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+          <div className="header-content">
+            <h1>Product Information</h1>
+            <div className="product-number">{formData.productNumber || "Recipe number"}</div>
+          </div>
+          <div className="page-number">Page 1</div>
+        </div>
 
-              {/* Centered Content */}
-              <div className="text-center">
-                <h1 className="text-xl font-bold text-slate-800 mb-1 tracking-wide">
-                  Product Information
-                </h1>
-                <div className="text-slate-800 font-semibold text-base">
-                  {formData.productNumber || "Recipe Number"}
-                </div>
-              </div>
+        <div className="product-name-section">
+          <span className="product-name-label">Product name</span>
+          <h2 className="product-name">{formData.productName || "Product name will appear here..."}</h2>
+        </div>
 
-              {/* Page Number */}
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className={`${isPDFMode ? 'bg-transparent' : 'bg-white px-2 py-0.5 rounded-full shadow-sm border border-slate-200'}`}>
-                  <p className="text-xs font-medium text-slate-700">Page 1</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Product Name Section */}
-            <div className="bg-gradient-to-r from-white to-slate-50 rounded-lg p-3 border border-slate-200 shadow-sm">
-              <div className="text-center">
-                <span className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-1 block">Product Name</span>
-                <h2 className="text-lg font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
-                  {formData.productName || "Product name will appear here..."}
-                </h2>
-              </div>
-            </div>
-
-            {/* Product Image */}
-            {formData.productImage && (
-              <div className="flex justify-center">
-                <img
-                  src={formData.productImage}
-                  alt="Product"
-                  className="max-w-xs max-h-32 object-contain"
-                />
-              </div>
-            )}
-
-            {/* Ingredients Section */}
-            <div className="border border-slate-200 rounded-lg">
-              <div className="px-3 py-2 border-b border-slate-200">
-                <h3 className="font-semibold text-base text-slate-800">Ingredients</h3>
-              </div>
-              <div className="p-3">
-                <div 
-                  className="text-sm leading-relaxed text-slate-700"
-                  dangerouslySetInnerHTML={{
-                    __html: formattedIngredients
-                  }}
-                />
-                <div className="text-xs text-slate-500 italic mt-1 pt-1 border-t border-slate-200">
-                  * percentage in ingredient
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-2 rounded-r-lg">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="w-4 h-4 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-2">
-                  <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                    The quality of all raw materials used in the manufacture and the finished product meets the current applicable 
-                    legal requirements relating to these products. Admissible levels of mycotoxins, heavy metal contamination, 
-                    pesticides and other - in accordance with applicable legislation.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Detailed Ingredients Table - Only show if ingredients exist */}
-            {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
-              <div className={`${isPDFMode ? 'mt-6 avoid-break' : 'border border-slate-200 rounded-lg'}`}>
-                <div className={`${isPDFMode ? 'pb-2 border-b-2 border-slate-400' : 'px-3 py-2 border-b border-slate-200'}`}>
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold text-base text-slate-800">Detailed Ingredients Breakdown</h3>
-                    {!isPDFMode && (
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="show-origin"
-                          checked={showCountryOfOrigin}
-                          onCheckedChange={() => setShowCountryOfOrigin(!showCountryOfOrigin)}
-                        />
-                        <Label htmlFor="show-origin" className="text-xs font-medium cursor-pointer flex items-center">
-                          {showCountryOfOrigin ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-                          Country of Origin
-                        </Label>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="p-2 text-left font-semibold text-slate-700">Ingredients</th>
-                        <th className="p-2 text-left font-semibold text-slate-700">Percentage content per whole product</th>
-                        {showCountryOfOrigin && (
-                          <th className="p-2 text-left font-semibold text-slate-700">Country of Origin</th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {generateIngredientsTable(formData).map((ingredient, index) => (
-                        <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                          <td className="p-2">
-                            {ingredient.isFinalProduct ? (
-                              <strong className="text-slate-800">{ingredient.name}</strong>
-                            ) : (
-                              <span className="text-slate-600" style={{ paddingLeft: '15px' }}>{ingredient.name}</span>
-                            )}
-                          </td>
-                          <td className="p-2 text-slate-700">
-                            {ingredient.percentage}%
-                          </td>
-                          {showCountryOfOrigin && (
-                            <td className="p-2 text-slate-600">{ingredient.origin || "-"}</td>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Page Break Indicator - Around this point nutrition section would start on new page */}
-            {formData.nutrition && <PageBreakIndicator pageNumber={2} />}
-
-            {/* Header for Page 2 */}
-            {formData.nutrition && <DocumentHeader pageNumber={2} />}
-
-            {/* Nutritional Table - Only show if nutrition data exists */}
-            {formData.nutrition && (
-            <>
-              <div className={`${isPDFMode ? 'mt-6 avoid-break' : 'border border-slate-200 rounded-lg'}`}>
-                <div className={`${isPDFMode ? 'pb-2 border-b-2 border-slate-400' : 'px-3 py-2 border-b border-slate-200'}`}>
-                  <h3 className="font-semibold text-base text-slate-800">Average Nutritional Value</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="p-2 text-left font-semibold text-slate-700">
-                          Nutrient
-                        </th>
-                        <th className="p-2 text-center font-semibold text-slate-700">
-                          per 100 g of product
-                        </th>
-                        <th className="p-2 text-center font-semibold text-slate-700">
-                          per {servingSize} g of product
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-medium text-slate-800">Energy</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.energy?.kj || 0} kJ / {formData.nutrition?.energy?.kcal || 0} kcal
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.energy?.kj || 0)} kJ / {calculatePerServing(formData.nutrition?.energy?.kcal || 0)} kcal
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-medium text-slate-800">Fat</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.fat || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.fat || 0)} g
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 pl-4 text-slate-600">of which saturates</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.saturatedFat || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.saturatedFat || 0)} g
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-medium text-slate-800">Carbohydrates</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.carbohydrates || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.carbohydrates || 0)} g
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 pl-4 text-slate-600">of which sugars</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.sugars || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.sugars || 0)} g
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-medium text-slate-800">Fibre</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.fiber || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.fiber || 0)} g
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-medium text-slate-800">Protein</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.protein || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.protein || 0)} g
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="p-2 font-medium text-slate-800">Salt</td>
-                        <td className="p-2 text-center text-slate-700">
-                          {formData.nutrition?.salt || 0} g
-                        </td>
-                        <td className="p-2 text-center text-slate-700">
-                          {calculatePerServing(formData.nutrition?.salt || 0)} g
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-            )}
-
-            {/* Nutri-Score and Claims Side by Side - Only show if nutrition data exists */}
-            {formData.nutrition && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Nutri-Score Display */}
-                {nutriScore && (
-                  <div className="border border-slate-200 rounded-lg p-3">
-                    <h3 className="font-semibold text-base text-slate-800 mb-2">Nutri-Score Rating</h3>
-                    <div className="text-center">
-                      <div className="flex justify-center">
-                        <div className="bg-white p-2 rounded-lg shadow-md border border-slate-200">
-                          <img 
-                            src={getNutriScoreImage(nutriScore.nutriGrade)} 
-                            alt={`Nutri-Score ${nutriScore.nutriGrade}`}
-                            className="h-16 w-auto"
-                          />
-                        </div>
-                      </div>
-                      <p className="text-sm text-slate-700 mt-2 font-medium">
-                        Grade: {nutriScore.nutriGrade} • Score: {nutriScore.finalScore}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Declarations - Calculated Claims */}
-                <div className="border border-slate-200 rounded-lg">
-                  <div className="px-3 py-2 border-b border-slate-200">
-                    <h3 className="font-semibold text-base text-slate-800">Possible Declarations</h3>
-                  </div>
-              <div className="p-3">
-                {(() => {
-                  if (!formData.nutrition) return (
-                    <div className="text-center text-slate-500 py-8">
-                      <svg className="w-12 h-12 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p>No nutrition data available for declarations</p>
-                    </div>
-                  );
-
-                const claimsToShow: Array<{ label: string; claim: string }> = [];
-
-                // Add only active automatic claims (threshold-based)
-                if (formData.declarations?.sourceOfProtein) {
-                  claimsToShow.push({ label: "Source of protein", claim: "✓" });
-                }
-                if (formData.declarations?.highInProtein) {
-                  claimsToShow.push({ label: "High protein", claim: "✓" });
-                }
-                if (formData.declarations?.sourceOfFiber) {
-                  claimsToShow.push({ label: "Source of fibre", claim: "✓" });
-                }
-                if (formData.declarations?.highInFiber) {
-                  claimsToShow.push({ label: "High fibre", claim: "✓" });
-                }
-                if (formData.declarations?.wholegrainPercentage && formData.declarations.wholegrainPercentage > 0) {
-                  claimsToShow.push({ label: "Content of wholegrain", claim: `${formData.declarations.wholegrainPercentage}%` });
-                }
-
-                // Add active manual claims (user-created)
-                if (formData.declarations?.manualClaims) {
-                  formData.declarations.manualClaims
-                    .filter((claim: any) => claim.isActive)
-                    .forEach((claim: any) => {
-                      claimsToShow.push({ label: claim.text, claim: "✓" });
-                    });
-                }
-
-                  if (claimsToShow.length === 0) {
-                    return (
-                      <div className="text-center text-slate-500 py-8">
-                        <svg className="w-12 h-12 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p>No nutritional claims available based on current values</p>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div className="grid gap-2">
-                      {claimsToShow.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                          <span className="text-sm font-medium text-slate-700">{item.label}</span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            {item.claim}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Storage Conditions - Always show */}
-            <div className="border border-slate-200 rounded-lg">
-              <div className="px-3 py-2 border-b border-slate-200">
-                <h3 className="font-semibold text-base text-slate-800">Storage Conditions</h3>
-              </div>
-              <div className="p-3">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 mr-3">
-                    <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                  </div>
-                  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                    {formData.storageConditions || "Storage conditions will be generated based on product type selection..."}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Allergy Advice - Always show in template */}
-            <div className="bg-red-50 border-l-4 border-red-400 rounded-r-lg shadow-sm">
-              <div className="flex items-start p-3">
-                <div className="flex-shrink-0 mr-2">
-                  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-base text-red-800 mb-1">Allergy Advice</h3>
-                  <div className="text-sm text-red-800 leading-relaxed whitespace-pre-line">
-                    {formData.allergyAdvice || "Product contains allergen ingredients according to ingredient list and will be produced in an environment, where the following allergens are present: cereals containing gluten, milk products, nuts, peanuts, sesame seeds and soya products."}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Preparation - Only show if preparation exists */}
-            {formData.preparation && (
-              <div className="border border-slate-200 rounded-lg">
-                <div className="px-3 py-2 border-b border-slate-200">
-                  <h3 className="font-semibold text-base text-slate-800">Preparation Instructions</h3>
-                </div>
-                <div className="p-3">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-5 h-5 text-purple-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                    </div>
-                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                      {formData.preparation}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Valid From Date and Prepared By Section - Footer */}
-            <div className="mt-4 bg-gradient-to-r from-slate-100 to-slate-50 rounded-lg p-3 border border-slate-200 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {/* Valid From Date */}
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 mr-3">
-                    <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-700">Valid from:</span>
-                    <span className="ml-2 text-slate-600">{new Date().toLocaleDateString('en-GB')}</span>
-                  </div>
-                </div>
-
-                {/* Prepared By */}
-                {(formData.preparedBy || formData.jobTitle) && (
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-slate-700">Prepared by:</span>
-                      <span className="ml-2 text-slate-600">
-                        {formData.preparedBy && formData.jobTitle 
-                          ? `${formData.preparedBy}, ${formData.jobTitle}`
-                          : formData.preparedBy || formData.jobTitle || ''
-                        }
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="text-xs text-slate-600 italic leading-relaxed mt-4">
-              The purpose of this product information is to describe a sample made
-              in the laboratory. Nutritional values are calculated. Minor variations
-              may occur due to different production conditions during manufacture.
-            </div>
+        <div className="section">
+          <div className="section-header"><h3 className="section-title">Ingredients</h3></div>
+          <div className="section-content">
+            <div className="ingredients-content" dangerouslySetInnerHTML={{ __html: formattedIngredients }} />
+            <div className="ingredients-note">* percentage in ingredient</div>
           </div>
         </div>
+
+        <div className="warning-box">
+          <p className="warning-text">The quality of all raw materials used in the manufacture and the finished product meets the current applicable legal requirements relating to these products. Admissible levels of mycotoxins, heavy metal contamination, pesticides and other - in accordance with applicable legislation.</p>
+        </div>
+
+        {(formData.ingredients?.length || 0) > 0 &&
+          <div className="section">
+            <div className="section-header"><h3 className="section-title">Detailed ingredients breakdown</h3></div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ingredients</th>
+                    <th>Percentage content per whole product</th>
+                    {showCountryOfOrigin && <th>Country of Origin</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {generateIngredientsTable(formData).map((ing, index) => (
+                    <tr key={index}>
+                      <td className={ing.isFinalProduct ? '' : 'base-ingredient'}>
+                        {ing.isFinalProduct ? <strong>{ing.name}</strong> : ing.name}
+                      </td>
+                      <td>{ing.percentage}%</td>
+                      {showCountryOfOrigin && <td>{ing.origin || "-"}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        {formData.nutrition && (
+          <>
+            <div className="section">
+              <div className="section-header"><h3 className="section-title">Average nutritional value</h3></div>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr><th>Nutrient</th><th style={{textAlign: 'center'}}>per 100 g</th><th style={{textAlign: 'center'}}>per {servingSize} g</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Energy</td><td style={{textAlign: 'center'}}>{formData.nutrition.energy.kj} kJ / {formData.nutrition.energy.kcal} kcal</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.energy.kj)} kJ / {calculatePerServing(formData.nutrition.energy.kcal)} kcal</td></tr>
+                    <tr><td>Fat</td><td style={{textAlign: 'center'}}>{formData.nutrition.fat} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.fat)} g</td></tr>
+                    <tr><td className="base-ingredient">of which saturates</td><td style={{textAlign: 'center'}}>{formData.nutrition.saturatedFat} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.saturatedFat)} g</td></tr>
+                    <tr><td>Carbohydrates</td><td style={{textAlign: 'center'}}>{formData.nutrition.carbohydrates} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.carbohydrates)} g</td></tr>
+                    <tr><td className="base-ingredient">of which sugars</td><td style={{textAlign: 'center'}}>{formData.nutrition.sugars} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.sugars)} g</td></tr>
+                    <tr><td>Fibre</td><td style={{textAlign: 'center'}}>{formData.nutrition.fiber} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.fiber)} g</td></tr>
+                    <tr><td>Protein</td><td style={{textAlign: 'center'}}>{formData.nutrition.protein} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.protein)} g</td></tr>
+                    <tr><td>Salt</td><td style={{textAlign: 'center'}}>{formData.nutrition.salt} g</td><td style={{textAlign: 'center'}}>{calculatePerServing(formData.nutrition.salt)} g</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="grid-two-cols">
+              {nutriScoreData && (
+                <div className="claims-section">
+                  <div className="claims-header"><h3 className="section-title">Nutri-Score Rating</h3></div>
+                  <div className="claims-content" style={{ textAlign: 'center' }}>
+                    <img src={getNutriScoreImage(nutriScoreData.nutriGrade)} alt={`Nutri-Score ${nutriScoreData.nutriGrade}`} style={{ height: '48px', margin: 'auto' }} />
+                    <p>Grade: {nutriScoreData.nutriGrade} • Score: {nutriScoreData.finalScore}</p>
+                  </div>
+                </div>
+              )}
+              {claimsToShow.length > 0 && (
+                <div className="claims-section">
+                  <div className="claims-header"><h3 className="section-title">Possible declarations</h3></div>
+                  <div className="claims-content">
+                    {claimsToShow.map(item => <div key={item.label} className="claim-item"><span>{item.label}</span><span className="claim-value">{item.claim}</span></div>)}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        <div className="storage-conditions section">
+          <div className="section-header"><h3 className="section-title">Storage conditions</h3></div>
+          <div className="section-content"><p className="section-text">{formData.storageConditions || "..."}</p></div>
+        </div>
+        <div className="allergy-advice section">
+          <div className="section-header"><h3 className="section-title">Allergy advice</h3></div>
+          <div className="section-content"><p className="section-text">{formData.allergyAdvice || "..."}</p></div>
+        </div>
+        <div className="preparation-instructions section">
+          <div className="section-header"><h3 className="section-title">Preparation instructions</h3></div>
+          <div className="section-content"><p className="section-text">{formData.preparation || "..."}</p></div>
+        </div>
+
+        <div className="footer-section">
+          <div className="footer-grid">
+            <div className="footer-item"><span className="footer-label">Valid from:</span><span className="footer-value">{new Date().toLocaleDateString('en-GB')}</span></div>
+            {(formData.preparedBy || formData.jobTitle) && <div className="footer-item"><span className="footer-label">Prepared by:</span><span className="footer-value">{formData.preparedBy}, {formData.jobTitle}</span></div>}
+          </div>
+        </div>
+        <p className="disclaimer">The purpose of this product information is to describe a sample made in the laboratory. Nutritional values are calculated. Minor variations may occur due to different production conditions during manufacture.</p>
       </div>
     </div>
   );
