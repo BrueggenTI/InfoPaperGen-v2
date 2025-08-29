@@ -12,6 +12,7 @@ import path from 'path';
  */
 
 export function generatePDFTemplate(formData: ProductInfo): string {
+  const { showCountryOfOriginInPDF = true } = formData;
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
   // Function to get base64 image from file system
@@ -88,46 +89,46 @@ export function generatePDFTemplate(formData: ProductInfo): string {
   };
 
   const generateIngredientsTable = () => {
-    const finalIngredients = formData.ingredients || [];
-    const baseIngredients = formData.baseProductIngredients || [];
+    const finalIngredients = [...(formData.ingredients || [])];
+    const baseIngredients = [...(formData.baseProductIngredients || [])];
+    const tableIngredients: Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean }> = [];
+
+    if (finalIngredients.length === 0) {
+      return [];
+    }
+
+    // Sort final and base ingredients by percentage, descending
+    finalIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+    baseIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+
     const markedIngredientPercentage = getMarkedIngredientPercentage();
-    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
 
-    finalIngredients
-      .filter(ing => ing.name.trim())
-      .forEach(ing => {
+    finalIngredients.forEach(ing => {
+      if (ing.name.trim()) {
+        tableIngredients.push({
+          name: ing.name,
+          percentage: ing.percentage || 0,
+          origin: ing.origin || "",
+          isFinalProduct: true
+        });
+
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-          // Add the marked ingredient first
-          tableIngredients.push({
-            name: ing.name,
-            percentage: ing.percentage || 0,
-            origin: ing.origin || "",
-            isFinalProduct: true
-          });
-
-          // Add base ingredients under the marked ingredient
-          baseIngredients
-            .filter(baseIng => baseIng.name.trim())
-            .forEach(baseIng => {
-              const wholeProductPercentage = baseIng.percentage 
+          baseIngredients.forEach(baseIng => {
+            if (baseIng.name.trim()) {
+              const wholeProductPercentage = baseIng.percentage
                 ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
                 : 0;
               tableIngredients.push({
-                name: `  ${baseIng.name}`, // Indent base ingredients
+                name: baseIng.name, // Indentation will be handled by CSS class
                 percentage: wholeProductPercentage,
                 origin: baseIng.origin || "",
                 isFinalProduct: false
               });
-            });
-        } else {
-          tableIngredients.push({
-            name: ing.name,
-            percentage: ing.percentage || 0,
-            origin: ing.origin || "",
-            isFinalProduct: true
+            }
           });
         }
-      });
+      }
+    });
 
     return tableIngredients;
   };
@@ -723,20 +724,20 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                         <tr>
                             <th>Ingredients</th>
                             <th>Percentage content per whole product</th>
-                            <th>Country of Origin</th>
+                            ${showCountryOfOriginInPDF ? `<th>Country of Origin</th>` : ''}
                         </tr>
                     </thead>
                     <tbody>
                         ${generateIngredientsTable().map(ingredient => `
                         <tr>
-                            <td class="${ingredient.isFinalProduct ? '' : 'base-ingredient'}">
-                                ${ingredient.isFinalProduct ? 
-                                  `<strong>${ingredient.name}</strong>` : 
-                                  ingredient.name
+                            <td>
+                                ${ingredient.isFinalProduct ?
+                                  `<strong>${ingredient.name}</strong>` :
+                                  `<span style="padding-left: 15px;">${ingredient.name}</span>`
                                 }
                             </td>
                             <td>${ingredient.percentage}%</td>
-                            <td>${ingredient.origin || "-"}</td>
+                            ${showCountryOfOriginInPDF ? `<td>${ingredient.origin || "-"}</td>` : ''}
                         </tr>
                         `).join('')}
                     </tbody>

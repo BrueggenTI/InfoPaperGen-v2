@@ -1,25 +1,13 @@
 import { ProductInfo } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Download, Loader2, Eye, EyeOff } from "lucide-react";
 import { downloadPDFFromServer } from "@/lib/server-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
-import { calculateNutriScore, getNutriScoreColor, getNutriScoreImage } from "@/lib/nutri-score";
-import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
+import { calculateNutriScore, getNutriScoreImage } from "@/lib/nutri-score";
 import { useState, useMemo, useCallback } from "react";
-
-// Helper function to format ingredients list
-const formatIngredients = (ingredients: any[]) => {
-  if (!ingredients || ingredients.length === 0) return "";
-
-  return ingredients
-    .map(ingredient => {
-      if (ingredient.percentage && ingredient.percentage > 0) {
-        return `${ingredient.name} (${ingredient.percentage}%)`;
-      }
-      return ingredient.name;
-    })
-    .join(", ");
-};
+import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -29,6 +17,7 @@ interface DocumentPreviewProps {
 
 export default function DocumentPreview({ formData, sessionId, isPDFMode = false }: DocumentPreviewProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showCountryOfOrigin, setShowCountryOfOrigin] = useState(true);
 
   // Performance: Memoize parsed serving size
   const servingSize = useMemo(() => 
@@ -43,41 +32,7 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
 
   // Performance: Memoize ingredients formatting
   const formattedIngredients = useMemo(() => {
-    const finalIngredients = formData.ingredients || [];
-    const baseIngredients = formData.baseProductIngredients || [];
-
-    if (finalIngredients.length === 0 && baseIngredients.length === 0) {
-      return "Ingredients will appear here after extraction...";
-    }
-
-    // Format base ingredients for inclusion in brackets (same as Kombinierte Vorschau)
-    const baseFormatted = baseIngredients
-      .filter(ingredient => ingredient.name.trim() !== "")
-      .map(ingredient => {
-        const percentage = ingredient.percentage ? ` ${ingredient.percentage}%*` : '';
-        // Use current displayed name (which could be translated)
-        return `${ingredient.name}${percentage}`;
-      })
-      .join(', ');
-
-    // Format final ingredients with base ingredients in brackets (same as Kombinierte Vorschau)
-    const finalFormatted = finalIngredients
-      .filter(ingredient => ingredient.name.trim() !== "")
-      .map(ingredient => {
-        const percentage = ingredient.percentage ? ` (${ingredient.percentage}%)` : '';
-        // Use current displayed name (which could be translated)
-        const ingredientText = `<strong>${ingredient.name}${percentage}</strong>`;
-
-        // Check if this ingredient is marked as base recipe
-        if (ingredient.isMarkedAsBase && baseFormatted) {
-          return `${ingredientText} [${baseFormatted}]`;
-        }
-
-        return ingredientText;
-      })
-      .join(', ');
-
-    return finalFormatted || "Ingredients will appear here after extraction...";
+    return formatCombinedIngredients(formData).replace('<strong>Ingredients:</strong>', '');
   }, [formData.ingredients, formData.baseProductIngredients]);
 
   // Performance: Memoize Nutri-Score calculation
@@ -96,88 +51,34 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
     });
   }, [formData.nutrition]);
 
-  // Calculate percentage from base product to whole product using the same formula as ingredients-step
-  const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
-    return +((basePercentage * markedIngredientPercentage) / 100).toFixed(1);
-  };
-
-  // Extract base product percentage from marked ingredient
-  const getMarkedIngredientPercentage = () => {
-    const markedIngredient = (formData.ingredients || []).find(ing => ing.isMarkedAsBase);
-    return markedIngredient?.percentage || 0;
-  };
-
-  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> => {
-    const finalIngredients = formData.ingredients || [];
-    const baseIngredients = formData.baseProductIngredients || [];
-    const markedIngredientPercentage = getMarkedIngredientPercentage();
-    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
-
-    // Add final product ingredients in the same order as they appear
-    finalIngredients
-      .filter(ing => ing.name.trim())
-      .forEach(ing => {
-        if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-          // First add the marked ingredient itself
-          tableIngredients.push({
-            name: ing.name,
-            percentage: ing.percentage || 0,
-            origin: ing.origin || "",
-            isFinalProduct: true
-          });
-
-          // Then add base product ingredients with recalculated percentages
-          baseIngredients
-            .filter(baseIng => baseIng.name.trim())
-            .forEach(baseIng => {
-              const wholeProductPercentage = baseIng.percentage 
-                ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
-                : 0;
-              tableIngredients.push({
-                name: baseIng.name,
-                percentage: wholeProductPercentage,
-                origin: baseIng.origin || "",
-                isFinalProduct: false
-              });
-            });
-        } else {
-          // Add regular final product ingredient
-          tableIngredients.push({
-            name: ing.name,
-            percentage: ing.percentage || 0,
-            origin: ing.origin || "",
-            isFinalProduct: true
-          });
-        }
-      });
-
-    return tableIngredients;
-  };
 
   const handleDownloadPDF = async () => {
     if (!sessionId) {
-      alert('Keine Session-ID verfügbar. Bitte laden Sie die Seite neu.');
+      alert('A session ID is not available. Please reload the page.');
       return;
     }
 
     if (!formData) {
-      alert('Keine Formular-Daten verfügbar. Bitte füllen Sie das Formular aus.');
+      alert('Form data is not available. Please fill out the form.');
       return;
     }
 
     setIsGeneratingPDF(true);
 
     try {
-      // Verwende die neue direkte PDF-Generierung mit Formular-Daten
-      // Diese erstellt ein sauberes PDF nur mit den ausgefüllten Formular-Informationen
+      // Add the current state of the checkbox to the data sent to the server
+      const pdfFormData = {
+        ...formData,
+        showCountryOfOriginInPDF: showCountryOfOrigin,
+      };
+
       await downloadPDFFromServer({
-        formData: formData,
+        formData: pdfFormData,
         sessionId: sessionId
       });
     } catch (error) {
-      console.error('Fehler beim Generieren des PDFs:', error);
-      // Zeige benutzerfreundliche Fehlermeldung
-      alert(error instanceof Error ? error.message : 'Beim Erstellen des PDFs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
+      console.error('Error generating PDF:', error);
+      alert(error instanceof Error ? error.message : 'An error occurred while creating the PDF. Please try again.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -349,7 +250,22 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
             {(formData.ingredients?.some(ing => ing.name.trim()) || formData.baseProductIngredients?.some(ing => ing.name.trim())) && (
               <div className={`${isPDFMode ? 'mt-6 avoid-break' : 'border border-slate-200 rounded-lg'}`}>
                 <div className={`${isPDFMode ? 'pb-2 border-b-2 border-slate-400' : 'px-3 py-2 border-b border-slate-200'}`}>
-                  <h3 className="font-semibold text-base text-slate-800">Detailed Ingredients Breakdown</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-base text-slate-800">Detailed Ingredients Breakdown</h3>
+                    {!isPDFMode && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="show-origin"
+                          checked={showCountryOfOrigin}
+                          onCheckedChange={() => setShowCountryOfOrigin(!showCountryOfOrigin)}
+                        />
+                        <Label htmlFor="show-origin" className="text-xs font-medium cursor-pointer flex items-center">
+                          {showCountryOfOrigin ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
+                          Country of Origin
+                        </Label>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
@@ -357,23 +273,27 @@ export default function DocumentPreview({ formData, sessionId, isPDFMode = false
                       <tr className="bg-slate-50 border-b border-slate-200">
                         <th className="p-2 text-left font-semibold text-slate-700">Ingredients</th>
                         <th className="p-2 text-left font-semibold text-slate-700">Percentage content per whole product</th>
-                        <th className="p-2 text-left font-semibold text-slate-700">Country of Origin</th>
+                        {showCountryOfOrigin && (
+                          <th className="p-2 text-left font-semibold text-slate-700">Country of Origin</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
-                      {generateIngredientsTable().map((ingredient, index) => (
+                      {generateIngredientsTable(formData).map((ingredient, index) => (
                         <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                           <td className="p-2">
                             {ingredient.isFinalProduct ? (
                               <strong className="text-slate-800">{ingredient.name}</strong>
                             ) : (
-                              <span className="text-slate-600">{ingredient.name}</span>
+                              <span className="text-slate-600" style={{ paddingLeft: '15px' }}>{ingredient.name}</span>
                             )}
                           </td>
                           <td className="p-2 text-slate-700">
                             {ingredient.percentage}%
                           </td>
-                          <td className="p-2 text-slate-600">{ingredient.origin || "-"}</td>
+                          {showCountryOfOrigin && (
+                            <td className="p-2 text-slate-600">{ingredient.origin || "-"}</td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
