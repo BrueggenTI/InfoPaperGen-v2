@@ -89,46 +89,46 @@ export function generatePDFTemplate(formData: ProductInfo): string {
   };
 
   const generateIngredientsTable = () => {
-    const finalIngredients = [...(formData.ingredients || [])];
-    const baseIngredients = [...(formData.baseProductIngredients || [])];
-    const tableIngredients: Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean }> = [];
-
-    if (finalIngredients.length === 0) {
-      return [];
-    }
-
-    // Sort final and base ingredients by percentage, descending
-    finalIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
-    baseIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
-
+    const finalIngredients = formData.ingredients || [];
+    const baseIngredients = formData.baseProductIngredients || [];
     const markedIngredientPercentage = getMarkedIngredientPercentage();
+    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean}> = [];
 
-    finalIngredients.forEach(ing => {
-      if (ing.name.trim()) {
-        tableIngredients.push({
-          name: ing.name,
-          percentage: ing.percentage || 0,
-          origin: ing.origin || "",
-          isFinalProduct: true
-        });
-
+    finalIngredients
+      .filter(ing => ing.name.trim())
+      .forEach(ing => {
         if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-          baseIngredients.forEach(baseIng => {
-            if (baseIng.name.trim()) {
+          // Add the marked ingredient first
+          tableIngredients.push({
+            name: ing.name,
+            percentage: ing.percentage || 0,
+            origin: ing.origin || "",
+            isFinalProduct: true
+          });
+
+          // Add base ingredients under the marked ingredient
+          baseIngredients
+            .filter(baseIng => baseIng.name.trim())
+            .forEach(baseIng => {
               const wholeProductPercentage = baseIng.percentage
                 ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
                 : 0;
               tableIngredients.push({
-                name: baseIng.name, // Indentation will be handled by CSS class
+                name: `  ${baseIng.name}`, // Indent base ingredients
                 percentage: wholeProductPercentage,
                 origin: baseIng.origin || "",
                 isFinalProduct: false
               });
-            }
+            });
+        } else {
+          tableIngredients.push({
+            name: ing.name,
+            percentage: ing.percentage || 0,
+            origin: ing.origin || "",
+            isFinalProduct: true
           });
         }
-      }
-    });
+      });
 
     return tableIngredients;
   };
@@ -193,16 +193,16 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
     // Add only active automatic claims based on user selection
     if (formData.declarations?.sourceOfProtein) {
-        claimsToShow.push({ label: "Source of protein", claim: "✓" });
+        claimsToShow.push({ label: "Source of protein", claim: "&#10003;" });
     }
     if (formData.declarations?.highInProtein) {
-        claimsToShow.push({ label: "High protein", claim: "✓" });
+        claimsToShow.push({ label: "High protein", claim: "&#10003;" });
     }
     if (formData.declarations?.sourceOfFiber) {
-        claimsToShow.push({ label: "Source of fibre", claim: "✓" });
+        claimsToShow.push({ label: "Source of fibre", claim: "&#10003;" });
     }
     if (formData.declarations?.highInFiber) {
-        claimsToShow.push({ label: "High fibre", claim: "✓" });
+        claimsToShow.push({ label: "High fibre", claim: "&#10003;" });
     }
 
     // Wholegrain Declaration
@@ -215,7 +215,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       formData.declarations.manualClaims
         .filter(claim => claim.isActive && claim.text.trim() !== "")
         .forEach(claim => {
-          claimsToShow.push({ label: claim.text, claim: "✓" });
+          claimsToShow.push({ label: claim.text, claim: "&#10003;" });
         });
     }
 
@@ -394,7 +394,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .section-title {
             font-weight: bold;
             font-size: 11px;
-            color: #333;
+            color: #ff4143;
             margin: 0;
         }
 
@@ -730,10 +730,10 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                     <tbody>
                         ${generateIngredientsTable().map(ingredient => `
                         <tr>
-                            <td>
+                            <td class="${ingredient.isFinalProduct ? '' : 'base-ingredient'}">
                                 ${ingredient.isFinalProduct ?
                                   `<strong>${ingredient.name}</strong>` :
-                                  `<span style="padding-left: 15px;">${ingredient.name}</span>`
+                                  ingredient.name
                                 }
                             </td>
                             <td>${ingredient.percentage}%</td>

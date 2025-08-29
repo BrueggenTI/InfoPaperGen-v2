@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
+import { handleImagePaste } from "@/lib/image-upload-utils";
 
 interface Ingredient {
   name: string;
@@ -356,19 +357,6 @@ export default function IngredientsStep({
     reader.readAsDataURL(file);
   };
 
-  const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>, uploader: 'final' | 'base') => {
-    const items = event.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const file = items[i].getAsFile();
-        processImageFile(file, uploader);
-        // Prevent the default paste action
-        event.preventDefault();
-        break;
-      }
-    }
-  };
-
   const handleFinalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     processImageFile(file || null, 'final');
@@ -501,7 +489,7 @@ export default function IngredientsStep({
             <div
               className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer"
               onClick={() => finalRecipeInputRef.current?.click()}
-              onPaste={(e) => handlePaste(e, 'final')}
+              onPaste={(e) => handleImagePaste(e, (file) => processImageFile(file, 'final'))}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') finalRecipeInputRef.current?.click()}}
@@ -653,7 +641,7 @@ export default function IngredientsStep({
             <div
               className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer"
               onClick={() => baseRecipeInputRef.current?.click()}
-              onPaste={(e) => handlePaste(e, 'base')}
+              onPaste={(e) => handleImagePaste(e, (file) => processImageFile(file, 'base'))}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') baseRecipeInputRef.current?.click()}}
