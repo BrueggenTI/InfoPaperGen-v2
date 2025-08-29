@@ -92,10 +92,10 @@ export default function ProductGenerator() {
   useEffect(() => {
     if (sessionData && typeof sessionData === 'object' && sessionData !== null && 'sessionData' in sessionData) {
       const newSessionData = sessionData.sessionData as ProductInfo;
-      // Preserve the current step to prevent jumping back when session updates
+      // Smart merge: update with server data but preserve local state
       setFormData(prevFormData => ({
+        ...prevFormData,
         ...newSessionData,
-        currentStep: prevFormData.currentStep
       }));
     }
   }, [sessionData]);
@@ -152,13 +152,30 @@ export default function ProductGenerator() {
   }, [formData.ingredients, formData.baseProductIngredients]);
 
 
-  const updateFormData = (updates: Partial<ProductInfo>) => {
-    const newData = { ...formData, ...updates };
-    setFormData(newData);
-    
-    if (sessionId) {
-      updateSessionMutation.mutate(newData);
+  // Debounce hook
+  const useDebounce = <T,>(value: T, delay: number): T => {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+    return debouncedValue;
+  };
+
+  const debouncedFormData = useDebounce(formData, 500); // 500ms delay
+
+  useEffect(() => {
+    if (sessionId && debouncedFormData) {
+      updateSessionMutation.mutate(debouncedFormData);
     }
+  }, [debouncedFormData, sessionId]);
+
+  const updateFormData = (updates: Partial<ProductInfo>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
   };
 
   const goToStep = (step: number) => {
