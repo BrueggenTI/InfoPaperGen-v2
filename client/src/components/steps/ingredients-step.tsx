@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ProductInfo } from "@shared/schema";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Upload, Camera, Tag, Languages, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, Camera, Tag, Languages, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
 
 interface Ingredient {
   name: string;
@@ -17,9 +17,9 @@ interface Ingredient {
   translatedName?: string;
   percentage?: number | null;
   origin?: string;
-  isMarkedAsBase?: boolean;
-  isWholegrain?: boolean;
-  language?: 'original' | 'english';
+  isMarkedAsBase: boolean;
+  isWholegrain: boolean;
+  language: 'original' | 'english';
 }
 
 interface IngredientsStepProps {
@@ -38,10 +38,20 @@ export default function IngredientsStep({
   isLoading = false,
 }: IngredientsStepProps) {
   const [finalProductIngredients, setFinalProductIngredients] = useState<Ingredient[]>(
-    formData.ingredients || [{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false, language: 'original' }]
+    (formData.ingredients || []).map(ing => ({
+      ...ing,
+      isMarkedAsBase: ing.isMarkedAsBase ?? false,
+      isWholegrain: ing.isWholegrain ?? false,
+      language: ing.language ?? 'original',
+    }))
   );
   const [baseProductIngredients, setBaseProductIngredients] = useState<Ingredient[]>(
-    formData.baseProductIngredients || [{ name: "", percentage: undefined, origin: "", language: 'original' }]
+    (formData.baseProductIngredients || []).map(ing => ({
+      ...ing,
+      isMarkedAsBase: false, // Base ingredients can't be marked
+      isWholegrain: ing.isWholegrain ?? false,
+      language: ing.language ?? 'original',
+    }))
   );
   
   // Text versions for manual editing after AI extraction
@@ -72,18 +82,6 @@ export default function IngredientsStep({
     language: ing.language ?? 'original',
   });
 
-  // Calculate percentage from base product to whole product using the new formula
-  const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
-    // Formula: (basePercentage / 100) * 100 * (markedIngredientPercentage / 100)
-    // Simplified: basePercentage * markedIngredientPercentage / 100
-    return +((basePercentage * markedIngredientPercentage) / 100).toFixed(1);
-  };
-
-  // Extract base product percentage from marked ingredient
-  const getMarkedIngredientPercentage = () => {
-    const markedIngredient = finalProductIngredients.find(ing => ing.isMarkedAsBase);
-    return markedIngredient?.percentage || 0;
-  };
 
   // AI extraction mutations - separate for each type
   const extractFinalIngredientsMutation = useMutation({
@@ -327,8 +325,7 @@ export default function IngredientsStep({
     },
   });
 
-  const handleFinalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const processImageFile = (file: File | null, uploader: 'final' | 'base') => {
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
@@ -340,14 +337,41 @@ export default function IngredientsStep({
       return;
     }
 
-    setFinalRecipeFile(file);
+    if (uploader === 'final') {
+      setFinalRecipeFile(file);
+    } else {
+      setBaseRecipeFile(file);
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
       const base64Data = base64.split(',')[1];
-      extractFinalIngredientsMutation.mutate({ image: base64Data });
+      if (uploader === 'final') {
+        extractFinalIngredientsMutation.mutate({ image: base64Data });
+      } else {
+        extractBaseIngredientsMutation.mutate({ image: base64Data });
+      }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>, uploader: 'final' | 'base') => {
+    const items = event.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        processImageFile(file, uploader);
+        // Prevent the default paste action
+        event.preventDefault();
+        break;
+      }
+    }
+  };
+
+  const handleFinalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    processImageFile(file || null, 'final');
   };
 
   const handleRemoveFinalImage = () => {
@@ -366,31 +390,13 @@ export default function IngredientsStep({
 
   const handleBaseImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please select a file under 10MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setBaseRecipeFile(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      const base64Data = base64.split(',')[1];
-      extractBaseIngredientsMutation.mutate({ image: base64Data });
-    };
-    reader.readAsDataURL(file);
+    processImageFile(file || null, 'base');
   };
 
   const handleRemoveBaseImage = () => {
     setBaseRecipeFile(null);
     setBaseRecipeText("");
-    setBaseProductIngredients([{ name: "", percentage: undefined, origin: "", isWholegrain: false, language: 'original' }]);
+    setBaseProductIngredients([{ name: "", percentage: undefined, origin: "", isMarkedAsBase: false, isWholegrain: false, language: 'original' }]);
     onUpdate({ baseProductIngredients: [] });
     if (baseRecipeInputRef.current) {
       baseRecipeInputRef.current.value = "";
@@ -437,6 +443,7 @@ export default function IngredientsStep({
         originalName: name,
         percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
         origin: "",
+        isMarkedAsBase: false,
         isWholegrain: false,
         language: 'original' as const
       };
@@ -446,80 +453,6 @@ export default function IngredientsStep({
     onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
   };
 
-  const formatCombinedIngredients = () => {
-    const baseFormatted = baseProductIngredients
-      .filter(ing => ing.name.trim())
-      .map(ing => {
-        const percentage = ing.percentage ? ` ${ing.percentage.toFixed(1)}%*` : '';
-        return `${ing.name}${percentage}`;
-      })
-      .join(', ');
-
-    const finalFormatted = finalProductIngredients
-      .filter(ing => ing.name.trim())
-      .map(ing => {
-        const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
-        const ingredientText = `**${ing.name}${percentage}**`;
-        
-        // Check if this ingredient is marked as base recipe
-        if (ing.isMarkedAsBase && baseFormatted) {
-          return `${ingredientText} [${baseFormatted}]`;
-        }
-        
-        return ingredientText;
-      })
-      .join(', ');
-
-    return finalFormatted;
-  };
-
-  const generateIngredientsTable = (): Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean}> => {
-    const markedIngredientPercentage = getMarkedIngredientPercentage();
-    const tableIngredients: Array<{name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean}> = [];
-
-    // Add final product ingredients in the same order as they appear
-    finalProductIngredients
-      .filter(ing => ing.name.trim())
-      .forEach(ing => {
-        if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-          // First add the marked ingredient itself
-          tableIngredients.push({
-            name: ing.name,
-            percentage: ing.percentage || 0,
-            origin: ing.origin || "",
-            isFinalProduct: true,
-            isWholegrain: ing.isWholegrain || false,
-          });
-          
-          // Then add base product ingredients with recalculated percentages
-          baseProductIngredients
-            .filter(baseIng => baseIng.name.trim())
-            .forEach(baseIng => {
-              const wholeProductPercentage = baseIng.percentage 
-                ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
-                : 0;
-              tableIngredients.push({
-                name: baseIng.name,
-                percentage: wholeProductPercentage,
-                origin: baseIng.origin || "",
-                isFinalProduct: false,
-                isWholegrain: baseIng.isWholegrain || false,
-              });
-            });
-        } else {
-          // Add regular final product ingredient
-          tableIngredients.push({
-            name: ing.name,
-            percentage: ing.percentage || 0,
-            origin: ing.origin || "",
-            isFinalProduct: true,
-            isWholegrain: ing.isWholegrain || false,
-          });
-        }
-      });
-
-    return tableIngredients;
-  };
 
   // Function to mark/unmark an ingredient as base recipe
   const toggleIngredientAsBase = (ingredientName: string) => {
@@ -528,22 +461,11 @@ export default function IngredientsStep({
         const isMarked = !ing.isMarkedAsBase;
         // Update marked ingredient tracker
         setMarkedIngredient(isMarked ? ingredientName : null);
-        return { 
-          ...ing, 
-          isMarkedAsBase: isMarked,
-          isWholegrain: ing.isWholegrain ?? false,
-          language: ing.language ?? 'original' as const
-        };
+        return { ...ing, isMarkedAsBase: isMarked };
       }
       // Remove mark from other ingredients (only one can be marked)
-      return { 
-        ...ing, 
-        isMarkedAsBase: false,
-        isWholegrain: ing.isWholegrain ?? false,
-        language: ing.language ?? 'original' as const
-      };
+      return { ...ing, isMarkedAsBase: false };
     });
-    
     setFinalProductIngredients(updatedIngredients);
     onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
   };
@@ -576,7 +498,14 @@ export default function IngredientsStep({
         </CardHeader>
         <CardContent className="space-y-4">
           {!finalRecipeFile ? (
-            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+            <div
+              className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer"
+              onClick={() => finalRecipeInputRef.current?.click()}
+              onPaste={(e) => handlePaste(e, 'final')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') finalRecipeInputRef.current?.click()}}
+            >
               <input
                 ref={finalRecipeInputRef}
                 type="file"
@@ -586,15 +515,10 @@ export default function IngredientsStep({
               />
               <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
               <p className="text-sm text-slate-600 mb-2">
-                Click here to upload an image of the Final Recipe
+                Click or paste an image to upload the Final Recipe
               </p>
               <Button
                 variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  finalRecipeInputRef.current?.click();
-                }}
                 disabled={extractFinalIngredientsMutation.isPending}
                 data-testid="button-upload-final-recipe"
               >
@@ -726,7 +650,14 @@ export default function IngredientsStep({
         </CardHeader>
         <CardContent className="space-y-4">
           {!baseRecipeFile ? (
-            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+            <div
+              className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer"
+              onClick={() => baseRecipeInputRef.current?.click()}
+              onPaste={(e) => handlePaste(e, 'base')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') baseRecipeInputRef.current?.click()}}
+            >
               <input
                 ref={baseRecipeInputRef}
                 type="file"
@@ -736,15 +667,10 @@ export default function IngredientsStep({
               />
               <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
               <p className="text-sm text-slate-600 mb-2">
-                Click here to upload an image of the Base Recipe
+                Click or paste an image to upload the Base Recipe
               </p>
               <Button
                 variant="outline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  baseRecipeInputRef.current?.click();
-                }}
                 disabled={extractBaseIngredientsMutation.isPending}
                 data-testid="button-upload-base-recipe"
               >
@@ -850,11 +776,10 @@ export default function IngredientsStep({
               Final Recipe ingredients (bold) with Base Recipe (in square brackets):
             </p>
             <div className="bg-slate-50 p-4 rounded-lg">
-              <div 
+        <div
                 className="text-sm text-slate-700"
                 dangerouslySetInnerHTML={{
-                  __html: `<strong>Ingredients:</strong> ${(formatCombinedIngredients() || "No ingredients extracted yet...")
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}`
+            __html: formatCombinedIngredients(formData)
                 }}
               />
               <p className="text-xs text-slate-500 mt-2">* percentage in ingredient</p>
@@ -871,12 +796,6 @@ export default function IngredientsStep({
             <p className="text-sm text-slate-600">
               Base Product ingredients are calculated based on the marked Final Recipe ingredient.
             </p>
-            {getMarkedIngredientPercentage() > 0 && (
-              <p className="text-xs text-slate-500">
-                Formula: Base ingredient % × {getMarkedIngredientPercentage()}% ÷ 100
-                (Example: 20% × {getMarkedIngredientPercentage()}% ÷ 100 = {((20 * getMarkedIngredientPercentage()) / 100).toFixed(1)}%)
-              </p>
-            )}
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -890,13 +809,13 @@ export default function IngredientsStep({
                   </tr>
                 </thead>
                 <tbody>
-                  {generateIngredientsTable().map((ingredient, index) => (
+                  {generateIngredientsTable(formData).map((ingredient, index) => (
                     <tr key={index}>
                       <td className="border border-slate-300 p-2">
                         {ingredient.isFinalProduct ? (
                           <strong>{ingredient.name}</strong>
                         ) : (
-                          ingredient.name
+                          <span style={{ paddingLeft: '15px' }}>{ingredient.name}</span>
                         )}
                       </td>
                       <td className="border border-slate-300 p-2">{ingredient.percentage}%</td>
