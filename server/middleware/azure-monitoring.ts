@@ -21,7 +21,7 @@ export function azurePerformanceMiddleware(req: Request, res: Response, next: Ne
           statusCode: res.statusCode
         },
         performance: {
-          memoryUsed: endMemory.heapUsed - startMemory.heapUsed,
+          memoryUsed: endMemory.heapUsed,
           totalMemory: endMemory.heapTotal,
           rss: endMemory.rss
         },
