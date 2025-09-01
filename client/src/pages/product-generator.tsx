@@ -22,19 +22,44 @@ const STEPS = [
   { id: 4, name: "Storage & Preparation", component: ConditionsStep },
 ];
 
+const getInitialFormData = (): ProductInfo => ({
+  productNumber: "",
+  productName: "",
+  description: "",
+  category: "",
+  packageSize: "",
+  servingSize: "40g",
+  preparedBy: "",
+  jobTitle: "",
+  currentStep: 1,
+  ingredients: [],
+  baseProductIngredients: [],
+  nutrition: {
+    energy: { kj: 0, kcal: 0 },
+    fat: 0,
+    saturatedFat: 0,
+    carbohydrates: 0,
+    sugars: 0,
+    fiber: 0,
+    protein: 0,
+    salt: 0,
+    fruitVegLegumeContent: 0,
+  },
+  declarations: {
+    sourceOfProtein: false,
+    highInProtein: false,
+    sourceOfFiber: false,
+    highInFiber: false,
+    wholegrain: false,
+    isWholegrainPercentageManuallySet: false,
+    manualClaims: [],
+  },
+  // Add other fields from ProductInfo schema with default values
+});
+
 export default function ProductGenerator() {
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<ProductInfo>({
-    productNumber: "",
-    productName: "",
-    description: "",
-    category: "",
-    packageSize: "",
-    servingSize: "40g",
-    preparedBy: "",
-    jobTitle: "",
-    currentStep: 1,
-  });
+  const [formData, setFormData] = useState<ProductInfo>(getInitialFormData());
 
   // Check for session ID in URL
   useEffect(() => {
@@ -77,6 +102,16 @@ export default function ProductGenerator() {
     },
   });
 
+  const deleteSessionMutation = useMutation({
+    mutationFn: async (sessionIdToDelete: string) => {
+      if (!sessionIdToDelete) return;
+      await apiRequest("DELETE", `/api/product-info/sessions/${sessionIdToDelete}`);
+    },
+    onSuccess: () => {
+      console.log("Previous session deleted.");
+    },
+  });
+
   // Get session data
   const { data: sessionData } = useQuery<{ sessionData: ProductInfo }>({
     queryKey: ["/api/product-info/sessions", sessionId],
@@ -100,52 +135,51 @@ export default function ProductGenerator() {
     }
   }, [sessionData]);
 
-  // Auto-calculate wholegrain content
+  // [NEW] Auto-calculate wholegrain content
   useEffect(() => {
+    console.log("[Wholegrain] Calculation effect triggered.");
     const ingredients = formData.ingredients || [];
     const baseIngredients = formData.baseProductIngredients || [];
 
-    const markedIngredient = ingredients.find(ing => ing.isMarkedAsBase);
-    const markedIngredientPercentage = markedIngredient?.percentage || 0;
-
     let totalWholegrainPercentage = 0;
 
-    // Calculate from final ingredients
+    console.log(`[Wholegrain] Found ${ingredients.length} ingredients and ${baseIngredients.length} base ingredients.`);
+
     ingredients.forEach(ing => {
       if (ing.isWholegrain && ing.percentage) {
-        // if it's the base for other ingredients, don't add it directly
         if (!ing.isMarkedAsBase) {
           totalWholegrainPercentage += ing.percentage;
         }
       }
     });
 
-    // Calculate from base ingredients if a base is marked
-    if (markedIngredientPercentage > 0) {
-      baseIngredients.forEach(ing => {
-        if (ing.isWholegrain && ing.percentage) {
-          totalWholegrainPercentage += (ing.percentage * markedIngredientPercentage) / 100;
-        }
-      });
+    const markedIngredient = ingredients.find(ing => ing.isMarkedAsBase);
+    if (markedIngredient && markedIngredient.percentage) {
+        console.log(`[Wholegrain] Found marked base ingredient with ${markedIngredient.percentage}%.`);
+        baseIngredients.forEach(ing => {
+            if (ing.isWholegrain && ing.percentage) {
+                const contribution = (ing.percentage * markedIngredient.percentage) / 100;
+                console.log(`[Wholegrain] Base ingredient ${ing.name} contributes ${contribution}%.`);
+                totalWholegrainPercentage += contribution;
+            }
+        });
     }
 
     const roundedPercentage = Math.round(totalWholegrainPercentage * 10) / 10;
+    const currentDeclarations = formData.declarations;
 
-    const currentDeclarations = formData.declarations || {
-      sourceOfProtein: false,
-      highInProtein: false,
-      sourceOfFiber: false,
-      highInFiber: false,
-      wholegrain: false,
-      isWholegrainPercentageManuallySet: false,
-      manualClaims: [],
-    };
+    if (!currentDeclarations) {
+        console.log("[Wholegrain] Declarations object is missing.");
+        return;
+    }
 
-    // Only update if the value has changed AND it hasn't been manually set, to prevent loops and overwrites.
+    console.log(`[Wholegrain] Calculated: ${roundedPercentage}%. Current: ${currentDeclarations.wholegrainPercentage}%. Manually set: ${currentDeclarations.isWholegrainPercentageManuallySet}`);
+
     if (
       !currentDeclarations.isWholegrainPercentageManuallySet &&
       currentDeclarations.wholegrainPercentage !== roundedPercentage
     ) {
+      console.log(`[Wholegrain] Updating wholegrain percentage to ${roundedPercentage}%`);
       updateFormData({
         declarations: {
           ...currentDeclarations,
@@ -153,7 +187,7 @@ export default function ProductGenerator() {
         },
       });
     }
-  }, [formData.ingredients, formData.baseProductIngredients]);
+  }, [formData.ingredients, formData.baseProductIngredients, updateFormData]);
 
 
   // Debounce hook implemented locally to avoid external dependencies.
@@ -190,15 +224,38 @@ export default function ProductGenerator() {
   };
 
   const goToStep = (step: number) => {
-    updateFormData({ currentStep: step });
+    const updatedData = { ...formData, currentStep: step };
+    setFormData(updatedData); // Update state immediately for UI
+    if (sessionId) {
+      // Also trigger a save immediately to ensure state is persisted on step change
+      updateSessionMutation.mutate(updatedData);
+    }
   };
 
   const currentStepData = STEPS.find(step => step.id === formData.currentStep);
   const CurrentStepComponent = currentStepData?.component || ProductDetailsStep;
 
+  const handleNew = async () => {
+    //
+    if (window.confirm("Are you sure you want to start a new specification? All current data will be lost.")) {
+      if (sessionId) {
+        // We don't need to wait for this to finish
+        deleteSessionMutation.mutate(sessionId);
+      }
+
+      // Reset state and create a new session
+      const initialData = getInitialFormData();
+      setFormData(initialData);
+      setSessionId(null); // This will trigger the useEffect to create a new session
+
+      // Also manually trigger creation to ensure it happens immediately
+      createSessionMutation.mutate(initialData);
+    }
+  };
+
   return (
     <>
-      <BruggenHeader />
+      <BruggenHeader onNew={handleNew} />
       
       {/* Debug Link - Only in development */}
       {import.meta.env.DEV && (

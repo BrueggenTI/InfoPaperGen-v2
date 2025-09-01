@@ -93,11 +93,18 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
           fiber: round(nutritionData.fiber), protein: round(nutritionData.protein), salt: round(nutritionData.salt),
           fruitVegLegumeContent: round(nutritionData.fruitVegLegumeContent),
         };
-        form.reset(processedData);
+
+        // Explicitly update the parent component's state FIRST.
         onUpdate({ nutrition: processedData });
+
+        // Then, reset the local form to be in sync.
+        // The useEffect that syncs from parent to child will also help.
+        form.reset(processedData);
+
         setExtractionError(null);
         toast({ title: "Successfully extracted", description: "Nutrition values recognized." });
       } else {
+        // This path should now be protected by the backend validation.
         throw new Error('No nutrition values detected.');
       }
     },
@@ -155,8 +162,26 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
     onNext();
   };
 
+  // Sync form with external data from props
   useEffect(() => {
-    const subscription = form.watch((values) => onUpdate({ nutrition: values as NutritionData }));
+    if (formData.nutrition) {
+      // Create a deep copy for comparison to avoid reference issues
+      const currentFormValues = JSON.parse(JSON.stringify(form.getValues()));
+      const parentValues = JSON.parse(JSON.stringify(formData.nutrition));
+
+      // Only reset the form if the data from the parent is different
+      // from what's currently in the form, to prevent infinite loops.
+      if (JSON.stringify(currentFormValues) !== JSON.stringify(parentValues)) {
+        form.reset(parentValues);
+      }
+    }
+  }, [formData.nutrition, form]);
+
+  // Watch for form changes and propagate them up to the parent
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      onUpdate({ nutrition: values as NutritionData });
+    });
     return () => subscription.unsubscribe();
   }, [form, onUpdate]);
 
