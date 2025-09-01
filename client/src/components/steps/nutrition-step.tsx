@@ -15,7 +15,7 @@ import { ChevronLeft, ChevronRight, Upload, X, Loader2, Zap, Calculator, CheckCi
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { calculateNutriScore, getNutriScoreColor } from "@/lib/nutri-score";
-import { calculateClaims, getValidClaims } from "@/lib/claims-calculator";
+import { calculateClaims, getValidClaims, PROTEIN_THRESHOLDS, FIBER_THRESHOLDS } from "@/lib/claims-calculator";
 import CustomClaims from "@/components/steps/custom-claims";
 
 const nutritionSchema = z.object({
@@ -58,18 +58,69 @@ const NutritionField = ({ label, unit, value, onChange, servingValue, servingSiz
   </div>
 );
 
-const StandardClaim = ({ claim, label, isAchieved, isChecked, onToggle, children }: { claim: string; label: string; isAchieved: boolean; isChecked: boolean; onToggle: () => void; children?: React.ReactNode; }) => (
-    <div className={`p-4 border-2 rounded-lg transition-all ${!isAchieved ? 'opacity-60 bg-gray-50' : isChecked ? 'bg-green-50 border-green-300' : 'bg-white border-gray-200'} ${isAchieved ? 'cursor-pointer' : 'cursor-not-allowed'}`} onClick={() => isAchieved && onToggle()}>
-        <div className="flex items-start space-x-3">
-            <Checkbox checked={isChecked} disabled={!isAchieved} className="mt-0.5 pointer-events-none" id={`checkbox-${claim}`} />
-            <div className="flex-1 space-y-2">
-                <label htmlFor={`checkbox-${claim}`} className={`font-medium text-sm ${isAchieved ? 'cursor-pointer' : 'cursor-not-allowed'}`}>{label}</label>
-                {!isAchieved && <div className="text-xs text-gray-500">Nutritional values do not meet the criteria for this claim.</div>}
-                {isChecked && children}
-            </div>
+const StandardClaim = ({
+  claim,
+  label,
+  isAchieved,
+  isChecked,
+  onToggle,
+  threshold,
+  currentValue,
+  children,
+}: {
+  claim: string;
+  label: string;
+  isAchieved: boolean;
+  isChecked: boolean;
+  onToggle: () => void;
+  threshold?: number;
+  currentValue?: number;
+  children?: React.ReactNode;
+}) => {
+  const isWarning = isChecked && !isAchieved;
+
+  return (
+    <div
+      className={`p-4 border-2 rounded-lg transition-all cursor-pointer ${
+        isWarning
+          ? "bg-red-50 border-destructive"
+          : isChecked
+          ? "bg-green-50 border-green-300"
+          : "bg-white border-gray-200 hover:bg-gray-50"
+      }`}
+      onClick={onToggle}
+    >
+      <div className="flex items-start space-x-3">
+        <Checkbox
+          checked={isChecked}
+          className="mt-0.5 pointer-events-none"
+          id={`checkbox-${claim}`}
+        />
+        <div className="flex-1 space-y-2">
+          <label htmlFor={`checkbox-${claim}`} className="font-medium text-sm cursor-pointer">
+            {label}
+          </label>
+
+          {/* Always visible status indicator */}
+          <div className="text-xs flex items-center gap-1.5">
+            {isAchieved ? (
+              <CheckCircle className="w-4 h-4 text-green-600" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-orange-500" />
+            )}
+            <span className={isAchieved ? "text-green-800" : "text-orange-800"}>
+              {isAchieved
+                ? "Threshold met"
+                : `Threshold not met (requires ${threshold}g)`}
+            </span>
+          </div>
+
+          {(claim === 'wholegrain' || isChecked) && children}
         </div>
+      </div>
     </div>
-);
+  );
+};
 
 export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLoading = false }: NutritionStepProps) {
   const { toast } = useToast();
@@ -269,10 +320,42 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
         <CardContent className="space-y-4">
           <h4 className="font-medium text-sm text-muted-foreground">Standard Claims</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <StandardClaim claim="sourceOfProtein" label="Source of Protein" isAchieved={thresholds.sourceOfProtein} isChecked={!!currentDeclarations.sourceOfProtein} onToggle={() => toggleStandardClaim('sourceOfProtein')} />
-            <StandardClaim claim="highInProtein" label="High in Protein" isAchieved={thresholds.highInProtein} isChecked={!!currentDeclarations.highInProtein} onToggle={() => toggleStandardClaim('highInProtein')} />
-            <StandardClaim claim="sourceOfFiber" label="Source of Fibre" isAchieved={thresholds.sourceOfFiber} isChecked={!!currentDeclarations.sourceOfFiber} onToggle={() => toggleStandardClaim('sourceOfFiber')} />
-            <StandardClaim claim="highInFiber" label="High in Fibre" isAchieved={thresholds.highInFiber} isChecked={!!currentDeclarations.highInFiber} onToggle={() => toggleStandardClaim('highInFiber')} />
+            <StandardClaim
+              claim="sourceOfProtein"
+              label="Source of Protein"
+              isAchieved={thresholds.sourceOfProtein}
+              isChecked={!!currentDeclarations.sourceOfProtein}
+              onToggle={() => toggleStandardClaim('sourceOfProtein')}
+              threshold={PROTEIN_THRESHOLDS.SOURCE}
+              currentValue={nutrition.protein}
+            />
+            <StandardClaim
+              claim="highInProtein"
+              label="High in Protein"
+              isAchieved={thresholds.highInProtein}
+              isChecked={!!currentDeclarations.highInProtein}
+              onToggle={() => toggleStandardClaim('highInProtein')}
+              threshold={PROTEIN_THRESHOLDS.HIGH}
+              currentValue={nutrition.protein}
+            />
+            <StandardClaim
+              claim="sourceOfFiber"
+              label="Source of Fibre"
+              isAchieved={thresholds.sourceOfFiber}
+              isChecked={!!currentDeclarations.sourceOfFiber}
+              onToggle={() => toggleStandardClaim('sourceOfFiber')}
+              threshold={FIBER_THRESHOLDS.SOURCE}
+              currentValue={nutrition.fiber}
+            />
+            <StandardClaim
+              claim="highInFiber"
+              label="High in Fibre"
+              isAchieved={thresholds.highInFiber}
+              isChecked={!!currentDeclarations.highInFiber}
+              onToggle={() => toggleStandardClaim('highInFiber')}
+              threshold={FIBER_THRESHOLDS.HIGH}
+              currentValue={nutrition.fiber}
+            />
             <div className="md:col-span-2">
               <StandardClaim claim="wholegrain" label="Content of wholegrain" isAchieved={true} isChecked={!!currentDeclarations.wholegrain} onToggle={() => onUpdate({ declarations: { ...currentDeclarations, wholegrain: !currentDeclarations.wholegrain } })}>
                 <>

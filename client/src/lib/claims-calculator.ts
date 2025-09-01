@@ -6,11 +6,15 @@ export interface ClaimsResult {
     canClaimSource: boolean;
     canClaimHigh: boolean;
     bestClaim: string | null;
+    sourceThreshold: number;
+    highThreshold: number;
   };
   fiber: {
     canClaimSource: boolean;
     canClaimHigh: boolean;
     bestClaim: string | null;
+    sourceThreshold: number;
+    highThreshold: number;
   };
   salt: {
     canClaimLow: boolean;
@@ -35,13 +39,13 @@ export interface ClaimsResult {
 }
 
 // Protein claim thresholds (g/100g)
-const PROTEIN_THRESHOLDS = {
+export const PROTEIN_THRESHOLDS = {
   SOURCE: 12,
   HIGH: 20
 } as const;
 
 // Fiber claim thresholds (g/100g)
-const FIBER_THRESHOLDS = {
+export const FIBER_THRESHOLDS = {
   SOURCE: 3,
   HIGH: 6
 } as const;
@@ -123,12 +127,16 @@ export function calculateClaims(nutrition: NutritionValues): ClaimsResult {
     protein: {
       canClaimSource: proteinCanClaimSource,
       canClaimHigh: proteinCanClaimHigh,
-      bestClaim: proteinBestClaim
+      bestClaim: proteinBestClaim,
+      sourceThreshold: PROTEIN_THRESHOLDS.SOURCE,
+      highThreshold: PROTEIN_THRESHOLDS.HIGH
     },
     fiber: {
       canClaimSource: fiberCanClaimSource,
       canClaimHigh: fiberCanClaimHigh,
-      bestClaim: fiberBestClaim
+      bestClaim: fiberBestClaim,
+      sourceThreshold: FIBER_THRESHOLDS.SOURCE,
+      highThreshold: FIBER_THRESHOLDS.HIGH
     },
     salt: {
       canClaimLow: saltCanClaimLow,
