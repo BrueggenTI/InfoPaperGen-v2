@@ -161,7 +161,6 @@ export default function PDFPreviewPage() {
         <DocumentPreview 
           formData={sessionData as ProductInfo} 
           sessionId={sessionId}
-          isPDFMode={true}
         />
       </div>
     </div>

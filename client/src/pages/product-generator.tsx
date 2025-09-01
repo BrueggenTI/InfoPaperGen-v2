@@ -78,7 +78,7 @@ export default function ProductGenerator() {
   });
 
   // Get session data
-  const { data: sessionData } = useQuery({
+  const { data: sessionData } = useQuery<{ sessionData: ProductInfo }>({
     queryKey: ["/api/product-info/sessions", sessionId],
     enabled: !!sessionId,
   });
@@ -137,28 +137,56 @@ export default function ProductGenerator() {
       sourceOfFiber: false,
       highInFiber: false,
       wholegrain: false,
+      isWholegrainPercentageManuallySet: false,
       manualClaims: [],
     };
 
-    // Only update if the value has changed to prevent loops
-    if (currentDeclarations.wholegrainPercentage !== roundedPercentage) {
+    // Only update if the value has changed AND it hasn't been manually set, to prevent loops and overwrites.
+    if (
+      !currentDeclarations.isWholegrainPercentageManuallySet &&
+      currentDeclarations.wholegrainPercentage !== roundedPercentage
+    ) {
       updateFormData({
         declarations: {
           ...currentDeclarations,
           wholegrainPercentage: roundedPercentage,
-        }
+        },
       });
     }
   }, [formData.ingredients, formData.baseProductIngredients]);
 
 
-  const updateFormData = (updates: Partial<ProductInfo>) => {
-    const newData = { ...formData, ...updates };
-    setFormData(newData);
+  // Debounce hook implemented locally to avoid external dependencies.
+  const useDebounce = <T,>(value: T, delay: number): T => {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+    return debouncedValue;
+  };
 
-    if (sessionId) {
-      updateSessionMutation.mutate(newData);
+  const debouncedFormData = useDebounce(formData, 500); // 500ms delay
+
+  useEffect(() => {
+    // This effect watches the debounced form data. When it changes (500ms after
+    // the user stops typing), it triggers the mutation to save to the server.
+    if (sessionId && debouncedFormData) {
+      // We only mutate if there are actual changes to prevent unnecessary updates on mount
+      if (JSON.stringify(debouncedFormData) !== JSON.stringify(sessionData?.sessionData)) {
+         updateSessionMutation.mutate(debouncedFormData);
+      }
     }
+  }, [debouncedFormData, sessionId]);
+
+  const updateFormData = (updates: Partial<ProductInfo>) => {
+    // This function now only updates the local state immediately for a responsive UI.
+    // The useEffect above will handle saving the debounced state to the server.
+    setFormData(prev => ({ ...prev, ...updates }));
   };
 
   const goToStep = (step: number) => {

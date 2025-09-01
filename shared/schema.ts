@@ -78,6 +78,7 @@ export const productInfoSchema = z.object({
   productType: z.string().optional(),
   shelfLifeMonths: z.number().optional(),
   preparationType: z.string().optional(),
+  showCountryOfOriginInPDF: z.boolean().optional(),
   declarations: z.object({
     // Automatic claims (threshold-based)
     sourceOfProtein: z.boolean().optional().default(false),
@@ -86,6 +87,7 @@ export const productInfoSchema = z.object({
     highInFiber: z.boolean().optional().default(false),
     wholegrain: z.boolean().optional().default(false),
     wholegrainPercentage: z.number().optional(),
+    isWholegrainPercentageManuallySet: z.boolean().optional().default(false),
     // Manual claims (user-created)
     manualClaims: z.array(z.object({
       id: z.string(),
