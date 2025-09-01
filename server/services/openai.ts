@@ -415,6 +415,21 @@ export async function extractNutritionFromImage(base64Image: string): Promise<Ex
       salt: nutritionData.salt || 0
     };
 
+    // Data validation: Check if the extraction returned any meaningful data.
+    const isDataEffectivelyEmpty =
+      (completeNutritionData.energy.kcal === 0 && completeNutritionData.energy.kj === 0) &&
+      completeNutritionData.fat === 0 &&
+      completeNutritionData.protein === 0 &&
+      completeNutritionData.carbohydrates === 0;
+
+    if (isDataEffectivelyEmpty) {
+      console.warn("[OPENAI NUTRITION] Extraction resulted in empty or zero-value data. Throwing error.", { result });
+      if ((result as any).error) {
+        throw new Error(`Die KI hat einen Fehler gemeldet: ${(result as any).error}`);
+      }
+      throw new Error("Es konnten keine Nährwertangaben aus dem Bild extrahiert werden. Bitte versuchen Sie es mit einem deutlicheren Bild erneut.");
+    }
+
     console.log("[OPENAI NUTRITION] Successfully processed nutrition data:", completeNutritionData);
     console.log("[OPENAI NUTRITION] Original OpenAI response keys:", Object.keys(result));
     return completeNutritionData;
