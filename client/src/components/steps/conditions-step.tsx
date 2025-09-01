@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -113,6 +113,14 @@ export function ConditionsStep({ formData, onUpdate, onNext, onPrev, isLoading }
   const handleFieldChange = (field: keyof z.infer<typeof conditionsSchema>, value: any) => {
     onUpdate({ [field]: value });
   };
+
+  useEffect(() => {
+    // On mount, if allergy advice is not set, set it to the default.
+    if (!formData.allergyAdvice) {
+      onUpdate({ allergyAdvice: DEFAULT_ALLERGY_ADVICE });
+      form.setValue('allergyAdvice', DEFAULT_ALLERGY_ADVICE);
+    }
+  }, []); // Run only once on mount
 
   return (
     <div className="p-6">

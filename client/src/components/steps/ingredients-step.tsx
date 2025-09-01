@@ -43,9 +43,18 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
-  const [finalRecipeFile, setFinalRecipeFile] = useState<File | null>(null);
-  const [baseRecipeFile, setBaseRecipeFile] = useState<File | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Sync local state with parent form data
+    const newFinalIngredients = (formData.ingredients || []).map(ing => ({ ...ing, isMarkedAsBase: !!ing.isMarkedAsBase, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
+    setFinalProductIngredients(newFinalIngredients);
+    setFinalRecipeText(newFinalIngredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', '));
+
+    const newBaseIngredients = (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
+    setBaseProductIngredients(newBaseIngredients);
+    setBaseRecipeText(newBaseIngredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', '));
+  }, [formData.ingredients, formData.baseProductIngredients]);
 
   const ensureIngredientDefaults = (ing: Partial<Ingredient>): Ingredient => ({
     name: ing.name || '',
@@ -104,13 +113,19 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
       toast({ title: "File too large", description: "Please select a file under 10MB.", variant: "destructive" });
       return;
     }
-    if (uploader === 'final') setFinalRecipeFile(file);
-    else setBaseRecipeFile(file);
+
     const reader = new FileReader();
     reader.onload = (e) => {
-      const base64Data = (e.target?.result as string).split(',')[1];
-      if (uploader === 'final') extractFinalIngredientsMutation({ image: base64Data });
-      else extractBaseIngredientsMutation({ image: base64Data });
+      const dataUrl = e.target?.result as string;
+      const base64Data = dataUrl.split(',')[1];
+
+      if (uploader === 'final') {
+        onUpdate({ finalRecipeImageUrl: dataUrl });
+        extractFinalIngredientsMutation({ image: base64Data });
+      } else {
+        onUpdate({ baseRecipeImageUrl: dataUrl });
+        extractBaseIngredientsMutation({ image: base64Data });
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -138,19 +153,17 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const handleBaseImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => processImageFile(e.target.files?.[0] || null, 'base');
 
   const handleRemoveFinalImage = () => {
-    setFinalRecipeFile(null);
     setFinalRecipeText("");
     setFinalProductIngredients([]);
-    onUpdate({ ingredients: [] });
+    onUpdate({ ingredients: [], finalRecipeImageUrl: undefined });
     if (finalRecipeInputRef.current) finalRecipeInputRef.current.value = "";
     toast({ title: "Image removed" });
   };
 
   const handleRemoveBaseImage = () => {
-    setBaseRecipeFile(null);
     setBaseRecipeText("");
     setBaseProductIngredients([]);
-    onUpdate({ baseProductIngredients: [] });
+    onUpdate({ baseProductIngredients: [], baseRecipeImageUrl: undefined });
     if (baseRecipeInputRef.current) baseRecipeInputRef.current.value = "";
     toast({ title: "Image removed" });
   };
@@ -212,7 +225,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
       <Card>
         <CardHeader><CardTitle className="flex items-center space-x-2"><Camera className="w-5 h-5" /><span>Final Recipe Upload</span></CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {!finalRecipeFile ? (
+          {!formData.finalRecipeImageUrl ? (
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
               <input ref={finalRecipeInputRef} type="file" accept="image/*" onChange={handleFinalImageUpload} className="hidden" />
               <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
@@ -224,8 +237,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
             </div>
           ) : (
             <div className="border-2 border-slate-300 rounded-lg p-4">
-              <img src={URL.createObjectURL(finalRecipeFile)} alt="Final Recipe Preview" className="w-full max-w-md mx-auto rounded-lg shadow-sm mb-4" style={{ aspectRatio: '16 / 9', objectFit: 'contain' }} />
-              <div className="flex items-center justify-between mb-3"><div className="flex items-center space-x-2"><Camera className="w-5 h-5 text-green-600" /><span className="text-sm font-medium text-slate-700">Uploaded: {finalRecipeFile.name}</span></div><Button variant="outline" size="sm" onClick={handleRemoveFinalImage} className="text-red-600 hover:text-red-700 hover:bg-red-50"><X className="w-4 h-4 mr-1" />Remove</Button></div>
+              <img src={formData.finalRecipeImageUrl} alt="Final Recipe Preview" className="w-full max-w-md mx-auto rounded-lg shadow-sm mb-4" style={{ aspectRatio: '16 / 9', objectFit: 'contain' }} />
+              <div className="flex items-center justify-between mb-3"><div className="flex items-center space-x-2"><Camera className="w-5 h-5 text-green-600" /><span className="text-sm font-medium text-slate-700">Image uploaded.</span></div><Button variant="outline" size="sm" onClick={handleRemoveFinalImage} className="text-red-600 hover:text-red-700 hover:bg-red-50"><X className="w-4 h-4 mr-1" />Remove</Button></div>
               <div className="flex items-center space-x-2"><Button variant="outline" size="sm" onClick={() => finalRecipeInputRef.current?.click()} disabled={isExtractingFinal}><Upload className="w-4 h-4 mr-1" />Upload New Image</Button></div>
             </div>
           )}
@@ -256,7 +269,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
       <Card>
         <CardHeader><CardTitle className="flex items-center space-x-2"><Camera className="w-5 h-5" /><span>Base Recipe Upload</span></CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {!baseRecipeFile ? (
+          {!formData.baseRecipeImageUrl ? (
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
               <input ref={baseRecipeInputRef} type="file" accept="image/*" onChange={handleBaseImageUpload} className="hidden" />
               <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
@@ -268,8 +281,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
             </div>
           ) : (
             <div className="border-2 border-slate-300 rounded-lg p-4">
-               <img src={URL.createObjectURL(baseRecipeFile)} alt="Base Recipe Preview" className="w-full max-w-md mx-auto rounded-lg shadow-sm mb-4" style={{ aspectRatio: '16 / 9', objectFit: 'contain' }} />
-               <div className="flex items-center justify-between mb-3"><div className="flex items-center space-x-2"><Camera className="w-5 h-5 text-green-600" /><span className="text-sm font-medium text-slate-700">Uploaded: {baseRecipeFile.name}</span></div><Button variant="outline" size="sm" onClick={handleRemoveBaseImage} className="text-red-600 hover:text-red-700 hover:bg-red-50"><X className="w-4 h-4 mr-1" />Remove</Button></div>
+               <img src={formData.baseRecipeImageUrl} alt="Base Recipe Preview" className="w-full max-w-md mx-auto rounded-lg shadow-sm mb-4" style={{ aspectRatio: '16 / 9', objectFit: 'contain' }} />
+               <div className="flex items-center justify-between mb-3"><div className="flex items-center space-x-2"><Camera className="w-5 h-5 text-green-600" /><span className="text-sm font-medium text-slate-700">Image uploaded.</span></div><Button variant="outline" size="sm" onClick={handleRemoveBaseImage} className="text-red-600 hover:text-red-700 hover:bg-red-50"><X className="w-4 h-4 mr-1" />Remove</Button></div>
                <div className="flex items-center space-x-2"><Button variant="outline" size="sm" onClick={() => baseRecipeInputRef.current?.click()} disabled={isExtractingBase}><Upload className="w-4 h-4 mr-1" />Upload New Image</Button></div>
             </div>
           )}

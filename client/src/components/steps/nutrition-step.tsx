@@ -125,7 +125,6 @@ const StandardClaim = ({
 export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLoading = false }: NutritionStepProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [extractionError, setExtractionError] = useState<string | null>(null);
   
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
@@ -185,9 +184,12 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
       return;
     }
     const reader = new FileReader();
-    reader.onload = (e) => setUploadedImage(e.target?.result as string);
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      onUpdate({ nutritionImageUrl: dataUrl });
+      extractionMutation.mutate(file);
+    };
     reader.readAsDataURL(file);
-    extractionMutation.mutate(file);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => processNutritionImage(event.target.files?.[0] || null);
@@ -211,7 +213,7 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
   };
 
   const removeImage = () => {
-    setUploadedImage(null);
+    onUpdate({ nutritionImageUrl: undefined });
     setExtractionError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -280,7 +282,7 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
             <Button type="button" variant="secondary" size="lg" onClick={handlePasteFromClipboard} disabled={extractionMutation.isPending}>Paste from clipboard</Button>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
           </div>
-          {uploadedImage && <div className="relative inline-block" style={{ aspectRatio: '16/9', width: '200px' }}><img src={uploadedImage} alt="Uploaded nutrition table" className="w-full h-full object-contain border rounded-lg" /><Button type="button" size="sm" variant="destructive" className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0" onClick={removeImage}><X className="w-3 h-3" /></Button></div>}
+          {formData.nutritionImageUrl && <div className="relative inline-block" style={{ aspectRatio: '16/9', width: '200px' }}><img src={formData.nutritionImageUrl} alt="Uploaded nutrition table" className="w-full h-full object-contain border rounded-lg" /><Button type="button" size="sm" variant="destructive" className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0" onClick={removeImage}><X className="w-3 h-3" /></Button></div>}
           <AIExtractionStatus isExtracting={extractionMutation.isPending} error={extractionError} onRetry={retryExtraction} />
         </CardContent>
       </Card>
@@ -386,7 +388,7 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
 
       <div className="flex justify-between pt-6">
         <Button type="button" variant="outline" onClick={onPrev} disabled={isLoading}><ChevronLeft className="w-4 h-4 mr-2" />Back</Button>
-        <Button onClick={() => form.handleSubmit(onSubmit)()} disabled={isLoading || !form.formState.isValid}><ChevronRight className="w-4 h-4 ml-2" />Next</Button>
+        <Button onClick={() => form.handleSubmit(onSubmit)()} disabled={isLoading}><ChevronRight className="w-4 h-4 ml-2" />Next</Button>
       </div>
     </div>
   );
