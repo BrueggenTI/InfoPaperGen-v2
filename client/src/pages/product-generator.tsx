@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ProductInfo } from "@shared/schema";
@@ -217,11 +217,11 @@ export default function ProductGenerator() {
     }
   }, [debouncedFormData, sessionId]);
 
-  const updateFormData = (updates: Partial<ProductInfo>) => {
+  const updateFormData = useCallback((updates: Partial<ProductInfo>) => {
     // This function now only updates the local state immediately for a responsive UI.
     // The useEffect above will handle saving the debounced state to the server.
     setFormData(prev => ({ ...prev, ...updates }));
-  };
+  }, []);
 
   const goToStep = (step: number) => {
     const updatedData = { ...formData, currentStep: step };
