@@ -232,7 +232,20 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
                 <div className="col-span-2 text-center">per serving</div>
                 <div className="col-span-3"></div>
               </div>
-              {/* Nutrition Fields */}
+              <FormField control={form.control} name="energy.kcal" render={({ field }) => (<NutritionField label="Energy" unit="kcal" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.energy?.kcal?.message} />)} />
+              <FormField control={form.control} name="energy.kj" render={({ field }) => (<NutritionField label="" unit="kJ" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.energy?.kj?.message} />)} />
+              <Separator />
+              <FormField control={form.control} name="fat" render={({ field }) => (<NutritionField label="Fat" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.fat?.message} />)} />
+              <FormField control={form.control} name="saturatedFat" render={({ field }) => (<NutritionField label="of which saturates" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.saturatedFat?.message} />)} />
+              <Separator />
+              <FormField control={form.control} name="carbohydrates" render={({ field }) => (<NutritionField label="Carbohydrate" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.carbohydrates?.message} />)} />
+              <FormField control={form.control} name="sugars" render={({ field }) => (<NutritionField label="of which sugars" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.sugars?.message} />)} />
+              <Separator />
+              <FormField control={form.control} name="fiber" render={({ field }) => (<NutritionField label="Fibre" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.fiber?.message} />)} />
+              <Separator />
+              <FormField control={form.control} name="protein" render={({ field }) => (<NutritionField label="Protein" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.protein?.message} />)} />
+              <Separator />
+              <FormField control={form.control} name="salt" render={({ field }) => (<NutritionField label="Salt" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.salt?.message} />)} />
             </form>
           </Form>
         </CardContent>
