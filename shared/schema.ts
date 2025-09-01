@@ -30,8 +30,9 @@ export const productInfoSchema = z.object({
   
   // Images
   productImage: z.string().optional(),
-  ingredientImage: z.string().optional(),
-  nutritionImage: z.string().optional(),
+  finalRecipeImageUrl: z.string().optional(),
+  baseRecipeImageUrl: z.string().optional(),
+  nutritionImageUrl: z.string().optional(),
   
   // Extracted ingredients
   ingredients: z.array(z.object({
