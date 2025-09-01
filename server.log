@@ -1,0 +1,9 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[OPENAI SERVICE] OpenAI API key not found - AI features will be disabled
+[Azure Fix] Temporäres Verzeichnis erfolgreich erstellt: /tmp/xdg-config
+[Azure Fix] Temporäres Verzeichnis erfolgreich erstellt: /tmp/xdg-cache
+[Azure Fix] Temporäres Verzeichnis erfolgreich erstellt: /tmp/chrome-data
+[Azure Fix] Temporäres Verzeichnis erfolgreich erstellt: /tmp/puppeteer-cache

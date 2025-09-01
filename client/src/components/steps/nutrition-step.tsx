@@ -58,6 +58,19 @@ const NutritionField = ({ label, unit, value, onChange, servingValue, servingSiz
   </div>
 );
 
+const StandardClaim = ({ claim, label, isAchieved, isChecked, onToggle, children }: { claim: string; label: string; isAchieved: boolean; isChecked: boolean; onToggle: () => void; children?: React.ReactNode; }) => (
+    <div className={`p-4 border-2 rounded-lg transition-all ${!isAchieved ? 'opacity-60 bg-gray-50' : isChecked ? 'bg-green-50 border-green-300' : 'bg-white border-gray-200'} ${isAchieved ? 'cursor-pointer' : 'cursor-not-allowed'}`} onClick={() => isAchieved && onToggle()}>
+        <div className="flex items-start space-x-3">
+            <Checkbox checked={isChecked} disabled={!isAchieved} className="mt-0.5 pointer-events-none" id={`checkbox-${claim}`} />
+            <div className="flex-1 space-y-2">
+                <label htmlFor={`checkbox-${claim}`} className={`font-medium text-sm ${isAchieved ? 'cursor-pointer' : 'cursor-not-allowed'}`}>{label}</label>
+                {!isAchieved && <div className="text-xs text-gray-500">Nutritional values do not meet the criteria for this claim.</div>}
+                {isChecked && children}
+            </div>
+        </div>
+    </div>
+);
+
 export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLoading = false }: NutritionStepProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -195,8 +208,8 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
     sourceOfFiber: claimsResult.fiber.canClaimSource,
     highInFiber: claimsResult.fiber.canClaimHigh,
   }), [claimsResult]);
-  type StandardClaim = keyof typeof thresholds;
-  const toggleStandardClaim = (claim: StandardClaim) => onUpdate({ declarations: { ...currentDeclarations, [claim]: !currentDeclarations[claim] } });
+  type StandardClaimKey = keyof typeof thresholds;
+  const toggleStandardClaim = (claim: StandardClaimKey) => onUpdate({ declarations: { ...currentDeclarations, [claim]: !currentDeclarations[claim] } });
 
   return (
     <div className="w-full space-y-6" data-testid="nutrition-step">
@@ -256,14 +269,15 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
         <CardContent className="space-y-4">
           <h4 className="font-medium text-sm text-muted-foreground">Standard Claims</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Standard claims */}
-            <div className={`p-4 border-2 rounded-lg transition-all md:col-span-2 cursor-pointer ${currentDeclarations?.wholegrain ? 'bg-amber-50 border-amber-300' : 'bg-white border-gray-200'}`} onClick={() => onUpdate({ declarations: { ...currentDeclarations, wholegrain: !currentDeclarations.wholegrain } })}>
-              <div className="flex items-start space-x-3">
-                <Checkbox checked={!!currentDeclarations?.wholegrain} className="mt-0.5 pointer-events-none" id="checkbox-wholegrain" />
-                <div className="flex-1 space-y-2">
-                  <label htmlFor="checkbox-wholegrain" className="font-medium text-sm cursor-pointer">Content of wholegrain</label>
+            <StandardClaim claim="sourceOfProtein" label="Source of Protein" isAchieved={thresholds.sourceOfProtein} isChecked={!!currentDeclarations.sourceOfProtein} onToggle={() => toggleStandardClaim('sourceOfProtein')} />
+            <StandardClaim claim="highInProtein" label="High in Protein" isAchieved={thresholds.highInProtein} isChecked={!!currentDeclarations.highInProtein} onToggle={() => toggleStandardClaim('highInProtein')} />
+            <StandardClaim claim="sourceOfFiber" label="Source of Fibre" isAchieved={thresholds.sourceOfFiber} isChecked={!!currentDeclarations.sourceOfFiber} onToggle={() => toggleStandardClaim('sourceOfFiber')} />
+            <StandardClaim claim="highInFiber" label="High in Fibre" isAchieved={thresholds.highInFiber} isChecked={!!currentDeclarations.highInFiber} onToggle={() => toggleStandardClaim('highInFiber')} />
+            <div className="md:col-span-2">
+              <StandardClaim claim="wholegrain" label="Content of wholegrain" isAchieved={true} isChecked={!!currentDeclarations.wholegrain} onToggle={() => onUpdate({ declarations: { ...currentDeclarations, wholegrain: !currentDeclarations.wholegrain } })}>
+                <>
                   <div className="text-xs text-gray-500">Auto-calculated from ingredients. Check to activate and manually override the value if needed.</div>
-                  <div className="relative w-24">
+                  <div className="relative w-24 mt-2">
                     <Input type="number" step="0.1" min="0" placeholder="e.g. 45.5" value={currentDeclarations?.wholegrainPercentage || ''}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -279,8 +293,8 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">%</span>
                   </div>
-                </div>
-              </div>
+                </>
+              </StandardClaim>
             </div>
           </div>
           <CustomClaims declarations={currentDeclarations} onUpdate={onUpdate} />
