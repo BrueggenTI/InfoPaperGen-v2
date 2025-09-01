@@ -38,8 +38,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }))
   );
   
-  const [finalRecipeText, setFinalRecipeText] = useState<string>("");
-  const [baseRecipeText, setBaseRecipeText] = useState<string>("");
   const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
@@ -49,11 +47,9 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     // Sync local state with parent form data
     const newFinalIngredients = (formData.ingredients || []).map(ing => ({ ...ing, isMarkedAsBase: !!ing.isMarkedAsBase, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
     setFinalProductIngredients(newFinalIngredients);
-    setFinalRecipeText(newFinalIngredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', '));
 
     const newBaseIngredients = (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
     setBaseProductIngredients(newBaseIngredients);
-    setBaseRecipeText(newBaseIngredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', '));
   }, [formData.ingredients, formData.baseProductIngredients]);
 
   const ensureIngredientDefaults = (ing: Partial<Ingredient>): Ingredient => ({
@@ -73,7 +69,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
         const ingredients = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
         setFinalProductIngredients(ingredients);
         onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
-        setFinalRecipeText(ingredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', '));
         toast({ title: "Final Recipe extracted successfully" });
     },
     onError: (error: any) => toast({ title: "Error extracting Final Recipe", description: error.message, variant: "destructive" }),
@@ -85,7 +80,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
         const ingredients = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
         setBaseProductIngredients(ingredients);
         onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
-        setBaseRecipeText(ingredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', '));
         toast({ title: "Base Recipe extracted successfully" });
     },
     onError: (error: any) => toast({ title: "Error extracting Base Recipe", description: error.message, variant: "destructive" }),
@@ -153,7 +147,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const handleBaseImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => processImageFile(e.target.files?.[0] || null, 'base');
 
   const handleRemoveFinalImage = () => {
-    setFinalRecipeText("");
     setFinalProductIngredients([]);
     onUpdate({ ingredients: [], finalRecipeImageUrl: undefined });
     if (finalRecipeInputRef.current) finalRecipeInputRef.current.value = "";
@@ -161,15 +154,14 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   };
 
   const handleRemoveBaseImage = () => {
-    setBaseRecipeText("");
     setBaseProductIngredients([]);
     onUpdate({ baseProductIngredients: [], baseRecipeImageUrl: undefined });
     if (baseRecipeInputRef.current) baseRecipeInputRef.current.value = "";
     toast({ title: "Image removed" });
   };
 
-  const handleFinalRecipeTextChange = (text: string) => {
-    setFinalRecipeText(text);
+  const handleFinalRecipeTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
     const ingredients = text.split(',').map(item => {
       const trimmed = item.trim();
       const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
@@ -183,8 +175,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
   };
 
-  const handleBaseRecipeTextChange = (text: string) => {
-    setBaseRecipeText(text);
+  const handleBaseRecipeTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
     const ingredients = text.split(',').map(item => {
       const trimmed = item.trim();
       const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
@@ -242,7 +234,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
               <div className="flex items-center space-x-2"><Button variant="outline" size="sm" onClick={() => finalRecipeInputRef.current?.click()} disabled={isExtractingFinal}><Upload className="w-4 h-4 mr-1" />Upload New Image</Button></div>
             </div>
           )}
-          {finalRecipeText && (
+          {(formData.ingredients && formData.ingredients.length > 0) && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Extracted Final Recipe Ingredients (editable):</label>
@@ -251,7 +243,12 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                   <Button variant="outline" size="sm" onClick={() => translateFinalIngredientsMutation({ targetLanguage: 'original' })} disabled={isTranslatingFinal}><Languages className="w-4 h-4 mr-1" />Back to Original</Button>
                 </div>
               </div>
-              <Textarea value={finalRecipeText} onChange={(e) => handleFinalRecipeTextChange(e.target.value)} rows={3} />
+              <Textarea
+                key={formData.ingredients.map(i => i.name).join(',')}
+                defaultValue={formData.ingredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
+                onChange={handleFinalRecipeTextChange}
+                rows={3}
+              />
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mark ingredient as Base Recipe:</label>
                 {finalProductIngredients.filter(ing => ing.name.trim()).map((ingredient, index) => (
@@ -286,7 +283,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                <div className="flex items-center space-x-2"><Button variant="outline" size="sm" onClick={() => baseRecipeInputRef.current?.click()} disabled={isExtractingBase}><Upload className="w-4 h-4 mr-1" />Upload New Image</Button></div>
             </div>
           )}
-           {baseRecipeText && (
+           {(formData.baseProductIngredients && formData.baseProductIngredients.length > 0) && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Extracted Base Recipe Ingredients (editable):</label>
@@ -295,7 +292,12 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                   <Button variant="outline" size="sm" onClick={() => translateBaseIngredientsMutation({ targetLanguage: 'original' })} disabled={isTranslatingBase}><Languages className="w-4 h-4 mr-1" />Back to Original</Button>
                 </div>
               </div>
-              <Textarea value={baseRecipeText} onChange={(e) => handleBaseRecipeTextChange(e.target.value)} rows={4} />
+              <Textarea
+                key={formData.baseProductIngredients.map(i => i.name).join(',')}
+                defaultValue={formData.baseProductIngredients.map(ing => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
+                onChange={handleBaseRecipeTextChange}
+                rows={4}
+              />
             </div>
            )}
         </CardContent>
