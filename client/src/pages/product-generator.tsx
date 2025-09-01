@@ -135,51 +135,49 @@ export default function ProductGenerator() {
     }
   }, [sessionData]);
 
-  // [NEW] Auto-calculate wholegrain content
+  // [ROBUST] Auto-calculate wholegrain content
   useEffect(() => {
-    console.log("[Wholegrain] Calculation effect triggered.");
     const ingredients = formData.ingredients || [];
     const baseIngredients = formData.baseProductIngredients || [];
 
     let totalWholegrainPercentage = 0;
 
-    console.log(`[Wholegrain] Found ${ingredients.length} ingredients and ${baseIngredients.length} base ingredients.`);
-
     ingredients.forEach(ing => {
-      if (ing.isWholegrain && ing.percentage) {
-        if (!ing.isMarkedAsBase) {
-          totalWholegrainPercentage += ing.percentage;
-        }
+      if (ing.isWholegrain && !ing.isMarkedAsBase) {
+        // Ensure percentage is a number, default to 0 if not
+        totalWholegrainPercentage += Number(ing.percentage) || 0;
       }
     });
 
     const markedIngredient = ingredients.find(ing => ing.isMarkedAsBase);
-    if (markedIngredient && markedIngredient.percentage) {
-        console.log(`[Wholegrain] Found marked base ingredient with ${markedIngredient.percentage}%.`);
+    const markedIngredientPercentage = Number(markedIngredient?.percentage) || 0;
+
+    if (markedIngredientPercentage > 0) {
         baseIngredients.forEach(ing => {
-            if (ing.isWholegrain && ing.percentage) {
-                const contribution = (ing.percentage * markedIngredient.percentage) / 100;
-                console.log(`[Wholegrain] Base ingredient ${ing.name} contributes ${contribution}%.`);
+            if (ing.isWholegrain) {
+                const basePercentage = Number(ing.percentage) || 0;
+                const contribution = (basePercentage * markedIngredientPercentage) / 100;
                 totalWholegrainPercentage += contribution;
             }
         });
+    }
+
+    // Final check to ensure we have a valid number
+    if (isNaN(totalWholegrainPercentage)) {
+        console.error("[Wholegrain] Calculation resulted in NaN. Aborting update.");
+        return;
     }
 
     const roundedPercentage = Math.round(totalWholegrainPercentage * 10) / 10;
     const currentDeclarations = formData.declarations;
 
     if (!currentDeclarations) {
-        console.log("[Wholegrain] Declarations object is missing.");
         return;
     }
 
-    console.log(`[Wholegrain] Calculated: ${roundedPercentage}%. Current: ${currentDeclarations.wholegrainPercentage}%. Manually set: ${currentDeclarations.isWholegrainPercentageManuallySet}`);
+    const hasChanged = currentDeclarations.wholegrainPercentage !== roundedPercentage;
 
-    if (
-      !currentDeclarations.isWholegrainPercentageManuallySet &&
-      currentDeclarations.wholegrainPercentage !== roundedPercentage
-    ) {
-      console.log(`[Wholegrain] Updating wholegrain percentage to ${roundedPercentage}%`);
+    if (!currentDeclarations.isWholegrainPercentageManuallySet && hasChanged) {
       updateFormData({
         declarations: {
           ...currentDeclarations,
