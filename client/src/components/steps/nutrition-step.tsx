@@ -88,7 +88,11 @@ const StandardClaim = ({
           ? "bg-green-50 border-green-300"
           : "bg-white border-gray-200 hover:bg-gray-50"
       }`}
-      onClick={onToggle}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggle();
+      }}
     >
       <div className="flex items-start space-x-3">
         <Checkbox
