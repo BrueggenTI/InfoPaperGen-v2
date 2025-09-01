@@ -94,12 +94,12 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
           fruitVegLegumeContent: round(nutritionData.fruitVegLegumeContent),
         };
 
-        // Explicitly update the parent component's state FIRST.
-        onUpdate({ nutrition: processedData });
-
-        // Then, reset the local form to be in sync.
-        // The useEffect that syncs from parent to child will also help.
+        // Reset the local form to be in sync FIRST.
         form.reset(processedData);
+
+        // Then, update the parent component's state.
+        // The useEffect that syncs from parent to child will prevent a loop.
+        onUpdate({ nutrition: processedData });
 
         setExtractionError(null);
         toast({ title: "Successfully extracted", description: "Nutrition values recognized." });
