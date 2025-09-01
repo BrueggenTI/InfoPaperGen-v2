@@ -3,6 +3,7 @@ import { calculateNutriScore, getNutriScoreColor } from './nutri-score-server';
 import { calculateClaims } from './claims-calculator-server';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * HTML-Template-Generator für PDF-Erstellung
@@ -11,9 +12,28 @@ import path from 'path';
  * das exakt der Live-Vorschau entspricht und für PDF-Generierung optimiert ist.
  */
 
-// Read the shared CSS file once when the module is loaded
-const sharedCssPath = path.join(process.cwd(), 'client', 'src', 'styles', 'pdf-preview.css');
-const sharedCss = fs.readFileSync(sharedCssPath, 'utf-8');
+// Use import.meta.url to create a path relative to the current file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// In production, this will resolve to /app/dist/pdf-preview.css
+// In development, it needs to find the source file.
+let sharedCss: string;
+try {
+  // Path for production (inside dist)
+  const prodPath = path.join(__dirname, 'pdf-preview.css');
+  sharedCss = fs.readFileSync(prodPath, 'utf-8');
+} catch (error) {
+  // Fallback path for development (accessing source)
+  const devPath = path.join(__dirname, '..', '..', 'client', 'src', 'styles', 'pdf-preview.css');
+  try {
+    sharedCss = fs.readFileSync(devPath, 'utf-8');
+  } catch (devError) {
+    console.error("Failed to load CSS in both production and development environments.");
+    // Assign a default empty style to prevent crashes, or re-throw
+    sharedCss = '/* CSS could not be loaded */';
+  }
+}
 
 
 export function generatePDFTemplate(formData: ProductInfo): string {
