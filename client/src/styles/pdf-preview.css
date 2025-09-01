@@ -1,0 +1,209 @@
+/* Extracted and adapted from server/lib/pdf-template-generator.ts */
+
+.pdf-preview-container * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.pdf-preview-container {
+    font-family: Arial, sans-serif;
+    line-height: 1.2;
+    color: #333;
+    background: white;
+    padding: 8mm;
+    font-size: 10px;
+}
+
+.pdf-preview-container h2,
+.pdf-preview-container h3 {
+    margin-bottom: 4px !important;
+}
+
+.pdf-preview-container p {
+    margin-top: 0 !important;
+    line-height: 1.5;
+}
+
+.pdf-preview-container .header {
+    position: relative;
+    background: #661c31;
+    padding: 15px 12px;
+    margin-bottom: 15px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.pdf-preview-container .header h1 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.pdf-preview-container .product-number {
+    font-weight: normal;
+    font-size: 10px;
+}
+
+.pdf-preview-container .page-number {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.pdf-preview-container .product-name-section {
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 8px;
+}
+
+.pdf-preview-container .product-name-label {
+    font-size: 10px;
+    color: #666;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.pdf-preview-container .product-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #661c31;
+}
+
+.pdf-preview-container .section {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.pdf-preview-container .section-header {
+    padding: 5px 8px;
+    border-bottom: 1px solid #ddd;
+    background: #f5f5f5;
+}
+
+.pdf-preview-container .section-title {
+    font-weight: bold;
+    font-size: 11px;
+    color: #ff4143; /* User requested color */
+    margin: 0;
+}
+
+.pdf-preview-container .section-content {
+    padding: 8px;
+}
+
+.pdf-preview-container .ingredients-content {
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+.pdf-preview-container .ingredients-note {
+    font-size: 8px;
+    color: #666;
+    font-style: italic;
+    margin-top: 5px;
+    padding-top: 3px;
+    border-top: 1px solid #ddd;
+}
+
+.pdf-preview-container .warning-box {
+    border: 1px solid #ddd;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.pdf-preview-container .warning-text {
+    font-size: 9px;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.pdf-preview-container table {
+    width: 100%;
+    font-size: 9px;
+    border-collapse: collapse;
+}
+
+.pdf-preview-container th {
+    padding: 5px;
+    text-align: left;
+    font-weight: bold;
+    background: #661c31;
+    color: white;
+    font-size: 9px;
+}
+
+.pdf-preview-container td {
+    padding: 4px 5px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.pdf-preview-container .base-ingredient {
+    padding-left: 15px;
+    font-style: italic;
+    color: #666;
+}
+
+.pdf-preview-container .grid-two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pdf-preview-container .claim-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
+    margin-bottom: 8px;
+}
+.pdf-preview-container .claim-value {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pdf-preview-container .footer-section {
+    margin-top: 15px;
+    background: #661c31;
+    padding: 8px;
+    color: white;
+}
+
+.pdf-preview-container .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.pdf-preview-container .footer-label {
+    font-weight: bold;
+}
+
+.pdf-preview-container .footer-value {
+    margin-left: 5px;
+}
+
+.pdf-preview-container .disclaimer {
+    font-size: 9px;
+    color: #666;
+    font-style: italic;
+    line-height: 1.3;
+    margin-top: 15px;
+    text-align: center;
+}

@@ -34,6 +34,7 @@ export default function ReviewStep({
       sourceOfFiber: false,
       highInFiber: false,
       wholegrain: false,
+      isWholegrainPercentageManuallySet: false,
       manualClaims: [],
     };
     onUpdate({
@@ -110,6 +111,7 @@ export default function ReviewStep({
                     sourceOfFiber: false,
                     highInFiber: false,
                     wholegrain: false,
+                    isWholegrainPercentageManuallySet: false,
                     manualClaims: [],
                   };
                   const manualClaims = [...(currentDeclarations.manualClaims || [])];

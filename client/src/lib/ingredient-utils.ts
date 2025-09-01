@@ -29,14 +29,24 @@ export const generateIngredientsTable = (
     return [];
   }
 
-  finalIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
-  baseIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+  const markedIngredientPercentage = getMarkedIngredientPercentage(finalIngredients);
 
-  const markedIngredientPercentage = getMarkedIngredientPercentage(formData.ingredients);
+  const finalTable: Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean }> = [];
+
+  // Sort final ingredients by percentage
+  finalIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+
+  // Sort base ingredients based on their contribution to the whole product
+  const sortedBaseIngredients = baseIngredients
+    .map(ing => ({
+      ...ing,
+      wholeProductPercentage: calculateWholeProductPercentage(ing.percentage || 0, markedIngredientPercentage)
+    }))
+    .sort((a, b) => b.wholeProductPercentage - a.wholeProductPercentage);
 
   finalIngredients.forEach(ing => {
     if (ing.name.trim()) {
-      tableIngredients.push({
+      finalTable.push({
         name: ing.name,
         percentage: ing.percentage || 0,
         origin: ing.origin || "",
@@ -45,14 +55,11 @@ export const generateIngredientsTable = (
       });
 
       if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
-        baseIngredients.forEach(baseIng => {
+        sortedBaseIngredients.forEach(baseIng => {
           if (baseIng.name.trim()) {
-            const wholeProductPercentage = baseIng.percentage
-              ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
-              : 0;
-            tableIngredients.push({
+            finalTable.push({
               name: baseIng.name,
-              percentage: wholeProductPercentage,
+              percentage: baseIng.wholeProductPercentage,
               origin: baseIng.origin || "",
               isFinalProduct: false,
               isWholegrain: baseIng.isWholegrain || false,
@@ -63,7 +70,7 @@ export const generateIngredientsTable = (
     }
   });
 
-  return tableIngredients;
+  return finalTable;
 };
 
 export const formatCombinedIngredients = (
@@ -77,10 +84,18 @@ export const formatCombinedIngredients = (
   }
 
   finalIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
-  baseIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+
+  const markedIngredientPercentage = getMarkedIngredientPercentage(finalIngredients);
 
   const baseFormatted = baseIngredients
     .filter(ing => ing.name.trim())
+    .map(ing => ({
+      ...ing,
+      // Note: Here we sort by the original percentage within the base recipe,
+      // as the final contribution isn't shown in this string format.
+      // The visual requirement for this string is just sorted base ingredients.
+    }))
+    .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))
     .map(ing => {
       const percentage = ing.percentage ? ` ${ing.percentage.toFixed(1)}%*` : '';
       return `${ing.name}${percentage}`;

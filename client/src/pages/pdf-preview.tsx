@@ -63,7 +63,7 @@ export default function PDFPreview() {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
       `}</style>
       
-      <DocumentPreview formData={formData as ProductInfo} sessionId={sessionId} isPDFMode={true} />
+      <DocumentPreview formData={formData as ProductInfo} sessionId={sessionId} />
     </div>
   );
 }

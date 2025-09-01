@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X, FileImage } from "lucide-react";
+import { Upload, X, FileImage, ClipboardPaste } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -25,6 +27,8 @@ export default function FileUpload({
   className = "",
   disabled = false,
 }: FileUploadProps) {
+  const { toast } = useToast();
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       onFileSelect(acceptedFiles[0]);
@@ -38,6 +42,34 @@ export default function FileUpload({
     multiple: false,
     disabled,
   });
+
+  const handlePasteFromClipboard = async () => {
+    if (disabled) return;
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      for (const item of clipboardItems) {
+        const imageType = item.types.find(type => type.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], "pasted-image.png", { type: imageType });
+          if (file.size > maxSize) {
+            toast({
+              title: "Image too large",
+              description: `The pasted image is larger than the maximum size of ${(maxSize / 1024 / 1024).toFixed(0)}MB.`,
+              variant: "destructive",
+            });
+            return;
+          }
+          onFileSelect(file);
+          return;
+        }
+      }
+      toast({ title: "No image found", description: "No image was found in your clipboard." });
+    } catch (error) {
+      console.error("Failed to read from clipboard:", error);
+      toast({ title: "Paste failed", description: "Could not read image from clipboard. You may need to grant permission in your browser.", variant: "destructive" });
+    }
+  };
 
   return (
     <div className={className}>
@@ -56,7 +88,8 @@ export default function FileUpload({
             {onFileRemove && (
               <button
                 onClick={onFileRemove}
-                className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                disabled={disabled}
+                className="p-1 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -64,20 +97,32 @@ export default function FileUpload({
           </div>
         </div>
       ) : (
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-            isDragActive
-              ? 'border-primary bg-primary/5'
-              : 'border-slate-300 hover:border-primary/40'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <input {...getInputProps()} />
-          <div className="mx-auto w-12 h-12 mb-4">
-            <Upload className="w-full h-full text-slate-400" />
+        <div className="space-y-3">
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+              isDragActive
+                ? 'border-primary bg-primary/5'
+                : 'border-slate-300 hover:border-primary/40'
+            } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <input {...getInputProps()} />
+            <div className="mx-auto w-12 h-12 mb-4 text-slate-400">
+              <Upload className="w-full h-full" />
+            </div>
+            <p className="font-medium text-slate-600 mb-1">{title}</p>
+            <p className="text-sm text-slate-500">{description}</p>
           </div>
-          <p className="text-slate-600 mb-2">{title}</p>
-          <p className="text-sm text-slate-500">{description}</p>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handlePasteFromClipboard}
+            disabled={disabled}
+          >
+            <ClipboardPaste className="w-4 h-4 mr-2" />
+            Paste from clipboard
+          </Button>
         </div>
       )}
     </div>
