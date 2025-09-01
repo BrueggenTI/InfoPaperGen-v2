@@ -11,7 +11,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
 
-// This interface needs to be kept in sync with the Zod schema in `shared/schema.ts`
 interface Ingredient {
   name: string;
   originalName?: string;
@@ -32,7 +31,6 @@ interface IngredientsStepProps {
 }
 
 export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, isLoading = false }: IngredientsStepProps) {
-  // State initialization with defaults to satisfy the stricter local Ingredient type
   const [finalProductIngredients, setFinalProductIngredients] = useState<Ingredient[]>(
     (formData.ingredients || []).map(ing => ({ ...ing, isMarkedAsBase: !!ing.isMarkedAsBase, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }))
   );
@@ -42,6 +40,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   
   const [finalRecipeText, setFinalRecipeText] = useState<string>("");
   const [baseRecipeText, setBaseRecipeText] = useState<string>("");
+  const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
   const [finalRecipeFile, setFinalRecipeFile] = useState<File | null>(null);
@@ -138,10 +137,59 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const handleFinalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => processImageFile(e.target.files?.[0] || null, 'final');
   const handleBaseImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => processImageFile(e.target.files?.[0] || null, 'base');
 
-  // ... (Remove image and text change handlers remain the same) ...
+  const handleRemoveFinalImage = () => {
+    setFinalRecipeFile(null);
+    setFinalRecipeText("");
+    setFinalProductIngredients([]);
+    onUpdate({ ingredients: [] });
+    if (finalRecipeInputRef.current) finalRecipeInputRef.current.value = "";
+    toast({ title: "Image removed" });
+  };
+
+  const handleRemoveBaseImage = () => {
+    setBaseRecipeFile(null);
+    setBaseRecipeText("");
+    setBaseProductIngredients([]);
+    onUpdate({ baseProductIngredients: [] });
+    if (baseRecipeInputRef.current) baseRecipeInputRef.current.value = "";
+    toast({ title: "Image removed" });
+  };
+
+  const handleFinalRecipeTextChange = (text: string) => {
+    setFinalRecipeText(text);
+    const ingredients = text.split(',').map(item => {
+      const trimmed = item.trim();
+      const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
+      const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
+      return {
+        name, originalName: name, percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
+        origin: "", isMarkedAsBase: false, isWholegrain: false, language: 'original' as const
+      };
+    }).filter(ing => ing.name);
+    setFinalProductIngredients(ingredients);
+    onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
+  };
+
+  const handleBaseRecipeTextChange = (text: string) => {
+    setBaseRecipeText(text);
+    const ingredients = text.split(',').map(item => {
+      const trimmed = item.trim();
+      const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
+      const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
+      return {
+        name, originalName: name, percentage: percentageMatch ? Math.round(parseFloat(percentageMatch[1]) * 10) / 10 : undefined,
+        origin: "", isMarkedAsBase: false, isWholegrain: false, language: 'original' as const
+      };
+    }).filter(ing => ing.name);
+    setBaseProductIngredients(ingredients);
+    onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
+  };
 
   const toggleIngredientAsBase = (ingredientName: string) => {
-    const updatedIngredients = finalProductIngredients.map(ing => ({ ...ing, isMarkedAsBase: ing.name === ingredientName ? !ing.isMarkedAsBase : false }));
+    const updatedIngredients = finalProductIngredients.map(ing => ({
+      ...ing,
+      isMarkedAsBase: ing.name === ingredientName ? !ing.isMarkedAsBase : false,
+    }));
     setFinalProductIngredients(updatedIngredients);
     onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
   };
@@ -177,7 +225,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
           ) : (
             <div className="border-2 border-slate-300 rounded-lg p-4">
               <img src={URL.createObjectURL(finalRecipeFile)} alt="Final Recipe Preview" className="w-full max-w-md mx-auto rounded-lg shadow-sm mb-4" style={{ aspectRatio: '16 / 9', objectFit: 'contain' }} />
-              {/* ... Buttons to remove/replace image ... */}
+              <div className="flex items-center justify-between mb-3"><div className="flex items-center space-x-2"><Camera className="w-5 h-5 text-green-600" /><span className="text-sm font-medium text-slate-700">Uploaded: {finalRecipeFile.name}</span></div><Button variant="outline" size="sm" onClick={handleRemoveFinalImage} className="text-red-600 hover:text-red-700 hover:bg-red-50"><X className="w-4 h-4 mr-1" />Remove</Button></div>
+              <div className="flex items-center space-x-2"><Button variant="outline" size="sm" onClick={() => finalRecipeInputRef.current?.click()} disabled={isExtractingFinal}><Upload className="w-4 h-4 mr-1" />Upload New Image</Button></div>
             </div>
           )}
           {finalRecipeText && (
@@ -189,7 +238,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                   <Button variant="outline" size="sm" onClick={() => translateFinalIngredientsMutation({ targetLanguage: 'original' })} disabled={isTranslatingFinal}><Languages className="w-4 h-4 mr-1" />Back to Original</Button>
                 </div>
               </div>
-              <Textarea value={finalRecipeText} onChange={(e) => setFinalRecipeText(e.target.value)} rows={3} />
+              <Textarea value={finalRecipeText} onChange={(e) => handleFinalRecipeTextChange(e.target.value)} rows={3} />
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mark ingredient as Base Recipe:</label>
                 {finalProductIngredients.filter(ing => ing.name.trim()).map((ingredient, index) => (
@@ -204,7 +253,105 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
         </CardContent>
       </Card>
 
-      {/* ... (Similar structure for Base Recipe Upload) ... */}
+      <Card>
+        <CardHeader><CardTitle className="flex items-center space-x-2"><Camera className="w-5 h-5" /><span>Base Recipe Upload</span></CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          {!baseRecipeFile ? (
+            <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+              <input ref={baseRecipeInputRef} type="file" accept="image/*" onChange={handleBaseImageUpload} className="hidden" />
+              <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm text-slate-600 mb-2">Click to upload or paste an image</p>
+              <div className="flex justify-center gap-2">
+                <Button type="button" variant="outline" onClick={() => baseRecipeInputRef.current?.click()} disabled={isExtractingBase}>Upload Image</Button>
+                <Button type="button" variant="secondary" onClick={() => handlePasteFromClipboard('base')} disabled={isExtractingBase}>Paste from clipboard</Button>
+              </div>
+            </div>
+          ) : (
+            <div className="border-2 border-slate-300 rounded-lg p-4">
+               <img src={URL.createObjectURL(baseRecipeFile)} alt="Base Recipe Preview" className="w-full max-w-md mx-auto rounded-lg shadow-sm mb-4" style={{ aspectRatio: '16 / 9', objectFit: 'contain' }} />
+               <div className="flex items-center justify-between mb-3"><div className="flex items-center space-x-2"><Camera className="w-5 h-5 text-green-600" /><span className="text-sm font-medium text-slate-700">Uploaded: {baseRecipeFile.name}</span></div><Button variant="outline" size="sm" onClick={handleRemoveBaseImage} className="text-red-600 hover:text-red-700 hover:bg-red-50"><X className="w-4 h-4 mr-1" />Remove</Button></div>
+               <div className="flex items-center space-x-2"><Button variant="outline" size="sm" onClick={() => baseRecipeInputRef.current?.click()} disabled={isExtractingBase}><Upload className="w-4 h-4 mr-1" />Upload New Image</Button></div>
+            </div>
+          )}
+           {baseRecipeText && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Extracted Base Recipe Ingredients (editable):</label>
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm" onClick={() => translateBaseIngredientsMutation({ targetLanguage: 'English' })} disabled={isTranslatingBase}><Languages className="w-4 h-4 mr-1" />Translate to English</Button>
+                  <Button variant="outline" size="sm" onClick={() => translateBaseIngredientsMutation({ targetLanguage: 'original' })} disabled={isTranslatingBase}><Languages className="w-4 h-4 mr-1" />Back to Original</Button>
+                </div>
+              </div>
+              <Textarea value={baseRecipeText} onChange={(e) => handleBaseRecipeTextChange(e.target.value)} rows={4} />
+            </div>
+           )}
+        </CardContent>
+      </Card>
+
+      {(finalProductIngredients.some(ing => ing.name.trim()) || baseProductIngredients.some(ing => ing.name.trim())) && (
+        <Card>
+          <CardHeader><CardTitle>Combined Ingredients Preview</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-sm text-slate-600 mb-2">Final Recipe ingredients (bold) with Base Recipe (in square brackets):</p>
+            <div className="bg-slate-50 p-4 rounded-lg">
+              <div className="text-sm text-slate-700" dangerouslySetInnerHTML={{ __html: formatCombinedIngredients(formData) }} />
+              <p className="text-xs text-slate-500 mt-2">* percentage in ingredient</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {(finalProductIngredients.some(ing => ing.name.trim()) || baseProductIngredients.some(ing => ing.name.trim())) && (
+        <Card>
+          <CardHeader><CardTitle>Ingredients Table</CardTitle><p className="text-sm text-slate-600">Base Product ingredients are calculated based on the marked Final Recipe ingredient.</p></CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-slate-300">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="border border-slate-300 p-2 text-left">Ingredients</th>
+                    <th className="border border-slate-300 p-2 text-left">Percentage content per whole product</th>
+                    <th className="border border-slate-300 p-2 text-left">Country of Origin</th>
+                    <th className="border border-slate-300 p-2 text-center">Is Wholegrain?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {generateIngredientsTable(formData).map((ingredient, index) => (
+                    <tr key={index}>
+                      <td className="border border-slate-300 p-2">{ingredient.isFinalProduct ? <strong>{ingredient.name}</strong> : <span style={{ paddingLeft: '15px' }}>{ingredient.name}</span>}</td>
+                      <td className="border border-slate-300 p-2">{ingredient.percentage}%</td>
+                      <td className="border border-slate-300 p-2"><Input value={ingredient.origin || ''} onChange={(e) => {
+                          const newOrigin = e.target.value;
+                          if (ingredient.isFinalProduct) {
+                              const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
+                              setFinalProductIngredients(updatedFinalIngredients);
+                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                          } else {
+                              const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
+                              setBaseProductIngredients(updatedBaseIngredients);
+                              onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
+                          }
+                      }} placeholder="Enter country" className="border-0 p-0 h-auto" /></td>
+                      <td className="border border-slate-300 p-2 text-center"><Checkbox checked={ingredient.isWholegrain} onCheckedChange={(checked) => {
+                          const isChecked = !!checked;
+                          if (ingredient.isFinalProduct) {
+                              const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
+                              setFinalProductIngredients(updatedFinalIngredients);
+                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                          } else {
+                              const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
+                              setBaseProductIngredients(updatedBaseIngredients);
+                              onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
+                          }
+                      }} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrev} disabled={isLoading}><ChevronLeft className="w-4 h-4 mr-2" />Previous</Button>

@@ -94,8 +94,6 @@ export const productInfoSchema = z.object({
       createdAt: z.string().optional(),
     })).optional().default([]),
   }).optional(),
-  // New field for controlling PDF column visibility
-  showCountryOfOriginInPDF: z.boolean().optional(),
 });
 
 export const insertProductInfoSessionSchema = createInsertSchema(productInfoSessions).pick({

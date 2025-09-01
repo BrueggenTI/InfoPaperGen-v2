@@ -12,7 +12,6 @@ import path from 'path';
  */
 
 export function generatePDFTemplate(formData: ProductInfo): string {
-  const { showCountryOfOriginInPDF = true } = formData;
   const servingSize = parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40');
 
   // Function to get base64 image from file system
@@ -193,16 +192,16 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
     // Add only active automatic claims based on user selection
     if (formData.declarations?.sourceOfProtein) {
-        claimsToShow.push({ label: "Source of protein", claim: "&#10003;" });
+        claimsToShow.push({ label: "Source of protein", claim: "✓" });
     }
     if (formData.declarations?.highInProtein) {
-        claimsToShow.push({ label: "High protein", claim: "&#10003;" });
+        claimsToShow.push({ label: "High protein", claim: "✓" });
     }
     if (formData.declarations?.sourceOfFiber) {
-        claimsToShow.push({ label: "Source of fibre", claim: "&#10003;" });
+        claimsToShow.push({ label: "Source of fibre", claim: "✓" });
     }
     if (formData.declarations?.highInFiber) {
-        claimsToShow.push({ label: "High fibre", claim: "&#10003;" });
+        claimsToShow.push({ label: "High fibre", claim: "✓" });
     }
 
     // Wholegrain Declaration
@@ -215,7 +214,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       formData.declarations.manualClaims
         .filter(claim => claim.isActive && claim.text.trim() !== "")
         .forEach(claim => {
-          claimsToShow.push({ label: claim.text, claim: "&#10003;" });
+          claimsToShow.push({ label: claim.text, claim: "✓" });
         });
     }
 
@@ -394,7 +393,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
         .section-title {
             font-weight: bold;
             font-size: 11px;
-            color: #ff4143;
+            color: #333;
             margin: 0;
         }
 
@@ -724,7 +723,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                         <tr>
                             <th>Ingredients</th>
                             <th>Percentage content per whole product</th>
-                            ${showCountryOfOriginInPDF ? `<th>Country of Origin</th>` : ''}
+                            <th>Country of Origin</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -737,7 +736,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
                                 }
                             </td>
                             <td>${ingredient.percentage}%</td>
-                            ${showCountryOfOriginInPDF ? `<td>${ingredient.origin || "-"}</td>` : ''}
+                            <td>${ingredient.origin || "-"}</td>
                         </tr>
                         `).join('')}
                     </tbody>
