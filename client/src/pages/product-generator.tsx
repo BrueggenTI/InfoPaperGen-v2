@@ -135,6 +135,12 @@ export default function ProductGenerator() {
     }
   }, [sessionData]);
 
+  const updateFormData = useCallback((updates: Partial<ProductInfo>) => {
+    // This function now only updates the local state immediately for a responsive UI.
+    // The useEffect below will handle saving the debounced state to the server.
+    setFormData(prev => ({ ...prev, ...updates }));
+  }, []);
+
   // [ROBUST] Auto-calculate wholegrain content
   useEffect(() => {
     const ingredients = formData.ingredients || [];
@@ -214,12 +220,6 @@ export default function ProductGenerator() {
       }
     }
   }, [debouncedFormData, sessionId]);
-
-  const updateFormData = useCallback((updates: Partial<ProductInfo>) => {
-    // This function now only updates the local state immediately for a responsive UI.
-    // The useEffect above will handle saving the debounced state to the server.
-    setFormData(prev => ({ ...prev, ...updates }));
-  }, []);
 
   const goToStep = (step: number) => {
     const updatedData = { ...formData, currentStep: step };
