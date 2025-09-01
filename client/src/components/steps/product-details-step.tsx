@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { handleImagePaste } from "@/lib/image-upload-utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -55,7 +54,8 @@ export default function ProductDetailsStep({
     onUpdate({ [field]: value });
   };
 
-  const processProductImage = (file: File | null) => {
+  const handleProductImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
@@ -77,36 +77,6 @@ export default function ProductDetailsStep({
       });
     };
     reader.readAsDataURL(file);
-  };
-
-  const handlePasteFromClipboard = async () => {
-    try {
-      const clipboardItems = await navigator.clipboard.read();
-      for (const item of clipboardItems) {
-        const imageType = item.types.find(type => type.startsWith('image/'));
-        if (imageType) {
-          const blob = await item.getType(imageType);
-          const file = new File([blob], "pasted-image.png", { type: imageType });
-          processProductImage(file);
-          return;
-        }
-      }
-      toast({
-        title: "No image found",
-        description: "No image was found in your clipboard.",
-      });
-    } catch (error) {
-      console.error("Failed to read from clipboard:", error);
-      toast({
-        title: "Paste failed",
-        description: "Could not read from clipboard. Your browser might not support this, or you may need to grant permission.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleProductImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    processProductImage(event.target.files?.[0] || null);
   };
 
   const removeProductImage = () => {
@@ -222,14 +192,7 @@ export default function ProductDetailsStep({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div
-                className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer"
-                onClick={() => productImageInputRef.current?.click()}
-                onPaste={(e) => handleImagePaste(e, processProductImage)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') productImageInputRef.current?.click()}}
-              >
+              <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
                 <input
                   ref={productImageInputRef}
                   type="file"
@@ -239,36 +202,29 @@ export default function ProductDetailsStep({
                 />
                 <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                 <p className="text-sm text-slate-600 mb-2">
-                  Click to upload or paste an image
+                  Click here to upload a product image
                 </p>
-                <div className="flex justify-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isLoading}
-                    data-testid="button-upload-product-image"
-                  >
-                    Upload Image
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handlePasteFromClipboard}
-                    disabled={isLoading}
-                    data-testid="button-paste-product-image"
-                  >
-                    Paste from clipboard
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    productImageInputRef.current?.click();
+                  }}
+                  disabled={isLoading}
+                  data-testid="button-upload-product-image"
+                >
+                  Upload Product Image
+                </Button>
               </div>
 
               {formData.productImage && (
-                <div className="relative mt-4">
+                <div className="relative">
                   <img
                     src={formData.productImage}
                     alt="Product"
                     className="w-full max-w-md mx-auto rounded-lg shadow-sm"
-                    style={{ aspectRatio: '16 / 9', objectFit: 'contain' }}
                   />
                   <Button
                     type="button"
