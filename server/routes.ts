@@ -297,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Ensure consistent response format across all nutrition endpoints
-      res.json({ nutrition: extractedNutrition });
+      res.json(extractedNutrition);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       DebugLogger.error("NUTRITION_EXTRACTION", "Processing Failed", { 
@@ -403,8 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[${operationId}] Sending response with nutrition data:`, { nutrition: extractedNutrition });
 
       // Make sure response format matches frontend expectations
-      const response = { nutrition: extractedNutrition };
-      res.json(response);
+      res.json(extractedNutrition);
 
       console.log(`[${operationId}] Response sent successfully`);
     } catch (error) {
