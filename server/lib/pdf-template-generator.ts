@@ -291,7 +291,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
       .page-break { page-break-before: always; }
       .avoid-break { page-break-inside: avoid; }
       @media print {
-        body { margin: 0; padding: 5mm; }
+        body { margin: 0; padding: 2mm; }
         .page-break { page-break-before: always; }
         .avoid-break { page-break-inside: avoid; }
       }
