@@ -1,11 +1,17 @@
 import { ProductInfo } from "@shared/schema";
 
+interface SubIngredient {
+  name: string;
+  percentage: number;
+}
+
 interface Ingredient {
   name: string;
   percentage?: number | null;
   origin?: string;
   isMarkedAsBase?: boolean;
   isWholegrain?: boolean;
+  subIngredients?: SubIngredient[];
 }
 
 const calculateWholeProductPercentage = (basePercentage: number, markedIngredientPercentage: number) => {
@@ -20,10 +26,9 @@ const getMarkedIngredientPercentage = (finalIngredients: Ingredient[] = []) => {
 
 export const generateIngredientsTable = (
   formData: Pick<ProductInfo, 'ingredients' | 'baseProductIngredients'>
-): Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean }> => {
+): Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean, level: 'main' | 'sub' | 'base' }> => {
   const finalIngredients = [...(formData.ingredients || [])];
   const baseIngredients = [...(formData.baseProductIngredients || [])];
-  const tableIngredients: Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean }> = [];
 
   if (finalIngredients.length === 0) {
     return [];
@@ -31,7 +36,7 @@ export const generateIngredientsTable = (
 
   const markedIngredientPercentage = getMarkedIngredientPercentage(finalIngredients);
 
-  const finalTable: Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean }> = [];
+  const finalTable: Array<{ name: string, percentage: number, origin: string, isFinalProduct: boolean, isWholegrain: boolean, level: 'main' | 'sub' | 'base' }> = [];
 
   // Sort final ingredients by percentage
   finalIngredients.sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
@@ -52,7 +57,22 @@ export const generateIngredientsTable = (
         origin: ing.origin || "",
         isFinalProduct: true,
         isWholegrain: ing.isWholegrain || false,
+        level: 'main',
       });
+
+      // Add sub-ingredients if they exist
+      if (ing.subIngredients && ing.subIngredients.length > 0) {
+        ing.subIngredients.forEach(subIng => {
+          finalTable.push({
+            name: subIng.name,
+            percentage: calculateWholeProductPercentage(subIng.percentage, ing.percentage || 0),
+            origin: "", // Sub-ingredients do not have origin
+            isFinalProduct: true, // Belongs to the final product
+            isWholegrain: false, // Sub-ingredients are not wholegrain
+            level: 'sub',
+          });
+        });
+      }
 
       if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
         sortedBaseIngredients.forEach(baseIng => {
@@ -63,6 +83,7 @@ export const generateIngredientsTable = (
               origin: baseIng.origin || "",
               isFinalProduct: false,
               isWholegrain: baseIng.isWholegrain || false,
+              level: 'base',
             });
           }
         });
@@ -91,9 +112,6 @@ export const formatCombinedIngredients = (
     .filter(ing => ing.name.trim())
     .map(ing => ({
       ...ing,
-      // Note: Here we sort by the original percentage within the base recipe,
-      // as the final contribution isn't shown in this string format.
-      // The visual requirement for this string is just sorted base ingredients.
     }))
     .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))
     .map(ing => {
@@ -105,8 +123,17 @@ export const formatCombinedIngredients = (
   const finalFormatted = finalIngredients
     .filter(ing => ing.name.trim())
     .map(ing => {
-      const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
-      const ingredientText = `**${ing.name}${percentage}**`;
+      let ingredientText;
+
+      if (ing.subIngredients && ing.subIngredients.length > 0) {
+        const subIngredientString = ing.subIngredients
+          .map(sub => `${sub.name} ${sub.percentage.toFixed(1)}%`)
+          .join(', ');
+        ingredientText = `**${ing.name}** (${subIngredientString})`;
+      } else {
+        const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
+        ingredientText = `**${ing.name}${percentage}**`;
+      }
 
       if (ing.isMarkedAsBase && baseFormatted) {
         return `${ingredientText} [${baseFormatted}]`;
