@@ -78,6 +78,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
     // Format base ingredients for inclusion in brackets
     const baseFormatted = baseIngredients
       .filter(ingredient => ingredient.name.trim() !== "")
+      .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))
       .map(ingredient => {
         const percentage = ingredient.percentage ? ` ${ingredient.percentage.toFixed(1)}%*` : '';
         return `${ingredient.name}${percentage}`;
@@ -135,6 +136,7 @@ export function generatePDFTemplate(formData: ProductInfo): string {
           // Add base ingredients under the marked ingredient
           baseIngredients
             .filter(baseIng => baseIng.name.trim())
+            .sort((a, b) => (b.percentage || 0) - (a.percentage || 0))
             .forEach(baseIng => {
               const wholeProductPercentage = baseIng.percentage
                 ? calculateWholeProductPercentage(baseIng.percentage, markedIngredientPercentage)
