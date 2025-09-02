@@ -113,3 +113,10 @@ export type User = typeof users.$inferSelect;
 export type ProductInfo = z.infer<typeof productInfoSchema>;
 export type InsertProductInfoSession = z.infer<typeof insertProductInfoSessionSchema>;
 export type ProductInfoSession = typeof productInfoSessions.$inferSelect;
+
+// Explicitly define and export the Ingredient type for reuse in the frontend
+const ingredientSchema = productInfoSchema.shape.ingredients.unwrap().element;
+export type Ingredient = z.infer<typeof ingredientSchema>;
+
+const baseProductIngredientSchema = productInfoSchema.shape.baseProductIngredients.unwrap().element;
+export type BaseProductIngredient = z.infer<typeof baseProductIngredientSchema>;
