@@ -37,19 +37,30 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const [baseProductIngredients, setBaseProductIngredients] = useState<Ingredient[]>(
     (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }))
   );
-  
+
+  const formatIngredientsToString = (ingredients: Ingredient[]) =>
+    (ingredients || []).map((ing) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ');
+
+  const [finalIngredientsText, setFinalIngredientsText] = useState<string>(() => formatIngredientsToString(formData.ingredients || []));
+  const [baseIngredientsText, setBaseIngredientsText] = useState<string>(() => formatIngredientsToString(formData.baseProductIngredients || []));
+
   const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Sync local state with parent form data
     const newFinalIngredients = (formData.ingredients || []).map(ing => ({ ...ing, isMarkedAsBase: !!ing.isMarkedAsBase, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
-    setFinalProductIngredients(newFinalIngredients);
+    if (JSON.stringify(newFinalIngredients) !== JSON.stringify(finalProductIngredients)) {
+      setFinalProductIngredients(newFinalIngredients);
+      setFinalIngredientsText(formatIngredientsToString(newFinalIngredients));
+    }
 
     const newBaseIngredients = (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
-    setBaseProductIngredients(newBaseIngredients);
+    if (JSON.stringify(newBaseIngredients) !== JSON.stringify(baseProductIngredients)) {
+      setBaseProductIngredients(newBaseIngredients);
+      setBaseIngredientsText(formatIngredientsToString(newBaseIngredients));
+    }
   }, [formData.ingredients, formData.baseProductIngredients]);
 
   const ensureIngredientDefaults = (ing: Partial<Ingredient>): Ingredient => ({
@@ -68,6 +79,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onSuccess: (data) => {
         const ingredients = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
         setFinalProductIngredients(ingredients);
+        setFinalIngredientsText(formatIngredientsToString(ingredients));
         onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
         toast({ title: "Final Recipe extracted successfully" });
     },
@@ -79,6 +91,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onSuccess: (data) => {
         const ingredients = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
         setBaseProductIngredients(ingredients);
+        setBaseIngredientsText(formatIngredientsToString(ingredients));
         onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
         toast({ title: "Base Recipe extracted successfully" });
     },
@@ -88,7 +101,24 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: translateFinalIngredientsMutation, isPending: isTranslatingFinal } = useMutation({
     mutationFn: async (params: { targetLanguage: string; sourceLanguage?: string }) => apiRequest("POST", "/api/translate-ingredients", { ingredients: finalProductIngredients, ...params }).then(res => res.json()),
     onSuccess: (data, variables) => {
-        // ... (Translation logic as before)
+        let updatedIngredients;
+        if (variables.targetLanguage === 'original') {
+            updatedIngredients = finalProductIngredients.map(ing => ({
+                ...ing,
+                name: ing.originalName || ing.name,
+                language: 'original',
+            }));
+        } else {
+            const translated = data.translatedIngredients || [];
+            updatedIngredients = finalProductIngredients.map(ing => {
+                const match = translated.find((t: any) => t.originalName === ing.name);
+                return match ? { ...ing, name: match.translatedName, language: variables.targetLanguage as 'english' } : ing;
+            });
+        }
+        setFinalProductIngredients(updatedIngredients);
+        setFinalIngredientsText(formatIngredientsToString(updatedIngredients));
+        onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
+        toast({ title: `Translated to ${variables.targetLanguage}` });
     },
     onError: () => toast({ title: "Translation failed", variant: "destructive" }),
   });
@@ -96,7 +126,24 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: translateBaseIngredientsMutation, isPending: isTranslatingBase } = useMutation({
     mutationFn: async (params: { targetLanguage: string; sourceLanguage?: string }) => apiRequest("POST", "/api/translate-ingredients", { ingredients: baseProductIngredients, ...params }).then(res => res.json()),
     onSuccess: (data, variables) => {
-        // ... (Translation logic as before)
+        let updatedIngredients;
+        if (variables.targetLanguage === 'original') {
+            updatedIngredients = baseProductIngredients.map(ing => ({
+                ...ing,
+                name: ing.originalName || ing.name,
+                language: 'original',
+            }));
+        } else {
+            const translated = data.translatedIngredients || [];
+            updatedIngredients = baseProductIngredients.map(ing => {
+                const match = translated.find((t: any) => t.originalName === ing.name);
+                return match ? { ...ing, name: match.translatedName, language: variables.targetLanguage as 'english' } : ing;
+            });
+        }
+        setBaseProductIngredients(updatedIngredients);
+        setBaseIngredientsText(formatIngredientsToString(updatedIngredients));
+        onUpdate({ baseProductIngredients: updatedIngredients.map(ensureIngredientDefaults) });
+        toast({ title: `Translated to ${variables.targetLanguage}` });
     },
     onError: () => toast({ title: "Translation failed", variant: "destructive" }),
   });
@@ -148,6 +195,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
 
   const handleRemoveFinalImage = () => {
     setFinalProductIngredients([]);
+    setFinalIngredientsText('');
     onUpdate({ ingredients: [], finalRecipeImageUrl: undefined });
     if (finalRecipeInputRef.current) finalRecipeInputRef.current.value = "";
     toast({ title: "Image removed" });
@@ -155,12 +203,13 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
 
   const handleRemoveBaseImage = () => {
     setBaseProductIngredients([]);
+    setBaseIngredientsText('');
     onUpdate({ baseProductIngredients: [], baseRecipeImageUrl: undefined });
     if (baseRecipeInputRef.current) baseRecipeInputRef.current.value = "";
     toast({ title: "Image removed" });
   };
 
-  const handleFinalRecipeTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleFinalRecipeTextBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     const ingredients = text.split(',').map(item => {
       const trimmed = item.trim();
@@ -175,7 +224,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
   };
 
-  const handleBaseRecipeTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleBaseRecipeTextBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     const ingredients = text.split(',').map(item => {
       const trimmed = item.trim();
@@ -196,6 +245,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
       isMarkedAsBase: ing.name === ingredientName ? !ing.isMarkedAsBase : false,
     }));
     setFinalProductIngredients(updatedIngredients);
+    setFinalIngredientsText(formatIngredientsToString(updatedIngredients));
     onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
   };
 
@@ -244,9 +294,11 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                 </div>
               </div>
               <Textarea
-                value={finalProductIngredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
-                onChange={handleFinalRecipeTextChange}
+                value={finalIngredientsText}
+                onChange={(e) => setFinalIngredientsText(e.target.value)}
+                onBlur={handleFinalRecipeTextBlur}
                 rows={3}
+                placeholder="Enter ingredients, separated by commas..."
               />
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mark ingredient as Base Recipe:</label>
@@ -292,9 +344,11 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                 </div>
               </div>
               <Textarea
-                value={baseProductIngredients.map(ing => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
-                onChange={handleBaseRecipeTextChange}
+                value={baseIngredientsText}
+                onChange={(e) => setBaseIngredientsText(e.target.value)}
+                onBlur={handleBaseRecipeTextBlur}
                 rows={4}
+                placeholder="Enter ingredients, separated by commas..."
               />
             </div>
            )}
