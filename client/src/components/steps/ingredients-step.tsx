@@ -30,7 +30,7 @@ interface Ingredient {
   translatedName?: string;
   percentage?: number | null;
   origin?: string;
-  isMarkedAsBase?: boolean;
+  isMarkedAsBase: boolean;
   isWholegrain: boolean;
   language: 'original' | 'english';
   subIngredients?: SubIngredient[];
@@ -94,7 +94,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: extractFinalIngredientsMutation, isPending: isExtractingFinal } = useMutation({
     mutationFn: async ({ image }: { image: string }) => apiRequest("POST", "/api/extract-ingredients", { image, isBaseProduct: false }).then(res => res.json()),
     onSuccess: (data) => {
-        const ingredients: Ingredient[] = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
+        const ingredients = (data.ingredients || []).map((ing: any) => ensureIngredientDefaults({ ...ing, originalName: ing.name }));
         setFinalProductIngredients(ingredients);
         setFinalIngredientsText(formatIngredientsToString(ingredients));
         onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
@@ -106,7 +106,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: extractBaseIngredientsMutation, isPending: isExtractingBase } = useMutation({
     mutationFn: async ({ image }: { image: string }) => apiRequest("POST", "/api/extract-ingredients", { image, isBaseProduct: true }).then(res => res.json()),
     onSuccess: (data) => {
-        const ingredients: Ingredient[] = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
+        const ingredients = (data.ingredients || []).map((ing: any) => ensureIngredientDefaults({ ...ing, originalName: ing.name, isMarkedAsBase: false }));
         setBaseProductIngredients(ingredients);
         setBaseIngredientsText(formatIngredientsToString(ingredients));
         onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
