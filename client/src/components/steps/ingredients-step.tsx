@@ -244,8 +244,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                 </div>
               </div>
               <Textarea
-                key={formData.ingredients.map(i => i.name).join(',')}
-                defaultValue={formData.ingredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
+                value={finalProductIngredients.map((ing: Ingredient) => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
                 onChange={handleFinalRecipeTextChange}
                 rows={3}
               />
@@ -293,8 +292,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                 </div>
               </div>
               <Textarea
-                key={formData.baseProductIngredients.map(i => i.name).join(',')}
-                defaultValue={formData.baseProductIngredients.map(ing => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
+                value={baseProductIngredients.map(ing => `${ing.name}${ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}`).join(', ')}
                 onChange={handleBaseRecipeTextChange}
                 rows={4}
               />
