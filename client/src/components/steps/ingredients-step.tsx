@@ -94,10 +94,16 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: extractFinalIngredientsMutation, isPending: isExtractingFinal } = useMutation({
     mutationFn: async ({ image }: { image: string }) => apiRequest("POST", "/api/extract-ingredients", { image, isBaseProduct: false }).then(res => res.json()),
     onSuccess: (data) => {
-        const ingredients = (data.ingredients || []).map((ing: any) => ensureIngredientDefaults({ ...ing, originalName: ing.name }));
+        const ingredients = (data.ingredients || []).map((ing: { name: string, percentage: number }) => {
+            return ensureIngredientDefaults({
+                name: ing.name,
+                originalName: ing.name,
+                percentage: ing.percentage,
+            });
+        });
         setFinalProductIngredients(ingredients);
         setFinalIngredientsText(formatIngredientsToString(ingredients));
-        onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
+        onUpdate({ ingredients });
         toast({ title: "Final Recipe extracted successfully" });
     },
     onError: (error: any) => toast({ title: "Error extracting Final Recipe", description: error.message, variant: "destructive" }),
@@ -106,10 +112,17 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: extractBaseIngredientsMutation, isPending: isExtractingBase } = useMutation({
     mutationFn: async ({ image }: { image: string }) => apiRequest("POST", "/api/extract-ingredients", { image, isBaseProduct: true }).then(res => res.json()),
     onSuccess: (data) => {
-        const ingredients = (data.ingredients || []).map((ing: any) => ensureIngredientDefaults({ ...ing, originalName: ing.name, isMarkedAsBase: false }));
+        const ingredients = (data.ingredients || []).map((ing: { name: string, percentage: number }) => {
+            return ensureIngredientDefaults({
+                name: ing.name,
+                originalName: ing.name,
+                percentage: ing.percentage,
+                isMarkedAsBase: false,
+            });
+        });
         setBaseProductIngredients(ingredients);
         setBaseIngredientsText(formatIngredientsToString(ingredients));
-        onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
+        onUpdate({ baseProductIngredients: ingredients });
         toast({ title: "Base Recipe extracted successfully" });
     },
     onError: (error: any) => toast({ title: "Error extracting Base Recipe", description: error.message, variant: "destructive" }),
