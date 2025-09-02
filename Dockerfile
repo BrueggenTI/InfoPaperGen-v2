@@ -77,8 +77,8 @@ RUN chown -R appuser:0 /app
 
 # [FIX] Berechtigungen für den Chrome-Browser für den appuser setzen
 # Der appuser benötigt die Berechtigung, den Chrome-Browser auszuführen.
-RUN chown -R appuser:0 /opt/google && \
-    chown -R appuser:0 /usr/bin/google-chrome-stable
+RUN chown -R appuser:0 /opt/google /usr/bin/google-chrome-stable && \
+    chmod +x /usr/bin/google-chrome-stable
 
 # Zum nicht-privilegierten Benutzer wechseln
 USER appuser
