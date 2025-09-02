@@ -6,10 +6,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { ProductInfo } from "@shared/schema";
 import { ChevronLeft, ChevronRight, Upload, Camera, Tag, Languages, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
+
+interface SubIngredient {
+  name: string;
+  percentage: number;
+}
 
 interface Ingredient {
   name: string;
@@ -17,9 +30,10 @@ interface Ingredient {
   translatedName?: string;
   percentage?: number | null;
   origin?: string;
-  isMarkedAsBase: boolean;
+  isMarkedAsBase?: boolean;
   isWholegrain: boolean;
   language: 'original' | 'english';
+  subIngredients?: SubIngredient[];
 }
 
 interface IngredientsStepProps {
@@ -32,10 +46,10 @@ interface IngredientsStepProps {
 
 export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, isLoading = false }: IngredientsStepProps) {
   const [finalProductIngredients, setFinalProductIngredients] = useState<Ingredient[]>(
-    (formData.ingredients || []).map(ing => ({ ...ing, isMarkedAsBase: !!ing.isMarkedAsBase, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }))
+    (formData.ingredients || []).map(ing => ensureIngredientDefaults(ing))
   );
   const [baseProductIngredients, setBaseProductIngredients] = useState<Ingredient[]>(
-    (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }))
+    (formData.baseProductIngredients || []).map(ing => ensureIngredientDefaults({ ...ing, isMarkedAsBase: false }))
   );
 
   const formatIngredientsToString = (ingredients: Ingredient[]) =>
@@ -45,18 +59,20 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const [baseIngredientsText, setBaseIngredientsText] = useState<string>(() => formatIngredientsToString(formData.baseProductIngredients || []));
 
   const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    const newFinalIngredients = (formData.ingredients || []).map(ing => ({ ...ing, isMarkedAsBase: !!ing.isMarkedAsBase, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
+    const newFinalIngredients = (formData.ingredients || []).map(ensureIngredientDefaults);
     if (JSON.stringify(newFinalIngredients) !== JSON.stringify(finalProductIngredients)) {
       setFinalProductIngredients(newFinalIngredients);
       setFinalIngredientsText(formatIngredientsToString(newFinalIngredients));
     }
 
-    const newBaseIngredients = (formData.baseProductIngredients || []).map(ing => ({ ...ing, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: ing.language || 'original' }));
+    const newBaseIngredients = (formData.baseProductIngredients || []).map(ing => ensureIngredientDefaults({ ...ing, isMarkedAsBase: false }));
     if (JSON.stringify(newBaseIngredients) !== JSON.stringify(baseProductIngredients)) {
       setBaseProductIngredients(newBaseIngredients);
       setBaseIngredientsText(formatIngredientsToString(newBaseIngredients));
@@ -72,12 +88,13 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     isMarkedAsBase: ing.isMarkedAsBase ?? false,
     isWholegrain: ing.isWholegrain ?? false,
     language: ing.language ?? 'original',
+    subIngredients: ing.subIngredients || [],
   });
 
   const { mutate: extractFinalIngredientsMutation, isPending: isExtractingFinal } = useMutation({
     mutationFn: async ({ image }: { image: string }) => apiRequest("POST", "/api/extract-ingredients", { image, isBaseProduct: false }).then(res => res.json()),
     onSuccess: (data) => {
-        const ingredients = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
+        const ingredients: Ingredient[] = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
         setFinalProductIngredients(ingredients);
         setFinalIngredientsText(formatIngredientsToString(ingredients));
         onUpdate({ ingredients: ingredients.map(ensureIngredientDefaults) });
@@ -89,7 +106,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const { mutate: extractBaseIngredientsMutation, isPending: isExtractingBase } = useMutation({
     mutationFn: async ({ image }: { image: string }) => apiRequest("POST", "/api/extract-ingredients", { image, isBaseProduct: true }).then(res => res.json()),
     onSuccess: (data) => {
-        const ingredients = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
+        const ingredients: Ingredient[] = (data.ingredients || []).map((ing: any) => ({ ...ing, originalName: ing.name, isMarkedAsBase: false, isWholegrain: !!ing.isWholegrain, language: 'original' as const }));
         setBaseProductIngredients(ingredients);
         setBaseIngredientsText(formatIngredientsToString(ingredients));
         onUpdate({ baseProductIngredients: ingredients.map(ensureIngredientDefaults) });
@@ -99,9 +116,9 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   });
 
   const { mutate: translateFinalIngredientsMutation, isPending: isTranslatingFinal } = useMutation({
-    mutationFn: async (params: { targetLanguage: string; sourceLanguage?: string }) => apiRequest("POST", "/api/translate-ingredients", { ingredients: finalProductIngredients, ...params }).then(res => res.json()),
+    mutationFn: async (params: { targetLanguage: 'english' | 'original'; sourceLanguage?: string }) => apiRequest("POST", "/api/translate-ingredients", { ingredients: finalProductIngredients, ...params }).then(res => res.json()),
     onSuccess: (data, variables) => {
-        let updatedIngredients;
+        let updatedIngredients: Ingredient[];
         if (variables.targetLanguage === 'original') {
             updatedIngredients = finalProductIngredients.map(ing => ({
                 ...ing,
@@ -111,8 +128,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
         } else {
             const translated = data.translatedIngredients || [];
             updatedIngredients = finalProductIngredients.map(ing => {
-                const match = translated.find((t: any) => t.originalName === ing.name);
-                return match ? { ...ing, name: match.translatedName, language: variables.targetLanguage as 'english' } : ing;
+                const match = translated.find((t: any) => t.originalName === ing.originalName);
+                return match ? { ...ing, name: match.translatedName, translatedName: match.translatedName, language: variables.targetLanguage } : ing;
             });
         }
         setFinalProductIngredients(updatedIngredients);
@@ -124,9 +141,9 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   });
 
   const { mutate: translateBaseIngredientsMutation, isPending: isTranslatingBase } = useMutation({
-    mutationFn: async (params: { targetLanguage: string; sourceLanguage?: string }) => apiRequest("POST", "/api/translate-ingredients", { ingredients: baseProductIngredients, ...params }).then(res => res.json()),
+    mutationFn: async (params: { targetLanguage: 'english' | 'original'; sourceLanguage?: string }) => apiRequest("POST", "/api/translate-ingredients", { ingredients: baseProductIngredients, ...params }).then(res => res.json()),
     onSuccess: (data, variables) => {
-        let updatedIngredients;
+        let updatedIngredients: Ingredient[];
         if (variables.targetLanguage === 'original') {
             updatedIngredients = baseProductIngredients.map(ing => ({
                 ...ing,
@@ -136,8 +153,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
         } else {
             const translated = data.translatedIngredients || [];
             updatedIngredients = baseProductIngredients.map(ing => {
-                const match = translated.find((t: any) => t.originalName === ing.name);
-                return match ? { ...ing, name: match.translatedName, language: variables.targetLanguage as 'english' } : ing;
+                const match = translated.find((t: any) => t.originalName === ing.originalName);
+                return match ? { ...ing, name: match.translatedName, translatedName: match.translatedName, language: variables.targetLanguage } : ing;
             });
         }
         setBaseProductIngredients(updatedIngredients);
@@ -211,7 +228,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
 
   const handleFinalRecipeTextBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
-    const ingredients = text.split(',').map(item => {
+    const ingredients: Ingredient[] = text.split(',').map(item => {
       const trimmed = item.trim();
       const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
       const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
@@ -226,7 +243,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
 
   const handleBaseRecipeTextBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
-    const ingredients = text.split(',').map(item => {
+    const ingredients: Ingredient[] = text.split(',').map(item => {
       const trimmed = item.trim();
       const percentageMatch = trimmed.match(/\((\d+(?:\.\d+)?)\s*%\)/) || trimmed.match(/(\d+(?:\.\d+)?)\s*%/);
       const name = trimmed.replace(/\s*\(?\d+(?:\.\d+)?%\)?\s*/, '').trim();
@@ -257,8 +274,32 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onNext();
   };
 
+  const handleSaveSubIngredients = (updatedSubIngredients: SubIngredient[]) => {
+    if (!selectedIngredient) return;
+
+    const updatedIngredients = finalProductIngredients.map(ing =>
+      ing.name === selectedIngredient.name
+        ? { ...ing, subIngredients: updatedSubIngredients }
+        : ing
+    );
+    setFinalProductIngredients(updatedIngredients);
+    onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
+    setIsModalOpen(false);
+    setSelectedIngredient(null);
+    toast({ title: "Sub-ingredients updated successfully" });
+  };
+
   return (
     <div className="p-6 space-y-8">
+      <SubIngredientModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedIngredient(null);
+        }}
+        ingredient={selectedIngredient}
+        onSave={handleSaveSubIngredients}
+      />
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Ingredients</h2>
         <p className="text-slate-600">Upload images of your Final Recipe and Base Recipe to automatically extract ingredients.</p>
@@ -289,7 +330,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Extracted Final Recipe Ingredients (editable):</label>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => translateFinalIngredientsMutation({ targetLanguage: 'English' })} disabled={isTranslatingFinal}><Languages className="w-4 h-4 mr-1" />Translate to English</Button>
+                  <Button variant="outline" size="sm" onClick={() => translateFinalIngredientsMutation({ targetLanguage: 'english' })} disabled={isTranslatingFinal}><Languages className="w-4 h-4 mr-1" />Translate to English</Button>
                   <Button variant="outline" size="sm" onClick={() => translateFinalIngredientsMutation({ targetLanguage: 'original' })} disabled={isTranslatingFinal}><Languages className="w-4 h-4 mr-1" />Back to Original</Button>
                 </div>
               </div>
@@ -339,7 +380,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Extracted Base Recipe Ingredients (editable):</label>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => translateBaseIngredientsMutation({ targetLanguage: 'English' })} disabled={isTranslatingBase}><Languages className="w-4 h-4 mr-1" />Translate to English</Button>
+                  <Button variant="outline" size="sm" onClick={() => translateBaseIngredientsMutation({ targetLanguage: 'english' })} disabled={isTranslatingBase}><Languages className="w-4 h-4 mr-1" />Translate to English</Button>
                   <Button variant="outline" size="sm" onClick={() => translateBaseIngredientsMutation({ targetLanguage: 'original' })} disabled={isTranslatingBase}><Languages className="w-4 h-4 mr-1" />Back to Original</Button>
                 </div>
               </div>
@@ -352,6 +393,31 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
               />
             </div>
            )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Unterzutaten verwalten</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p className="text-sm text-slate-600">Fügen Sie hier die Unterzutaten für Ihre Hauptzutaten hinzu.</p>
+            {finalProductIngredients.filter(ing => ing.name.trim() && !ing.isMarkedAsBase).map((ingredient, index) => (
+              <div key={index} className="flex items-center justify-between p-2 border rounded">
+                <span>{ingredient.name}</span>
+                <Button variant="outline" size="sm" onClick={() => {
+                  setSelectedIngredient(ingredient);
+                  setIsModalOpen(true);
+                }}>
+                  Unterzutaten bearbeiten
+                </Button>
+              </div>
+            ))}
+            {finalProductIngredients.some(ing => ing.isMarkedAsBase) && (
+              <p className="text-sm text-slate-500 italic mt-2">
+                Unterzutaten können nicht für Zutaten hinzugefügt werden, die als Basisrezept gekennzeichnet sind.
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -384,33 +450,51 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                 </thead>
                 <tbody>
                   {generateIngredientsTable(formData).map((ingredient, index) => (
-                    <tr key={index}>
-                      <td className="border border-slate-300 p-2">{ingredient.isFinalProduct ? <strong>{ingredient.name}</strong> : <span style={{ paddingLeft: '15px' }}>{ingredient.name}</span>}</td>
-                      <td className="border border-slate-300 p-2">{ingredient.percentage}%</td>
-                      <td className="border border-slate-300 p-2"><Input value={ingredient.origin || ''} onChange={(e) => {
-                          const newOrigin = e.target.value;
-                          if (ingredient.isFinalProduct) {
-                              const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
-                              setFinalProductIngredients(updatedFinalIngredients);
-                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
-                          } else {
-                              const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
-                              setBaseProductIngredients(updatedBaseIngredients);
-                              onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
-                          }
-                      }} placeholder="Enter country" className="border-0 p-0 h-auto" /></td>
-                      <td className="border border-slate-300 p-2 text-center"><Checkbox checked={ingredient.isWholegrain} onCheckedChange={(checked) => {
-                          const isChecked = !!checked;
-                          if (ingredient.isFinalProduct) {
-                              const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
-                              setFinalProductIngredients(updatedFinalIngredients);
-                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
-                          } else {
-                              const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
-                              setBaseProductIngredients(updatedBaseIngredients);
-                              onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
-                          }
-                      }} /></td>
+                    <tr key={index} className={ingredient.level === 'sub' ? 'bg-slate-50' : ''}>
+                      <td className="border border-slate-300 p-2">
+                        {ingredient.level === 'main' && <strong>{ingredient.name}</strong>}
+                        {ingredient.level === 'base' && <span style={{ paddingLeft: '15px' }}>{ingredient.name}</span>}
+                        {ingredient.level === 'sub' && <span style={{ paddingLeft: '30px', fontStyle: 'italic' }}>{ingredient.name}</span>}
+                      </td>
+                      <td className="border border-slate-300 p-2">{ingredient.percentage.toFixed(1)}%</td>
+                      <td className="border border-slate-300 p-2">
+                        <Input
+                          value={ingredient.origin || ''}
+                          onChange={(e) => {
+                            const newOrigin = e.target.value;
+                            if (ingredient.isFinalProduct) {
+                                const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
+                                setFinalProductIngredients(updatedFinalIngredients);
+                                onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                            } else {
+                                const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
+                                setBaseProductIngredients(updatedBaseIngredients);
+                                onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
+                            }
+                          }}
+                          placeholder={ingredient.level === 'sub' ? 'N/A' : 'Enter country'}
+                          disabled={ingredient.level === 'sub'}
+                          className="border-0 p-0 h-auto bg-transparent"
+                        />
+                      </td>
+                      <td className="border border-slate-300 p-2 text-center">
+                        <Checkbox
+                          checked={ingredient.isWholegrain}
+                          onCheckedChange={(checked) => {
+                            const isChecked = !!checked;
+                            if (ingredient.isFinalProduct) {
+                                const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
+                                setFinalProductIngredients(updatedFinalIngredients);
+                                onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                            } else {
+                                const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
+                                setBaseProductIngredients(updatedBaseIngredients);
+                                onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
+                            }
+                          }}
+                          disabled={ingredient.level === 'sub'}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -427,3 +511,98 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     </div>
   );
 }
+
+interface SubIngredientModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  ingredient: Ingredient | null;
+  onSave: (subIngredients: SubIngredient[]) => void;
+}
+
+const SubIngredientModal: React.FC<SubIngredientModalProps> = ({ isOpen, onClose, ingredient, onSave }) => {
+  const [subIngredients, setSubIngredients] = useState<SubIngredient[]>([]);
+  const [newName, setNewName] = useState("");
+  const [newPercentage, setNewPercentage] = useState("");
+
+  useEffect(() => {
+    if (ingredient?.subIngredients) {
+      setSubIngredients(ingredient.subIngredients);
+    } else {
+      setSubIngredients([]);
+    }
+    // Reset form fields when modal opens for a new ingredient
+    setNewName("");
+    setNewPercentage("");
+  }, [ingredient]);
+
+  if (!ingredient) return null;
+
+  const handleAdd = () => {
+    if (newName.trim() && newPercentage) {
+      const percentage = parseFloat(newPercentage);
+      if (!isNaN(percentage) && percentage > 0) {
+        setSubIngredients([...subIngredients, { name: newName.trim(), percentage }]);
+        setNewName("");
+        setNewPercentage("");
+      }
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    setSubIngredients(subIngredients.filter((_, i) => i !== index));
+  };
+
+  const handleSave = () => {
+    onSave(subIngredients);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit sub-ingredients for: {ingredient.name}</DialogTitle>
+          <DialogDescription>
+            Add or remove sub-ingredients. The percentage should be relative to the main ingredient.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {subIngredients.map((sub, index) => (
+              <div key={index} className="flex items-center justify-between p-2 border rounded">
+                <span>{sub.name} ({sub.percentage}%)</span>
+                <Button variant="ghost" size="sm" onClick={() => handleRemove(index)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-end space-x-2 pt-4 border-t mt-4">
+            <div className="flex-grow">
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                placeholder="e.g. Cocoa Butter"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+            </div>
+            <div className="w-32">
+              <label className="text-sm font-medium">Percentage (%)</label>
+              <Input
+                type="number"
+                placeholder="e.g. 70"
+                value={newPercentage}
+                onChange={(e) => setNewPercentage(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleAdd} type="button">Add</Button>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
