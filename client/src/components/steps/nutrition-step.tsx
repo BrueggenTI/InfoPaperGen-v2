@@ -275,7 +275,6 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
           <h2 className="text-2xl font-semibold text-foreground">Nutrition Values</h2>
           <p className="text-sm text-muted-foreground mt-1">Upload an image of the nutrition table or enter the values manually</p>
         </div>
-        {nutriScore && <Badge variant="outline" className={`text-white font-bold px-3 py-1`} style={{ backgroundColor: getNutriScoreColor(nutriScore.nutriGrade) }}>Nutri-Score: {nutriScore.nutriGrade}</Badge>}
       </div>
 
       <Card>
@@ -318,6 +317,61 @@ export default function NutritionStep({ formData, onUpdate, onNext, onPrev, isLo
               <FormField control={form.control} name="salt" render={({ field }) => (<NutritionField label="Salt" unit="g" value={field.value} onChange={field.onChange} servingSize={servingSize} servingValue={calculatePerServing(field.value)} error={form.formState.errors.salt?.message} />)} />
             </form>
           </Form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Eye className="w-5 h-5 text-purple-600" />Nutri-Score & Fruit Content</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="font-medium text-sm text-muted-foreground mb-2">Fruit, Vegetable & Legume Content</h4>
+            <p className="text-xs text-muted-foreground mb-4">Enter the total percentage of fruits, vegetables, and legumes. This value is required for an accurate Nutri-Score calculation.</p>
+            <FormField
+              control={form.control}
+              name="fruitVegLegumeContent"
+              render={({ field }) => (
+                <NutritionField
+                  label="Total Content"
+                  unit="%"
+                  value={field.value}
+                  onChange={field.onChange}
+                  servingSize={servingSize}
+                  servingValue={calculatePerServing(field.value)}
+                  error={form.formState.errors.fruitVegLegumeContent?.message}
+                />
+              )}
+            />
+          </div>
+          <Separator />
+          <div>
+            <h4 className="font-medium text-sm text-muted-foreground mb-2">Calculated Nutri-Score</h4>
+            {nutriScore ? (
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-16 h-16 flex items-center justify-center rounded-full text-white font-bold text-3xl"
+                    style={{ backgroundColor: getNutriScoreColor(nutriScore.nutriGrade) }}
+                  >
+                    {nutriScore.nutriGrade}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg">Grade {nutriScore.nutriGrade}</div>
+                    <div className="text-sm text-muted-foreground">Score: {nutriScore.finalScore} points</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Bonus Points</div>
+                  <div className="font-semibold text-green-600">{nutriScore.bonusScore}</div>
+                  <div className="text-xs text-muted-foreground mt-1">Malus Points</div>
+                  <div className="font-semibold text-red-600">{nutriScore.malusScore}</div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-sm text-muted-foreground py-4">
+                Enter nutrition values to calculate the Nutri-Score.
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
