@@ -313,8 +313,8 @@ export function generatePDFTemplate(formData: ProductInfo): string {
 
         <!-- Product Image -->
         ${formData.productImage ? `
-        <div class="product-image avoid-break">
-            <img src="${formData.productImage}" alt="Product" />
+        <div class="product-image avoid-break" style="text-align: center; margin-bottom: 12px;">
+            <img src="${formData.productImage}" alt="Product" style="max-width: 300px; max-height: 128px; object-fit: contain; display: inline-block;" />
         </div>
         ` : ''}
 
