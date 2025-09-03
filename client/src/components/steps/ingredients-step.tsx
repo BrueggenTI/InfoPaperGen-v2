@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,11 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
+
+interface SubIngredient {
+  name: string;
+  percentage: number;
+}
 
 interface Ingredient {
   name: string;
@@ -28,6 +32,7 @@ interface Ingredient {
   isMarkedAsBase: boolean;
   isWholegrain: boolean;
   language: 'original' | 'english';
+  subIngredients?: SubIngredient[];
 }
 
 interface IngredientsStepProps {
@@ -52,7 +57,7 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const [finalIngredientsText, setFinalIngredientsText] = useState<string>(() => formatIngredientsToString(formData.ingredients || []));
   const [baseIngredientsText, setBaseIngredientsText] = useState<string>(() => formatIngredientsToString(formData.baseProductIngredients || []));
 
-  const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
+  const [markedIngredientName, setMarkedIngredientName] = useState<string | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -278,6 +283,23 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onNext();
   };
 
+  const markedIngredientObject = finalProductIngredients.find(ing => ing.isMarkedAsBase);
+  const markedIngredientPercentage = markedIngredientObject?.percentage || 0;
+
+  const calculateWholeProductPercentage = (basePercentage: number, markedPercentage: number) => {
+    if (!basePercentage || !markedPercentage) return 0;
+    return +((basePercentage * markedPercentage) / 100).toFixed(1);
+  };
+
+  const sortedBaseIngredients = [...baseProductIngredients]
+    .map(ing => ({
+      ...ing,
+      wholeProductPercentage: calculateWholeProductPercentage(ing.percentage || 0, markedIngredientPercentage)
+    }))
+    .sort((a, b) => (b.wholeProductPercentage || 0) - (a.wholeProductPercentage || 0));
+
+  const sortedFinalIngredients = [...finalProductIngredients].sort((a, b) => (b.percentage || 0) - (a.percentage || 0));
+
   return (
     <div className="p-6 space-y-8">
       <div>
@@ -381,8 +403,20 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
           <CardHeader><CardTitle>Combined Ingredients Preview</CardTitle></CardHeader>
           <CardContent>
             <p className="text-sm text-slate-600 mb-2">Final Recipe ingredients (bold) with Base Recipe (in square brackets):</p>
-            <div className="bg-slate-50 p-4 rounded-lg">
-              <div className="text-sm text-slate-700" dangerouslySetInnerHTML={{ __html: formatCombinedIngredients(formData) }} />
+            <div className="bg-slate-50 p-4 rounded-lg text-sm text-slate-700">
+              <strong>Ingredients:</strong>{' '}
+              {sortedFinalIngredients.length > 0 ? sortedFinalIngredients.map((ing, index) => (
+                <React.Fragment key={`combined-${index}`}>
+                  <strong>
+                    {ing.name}
+                    {ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}
+                  </strong>
+                  {ing.isMarkedAsBase &&
+                    sortedBaseIngredients.length > 0 &&
+                    ` [${sortedBaseIngredients.map(b => `${b.name}${b.percentage ? ` ${b.percentage.toFixed(1)}%*` : ''}`).join(', ')}]`}
+                  {index < sortedFinalIngredients.length - 1 ? ', ' : ''}
+                </React.Fragment>
+              )) : 'No ingredients extracted yet...'}
               <p className="text-xs text-slate-500 mt-2">* percentage in ingredient</p>
             </div>
           </CardContent>
@@ -404,53 +438,67 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
                   </tr>
                 </thead>
                 <tbody>
-                  {generateIngredientsTable(formData).map((ingredient, index) => (
-                    <tr key={index} className={ingredient.level === 'sub' ? 'bg-slate-50' : ''}>
-                      <td className="border border-slate-300 p-2">
-                        {ingredient.level === 'main' && <strong>{ingredient.name}</strong>}
-                        {ingredient.level === 'base' && <span style={{ paddingLeft: '15px' }}>{ingredient.name}</span>}
-                        {ingredient.level === 'sub' && <span style={{ paddingLeft: '30px', fontStyle: 'italic' }}>{ingredient.name}</span>}
-                      </td>
-                      <td className="border border-slate-300 p-2">{ingredient.percentage.toFixed(1)}%</td>
-                      <td className="border border-slate-300 p-2">
-                        <Input
-                          value={ingredient.origin || ''}
-                          onChange={(e) => {
-                            const newOrigin = e.target.value;
-                            if (ingredient.isFinalProduct) {
-                                const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
-                                setFinalProductIngredients(updatedFinalIngredients);
-                                onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
-                            } else {
-                                const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
+                  {sortedFinalIngredients.map((ingredient, index) => (
+                    <React.Fragment key={`final-ingredient-${index}`}>
+                      <tr>
+                        <td className="border border-slate-300 p-2"><strong>{ingredient.name}</strong></td>
+                        <td className="border border-slate-300 p-2">{(ingredient.percentage || 0).toFixed(1)}%</td>
+                        <td className="border border-slate-300 p-2">
+                          <Input
+                            value={ingredient.origin || ''}
+                            onChange={(e) => {
+                              const newOrigin = e.target.value;
+                              const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, origin: newOrigin } : ing);
+                              setFinalProductIngredients(updatedFinalIngredients);
+                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                            }}
+                            placeholder="Enter country"
+                            className="border-0 p-0 h-auto bg-transparent"
+                          />
+                        </td>
+                        <td className="border border-slate-300 p-2 text-center">
+                          <Checkbox
+                            checked={ingredient.isWholegrain}
+                            onCheckedChange={(checked) => {
+                              const isChecked = !!checked;
+                              const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
+                              setFinalProductIngredients(updatedFinalIngredients);
+                              onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
+                            }}
+                          />
+                        </td>
+                      </tr>
+                      {ingredient.isMarkedAsBase && sortedBaseIngredients.map((baseIngredient, baseIndex) => (
+                        <tr key={`base-ingredient-${index}-${baseIndex}`} className="bg-slate-50">
+                          <td className="border border-slate-300 p-2"><span style={{ paddingLeft: '15px' }}>{baseIngredient.name}</span></td>
+                          <td className="border border-slate-300 p-2">{(baseIngredient.wholeProductPercentage || 0).toFixed(1)}%</td>
+                          <td className="border border-slate-300 p-2">
+                            <Input
+                              value={baseIngredient.origin || ''}
+                              onChange={(e) => {
+                                const newOrigin = e.target.value;
+                                const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === baseIngredient.name ? { ...ing, origin: newOrigin } : ing);
                                 setBaseProductIngredients(updatedBaseIngredients);
                                 onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
-                            }
-                          }}
-                          placeholder={ingredient.level === 'sub' ? 'N/A' : 'Enter country'}
-                          disabled={ingredient.level === 'sub'}
-                          className="border-0 p-0 h-auto bg-transparent"
-                        />
-                      </td>
-                      <td className="border border-slate-300 p-2 text-center">
-                        <Checkbox
-                          checked={ingredient.isWholegrain}
-                          onCheckedChange={(checked) => {
-                            const isChecked = !!checked;
-                            if (ingredient.isFinalProduct) {
-                                const updatedFinalIngredients = finalProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
-                                setFinalProductIngredients(updatedFinalIngredients);
-                                onUpdate({ ingredients: updatedFinalIngredients.map(ensureIngredientDefaults) });
-                            } else {
-                                const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === ingredient.name ? { ...ing, isWholegrain: isChecked } : ing);
+                              }}
+                              placeholder="Enter country"
+                              className="border-0 p-0 h-auto bg-transparent"
+                            />
+                          </td>
+                          <td className="border border-slate-300 p-2 text-center">
+                            <Checkbox
+                              checked={baseIngredient.isWholegrain}
+                              onCheckedChange={(checked) => {
+                                const isChecked = !!checked;
+                                const updatedBaseIngredients = baseProductIngredients.map(ing => ing.name === baseIngredient.name ? { ...ing, isWholegrain: isChecked } : ing);
                                 setBaseProductIngredients(updatedBaseIngredients);
                                 onUpdate({ baseProductIngredients: updatedBaseIngredients.map(ensureIngredientDefaults) });
-                            }
-                          }}
-                          disabled={ingredient.level === 'sub'}
-                        />
-                      </td>
-                    </tr>
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

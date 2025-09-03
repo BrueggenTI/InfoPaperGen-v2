@@ -51,7 +51,7 @@ export const productInfoSchema = z.object({
     translatedName: z.string().optional(),
     percentage: z.number().nullable().optional(),
     origin: z.string().optional(),
-    isMarkedAsBase: z.boolean().optional(),
+    isMarkedAsBase: z.boolean().optional().default(false),
     isWholegrain: z.boolean().optional().default(false),
     language: z.enum(['original', 'english']).optional().default('original'),
   })).optional(),

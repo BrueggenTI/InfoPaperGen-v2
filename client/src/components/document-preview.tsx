@@ -6,9 +6,16 @@ import { Download, Loader2, Eye, EyeOff } from "lucide-react";
 import { downloadPDFFromServer } from "@/lib/server-pdf-generator";
 import brueggenLogo from "@/assets/brueggen-logo.png";
 import { getNutriScoreImage, calculateNutriScore } from "@/lib/nutri-score";
-import { useState, useMemo, useCallback } from "react";
-import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
+import React, { useState, useMemo, useCallback } from "react";
 import "@/styles/pdf-preview.css";
+
+interface Ingredient {
+  name: string;
+  percentage?: number | null;
+  origin?: string;
+  isMarkedAsBase?: boolean;
+  isWholegrain?: boolean;
+}
 
 interface DocumentPreviewProps {
   formData: ProductInfo;
@@ -59,7 +66,38 @@ export default function DocumentPreview({ formData, sessionId }: DocumentPreview
 
   const servingSize = useMemo(() => parseFloat(formData.servingSize?.replace(/[^\d.]/g, '') || '40'), [formData.servingSize]);
   const calculatePerServing = useCallback((per100g: number) => (per100g * servingSize / 100).toFixed(1), [servingSize]);
-  const formattedIngredients = useMemo(() => formatCombinedIngredients(formData).replace('<strong>Ingredients:</strong>', ''), [formData.ingredients, formData.baseProductIngredients]);
+
+  const finalIngredients = useMemo(() => [...(formData.ingredients || [])].sort((a, b) => (b.percentage || 0) - (a.percentage || 0)), [formData.ingredients]);
+  const baseIngredients = useMemo(() => [...(formData.baseProductIngredients || [])].sort((a, b) => (b.percentage || 0) - (a.percentage || 0)), [formData.baseProductIngredients]);
+  const markedIngredient = useMemo(() => finalIngredients.find(ing => ing.isMarkedAsBase), [finalIngredients]);
+  const markedIngredientPercentage = useMemo(() => markedIngredient?.percentage || 0, [markedIngredient]);
+
+  const calculateWholeProductPercentage = (basePercentage: number, markedPercentage: number) => {
+    if (!basePercentage || !markedPercentage) return 0;
+    return +((basePercentage * markedPercentage) / 100).toFixed(1);
+  };
+
+  const detailedIngredientsTable = useMemo(() => {
+    const table: { name: string; percentage: number; origin: string; isFinalProduct: boolean }[] = [];
+    finalIngredients.forEach(ing => {
+      if (ing.name.trim()) {
+        table.push({ name: ing.name, percentage: ing.percentage || 0, origin: ing.origin || "", isFinalProduct: true });
+        if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
+          baseIngredients.forEach(baseIng => {
+            if (baseIng.name.trim()) {
+              table.push({
+                name: baseIng.name,
+                percentage: calculateWholeProductPercentage(baseIng.percentage || 0, markedIngredientPercentage),
+                origin: baseIng.origin || "",
+                isFinalProduct: false,
+              });
+            }
+          });
+        }
+      }
+    });
+    return table;
+  }, [finalIngredients, baseIngredients, markedIngredientPercentage]);
 
   return (
     <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100">
@@ -100,7 +138,15 @@ export default function DocumentPreview({ formData, sessionId }: DocumentPreview
         <div className="section">
           <div className="section-header"><h3 className="section-title">Ingredients</h3></div>
           <div className="section-content">
-            <div className="ingredients-content" dangerouslySetInnerHTML={{ __html: formattedIngredients }} />
+            <div className="ingredients-content">
+              {finalIngredients.length > 0 ? finalIngredients.map((ing, index) => (
+                <React.Fragment key={index}>
+                  <strong>{ing.name}{ing.percentage ? ` (${ing.percentage.toFixed(1)}%)` : ''}</strong>
+                  {ing.isMarkedAsBase && baseIngredients.length > 0 && ` [${baseIngredients.map(b => `${b.name}${b.percentage ? ` ${b.percentage.toFixed(1)}%*` : ''}`).join(', ')}]`}
+                  {index < finalIngredients.length - 1 ? ', ' : ''}
+                </React.Fragment>
+              )) : 'No ingredients provided.'}
+            </div>
             <div className="ingredients-note">* percentage in ingredient</div>
           </div>
         </div>
@@ -122,12 +168,12 @@ export default function DocumentPreview({ formData, sessionId }: DocumentPreview
                   </tr>
                 </thead>
                 <tbody>
-                  {generateIngredientsTable(formData).map((ing, index) => (
+                  {detailedIngredientsTable.map((ing, index) => (
                     <tr key={index}>
                       <td className={ing.isFinalProduct ? '' : 'base-ingredient'}>
                         {ing.isFinalProduct ? <strong>{ing.name}</strong> : ing.name}
                       </td>
-                      <td>{ing.percentage}%</td>
+                      <td>{ing.percentage.toFixed(1)}%</td>
                       {showCountryOfOrigin && <td>{ing.origin || "-"}</td>}
                     </tr>
                   ))}
