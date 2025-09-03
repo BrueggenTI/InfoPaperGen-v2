@@ -19,7 +19,16 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { generateIngredientsTable, formatCombinedIngredients } from "@/lib/ingredient-utils";
 
-import { SubIngredientModal, Ingredient, SubIngredient } from "./sub-ingredient-modal";
+interface Ingredient {
+  name: string;
+  originalName?: string;
+  translatedName?: string;
+  percentage?: number | null;
+  origin?: string;
+  isMarkedAsBase: boolean;
+  isWholegrain: boolean;
+  language: 'original' | 'english';
+}
 
 interface IngredientsStepProps {
   formData: ProductInfo;
@@ -44,8 +53,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
   const [baseIngredientsText, setBaseIngredientsText] = useState<string>(() => formatIngredientsToString(formData.baseProductIngredients || []));
 
   const [markedIngredient, setMarkedIngredient] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const finalRecipeInputRef = useRef<HTMLInputElement>(null);
   const baseRecipeInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -73,7 +80,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     isMarkedAsBase: ing.isMarkedAsBase ?? false,
     isWholegrain: ing.isWholegrain ?? false,
     language: ing.language ?? 'original',
-    subIngredients: ing.subIngredients || [],
   });
 
   const { mutate: extractFinalIngredientsMutation, isPending: isExtractingFinal } = useMutation({
@@ -272,32 +278,8 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     onNext();
   };
 
-  const handleSaveSubIngredients = (updatedSubIngredients: SubIngredient[]) => {
-    if (!selectedIngredient) return;
-
-    const updatedIngredients = finalProductIngredients.map(ing =>
-      ing.name === selectedIngredient.name
-        ? { ...ing, subIngredients: updatedSubIngredients }
-        : ing
-    );
-    setFinalProductIngredients(updatedIngredients);
-    onUpdate({ ingredients: updatedIngredients.map(ensureIngredientDefaults) });
-    setIsModalOpen(false);
-    setSelectedIngredient(null);
-    toast({ title: "Sub-ingredients updated successfully" });
-  };
-
   return (
     <div className="p-6 space-y-8">
-      <SubIngredientModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedIngredient(null);
-        }}
-        ingredient={selectedIngredient}
-        onSave={handleSaveSubIngredients}
-      />
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Ingredients</h2>
         <p className="text-slate-600">Upload images of your Final Recipe and Base Recipe to automatically extract ingredients.</p>
@@ -394,31 +376,6 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle>Unterzutaten verwalten</CardTitle></CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p className="text-sm text-slate-600">Fügen Sie hier die Unterzutaten für Ihre Hauptzutaten hinzu.</p>
-            {finalProductIngredients.filter(ing => ing.name.trim() && !ing.isMarkedAsBase).map((ingredient, index) => (
-              <div key={index} className="flex items-center justify-between p-2 border rounded">
-                <span>{ingredient.name}</span>
-                <Button variant="outline" size="sm" onClick={() => {
-                  setSelectedIngredient(ingredient);
-                  setIsModalOpen(true);
-                }}>
-                  Unterzutaten bearbeiten
-                </Button>
-              </div>
-            ))}
-            {finalProductIngredients.some(ing => ing.isMarkedAsBase) && (
-              <p className="text-sm text-slate-500 italic mt-2">
-                Unterzutaten können nicht für Zutaten hinzugefügt werden, die als Basisrezept gekennzeichnet sind.
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       {(finalProductIngredients.some(ing => ing.name.trim()) || baseProductIngredients.some(ing => ing.name.trim())) && (
         <Card>
           <CardHeader><CardTitle>Combined Ingredients Preview</CardTitle></CardHeader>
@@ -509,3 +466,98 @@ export default function IngredientsStep({ formData, onUpdate, onNext, onPrev, is
     </div>
   );
 }
+
+interface SubIngredientModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  ingredient: Ingredient | null;
+  onSave: (subIngredients: SubIngredient[]) => void;
+}
+
+const SubIngredientModal: React.FC<SubIngredientModalProps> = ({ isOpen, onClose, ingredient, onSave }) => {
+  const [subIngredients, setSubIngredients] = useState<SubIngredient[]>([]);
+  const [newName, setNewName] = useState("");
+  const [newPercentage, setNewPercentage] = useState("");
+
+  useEffect(() => {
+    if (ingredient?.subIngredients) {
+      setSubIngredients(ingredient.subIngredients);
+    } else {
+      setSubIngredients([]);
+    }
+    // Reset form fields when modal opens for a new ingredient
+    setNewName("");
+    setNewPercentage("");
+  }, [ingredient]);
+
+  if (!ingredient) return null;
+
+  const handleAdd = () => {
+    if (newName.trim() && newPercentage) {
+      const percentage = parseFloat(newPercentage);
+      if (!isNaN(percentage) && percentage > 0) {
+        setSubIngredients([...subIngredients, { name: newName.trim(), percentage }]);
+        setNewName("");
+        setNewPercentage("");
+      }
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    setSubIngredients(subIngredients.filter((_, i) => i !== index));
+  };
+
+  const handleSave = () => {
+    onSave(subIngredients);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit sub-ingredients for: {ingredient.name}</DialogTitle>
+          <DialogDescription>
+            Add or remove sub-ingredients. The percentage should be relative to the main ingredient.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {subIngredients.map((sub, index) => (
+              <div key={index} className="flex items-center justify-between p-2 border rounded">
+                <span>{sub.name} ({sub.percentage}%)</span>
+                <Button variant="ghost" size="sm" onClick={() => handleRemove(index)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-end space-x-2 pt-4 border-t mt-4">
+            <div className="flex-grow">
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                placeholder="e.g. Cocoa Butter"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+            </div>
+            <div className="w-32">
+              <label className="text-sm font-medium">Percentage (%)</label>
+              <Input
+                type="number"
+                placeholder="e.g. 70"
+                value={newPercentage}
+                onChange={(e) => setNewPercentage(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleAdd} type="button">Add</Button>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
