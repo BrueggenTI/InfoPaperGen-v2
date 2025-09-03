@@ -94,7 +94,16 @@ export default function ProductGenerator() {
   const updateSessionMutation = useMutation({
     mutationFn: async (data: ProductInfo) => {
       if (!sessionId) throw new Error("No session ID");
-      const res = await apiRequest("PUT", `/api/product-info/sessions/${sessionId}`, data);
+
+      // Create a shallow copy of the data to avoid mutating the original state object
+      const payload = { ...data };
+
+      // Remove the large image data URLs before sending to the backend for session persistence.
+      // These are not needed on the server and are the likely cause of crashes.
+      delete (payload as Partial<ProductInfo>).finalRecipeImageUrl;
+      delete (payload as Partial<ProductInfo>).baseRecipeImageUrl;
+
+      const res = await apiRequest("PUT", `/api/product-info/sessions/${sessionId}`, payload);
       return await res.json();
     },
     onSuccess: () => {
