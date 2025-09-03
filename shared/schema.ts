@@ -44,10 +44,6 @@ export const productInfoSchema = z.object({
     isMarkedAsBase: z.boolean().optional().default(false),
     isWholegrain: z.boolean().optional().default(false),
     language: z.enum(['original', 'english']).optional().default('original'),
-    subIngredients: z.array(z.object({
-      name: z.string(),
-      percentage: z.number(),
-    })).optional(),
   })).optional(),
   baseProductIngredients: z.array(z.object({
     name: z.string(),

@@ -60,20 +60,6 @@ export const generateIngredientsTable = (
         level: 'main',
       });
 
-      // Add sub-ingredients if they exist
-      if (ing.subIngredients && ing.subIngredients.length > 0) {
-        ing.subIngredients.forEach(subIng => {
-          finalTable.push({
-            name: subIng.name,
-            percentage: calculateWholeProductPercentage(subIng.percentage, ing.percentage || 0),
-            origin: "", // Sub-ingredients do not have origin
-            isFinalProduct: true, // Belongs to the final product
-            isWholegrain: false, // Sub-ingredients are not wholegrain
-            level: 'sub',
-          });
-        });
-      }
-
       if (ing.isMarkedAsBase && markedIngredientPercentage > 0) {
         sortedBaseIngredients.forEach(baseIng => {
           if (baseIng.name.trim()) {
@@ -125,15 +111,8 @@ export const formatCombinedIngredients = (
     .map(ing => {
       let ingredientText;
 
-      if (ing.subIngredients && ing.subIngredients.length > 0) {
-        const subIngredientString = ing.subIngredients
-          .map(sub => `${sub.name} ${sub.percentage.toFixed(1)}%`)
-          .join(', ');
-        ingredientText = `**${ing.name}** (${subIngredientString})`;
-      } else {
-        const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
-        ingredientText = `**${ing.name}${percentage}**`;
-      }
+      const percentage = ing.percentage ? ` **(${ing.percentage.toFixed(1)}%)**` : '';
+      ingredientText = `**${ing.name}${percentage}**`;
 
       if (ing.isMarkedAsBase && baseFormatted) {
         return `${ingredientText} [${baseFormatted}]`;
